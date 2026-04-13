@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: cambiz-market
+    runtime: docker
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cambiz-db
+          property: connectionString
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: cambiz-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: cambiz-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: 86400000
+      - key: MTN_API_URL
+        value: https://sandbox.momodeveloper.mtn.com
+      - key: MTN_PRIMARY_KEY
+        value: test-key
+      - key: ORANGE_API_URL
+        value: https://api.orange.com/orange-money-webpay
+
+databases:
+  - name: cambiz-db
+    plan: free
+    databaseName: cambiz_market
+    user: cambiz_user

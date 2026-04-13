@@ -1,0 +1,82 @@
+package com.cambiz.market.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "users", 
+       uniqueConstraints = {
+           @UniqueConstraint(columnNames = "email"),
+           @UniqueConstraint(columnNames = "phone")
+       })
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(nullable = false, unique = true)
+    private String email;
+    
+    @Column(unique = true)
+    private String phone;
+    
+    @Column(nullable = false)
+    private String password;
+    
+    private String firstName;
+    private String lastName;
+    private String businessName;
+    
+    @Enumerated(EnumType.STRING)
+    private UserType userType = UserType.BUYER;
+    
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.PENDING;
+    
+    @Enumerated(EnumType.STRING)
+    private Language language = Language.EN;
+    
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+               joinColumns = @JoinColumn(name = "user_id"),
+               inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
+    
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+    
+    public enum UserType {
+        BUYER, SELLER, ADMIN
+    }
+    
+    public enum UserStatus {
+        PENDING, ACTIVE, SUSPENDED, DELETED
+    }
+    
+    public enum Language {
+        EN, FR
+    }
+}
