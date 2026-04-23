@@ -28,9 +28,8 @@ public class UserService {
     private JwtUtils jwtUtils;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;  // ✅ ADDED: BCrypt Password Encoder
+    private PasswordEncoder passwordEncoder;
 
-    // ✅ FIXED: Use BCrypt for password encoding
     private String encodePassword(String password) {
         return passwordEncoder.encode(password);
     }
@@ -49,7 +48,7 @@ public class UserService {
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setPassword(encodePassword(request.getPassword()));  // ✅ Now uses BCrypt
+        user.setPassword(encodePassword(request.getPassword()));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setBusinessName(request.getBusinessName());
@@ -66,13 +65,24 @@ public class UserService {
             user.setLanguage(User.Language.EN);
         }
 
+        // ✅ FIXED: Auto-create role if it doesn't exist
         Role userRole;
         if (user.getUserType() == User.UserType.SELLER) {
             userRole = roleRepository.findByName(Role.ROLE_SELLER)
-                    .orElseThrow(() -> new RuntimeException("Seller role not found!"));
+                    .orElseGet(() -> {
+                        Role newRole = new Role();
+                        newRole.setName(Role.ROLE_SELLER);
+                        newRole.setDescription("Seller Role");
+                        return roleRepository.save(newRole);
+                    });
         } else {
             userRole = roleRepository.findByName(Role.ROLE_BUYER)
-                    .orElseThrow(() -> new RuntimeException("Buyer role not found!"));
+                    .orElseGet(() -> {
+                        Role newRole = new Role();
+                        newRole.setName(Role.ROLE_BUYER);
+                        newRole.setDescription("Buyer Role");
+                        return roleRepository.save(newRole);
+                    });
         }
 
         user.setRoles(new HashSet<>(Collections.singletonList(userRole)));
@@ -94,7 +104,6 @@ public class UserService {
             throw new RuntimeException("User not found!");
         }
 
-        // ✅ FIXED: Use BCrypt password matching
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password!");
         }
@@ -112,39 +121,32 @@ public class UserService {
         );
     }
 
-    // ✅ GET USER ID BY EMAIL
     public Long getUserIdByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return user.getId();
     }
 
-    // ✅ ADDED: Find user by email (returns full User object)
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
     }
 
-    // ✅ ADDED: Find user by phone
     public User findByPhone(String phone) {
         return userRepository.findByPhone(phone).orElse(null);
     }
 
-    // ✅ ADDED: Check if email exists
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
 
-    // ✅ ADDED: Check if phone exists
     public boolean existsByPhone(String phone) {
         return userRepository.existsByPhone(phone);
     }
 
-    // ✅ ADDED: Get user by ID
     public User findById(Long id) {
         return userRepository.findById(id).orElse(null);
     }
 
-    // ✅ ADDED: Update user password
     public void updatePassword(Long userId, String newPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -152,7 +154,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // ✅ ADDED: Update user profile
     public User updateProfile(Long userId, String firstName, String lastName, String phone) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -164,14 +165,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // ✅ ADDED: Get all sellers
     public java.util.List<User> getAllSellers() {
         return userRepository.findAll().stream()
                 .filter(u -> u.getUserType() == User.UserType.SELLER)
                 .collect(Collectors.toList());
     }
 
-    // ✅ ADDED: Get all buyers
     public java.util.List<User> getAllBuyers() {
         return userRepository.findAll().stream()
                 .filter(u -> u.getUserType() == User.UserType.BUYER)
