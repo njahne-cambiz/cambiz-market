@@ -10,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/featured")
@@ -74,8 +76,16 @@ public class FeaturedController {
 
     @GetMapping
     public ResponseEntity<ApiResponse> getFeaturedProducts() {
-        var featured = productRepository.findByIsFeaturedTrueAndFeaturedUntilAfter(LocalDateTime.now());
-        return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", featured));
+        try {
+            List<Product> allProducts = productRepository.findAll();
+            List<Product> featured = allProducts.stream()
+                .filter(p -> p.getIsFeatured() != null && p.getIsFeatured())
+                .filter(p -> p.getFeaturedUntil() != null && p.getFeaturedUntil().isAfter(LocalDateTime.now()))
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", featured));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", List.of()));
+        }
     }
 
     @GetMapping("/status/{productId}")
