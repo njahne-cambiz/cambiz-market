@@ -1,5 +1,6 @@
 package com.cambiz.market.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,9 +34,11 @@ public class Category {
     
     @ManyToOne
     @JoinColumn(name = "parent_id")
+    @JsonIgnoreProperties({"subCategories"})
     private Category parent;
     
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({"parent"})
     private List<Category> subCategories = new ArrayList<>();
     
     @Column(name = "created_at", updatable = false)
