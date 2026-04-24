@@ -7,6 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/categories")
 @CrossOrigin(origins = "*")
@@ -17,7 +22,19 @@ public class CategoryController {
 
     @GetMapping
     public ResponseEntity<ApiResponse> getAllCategories() {
-        return ResponseEntity.ok(new ApiResponse(true, "Categories retrieved", categoryRepository.findAll()));
+        List<Category> categories = categoryRepository.findAll();
+        // Convert to simple map to avoid circular reference
+        List<Map<String, Object>> simplified = categories.stream().map(cat -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", cat.getId());
+            map.put("nameEn", cat.getNameEn());
+            map.put("nameFr", cat.getNameFr());
+            map.put("description", cat.getDescription());
+            map.put("icon", cat.getIcon());
+            map.put("sortOrder", cat.getSortOrder());
+            return map;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(new ApiResponse(true, "Categories retrieved", simplified));
     }
 
     @GetMapping("/{id}")
@@ -28,7 +45,6 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> createCategory(@RequestBody Category category) {
-        // If nameEn is not set, use the name field if available
         if (category.getNameEn() == null || category.getNameEn().isEmpty()) {
             category.setNameEn(category.getNameFr());
         }
