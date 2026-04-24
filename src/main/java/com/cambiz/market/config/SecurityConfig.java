@@ -65,7 +65,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/payments/methods").permitAll()
                 .requestMatchers("/api").permitAll()
 
-                // ✅ ADDED: Featured products - public to view
+                // ✅ Database migration - TEMPORARY PUBLIC ACCESS
+                .requestMatchers("/api/admin/db/**").permitAll()
+
+                // Featured products - public to view
                 .requestMatchers(HttpMethod.GET, "/api/featured/**").permitAll()
 
                 // STATIC & PAGES
@@ -87,7 +90,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
                 
-                // ✅ ADDED: Featured POST requires authentication
+                // Featured POST requires authentication
                 .requestMatchers(HttpMethod.POST, "/api/featured/**").authenticated()
                 
                 // Products - Write
