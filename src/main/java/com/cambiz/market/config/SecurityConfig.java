@@ -75,7 +75,7 @@ public class SecurityConfig {
                 .requestMatchers("/api").permitAll()
 
                 // ========== STATIC & PAGES ==========
-                .requestMatchers("/", "/dashboard/**", "/store/**", "/shop/**", "/home", "/index", "/about", "/contact").permitAll()
+                .requestMatchers("/", "/dashboard/**", "/store/**", "/shop/**", "/product", "/home", "/index", "/about", "/contact").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 
