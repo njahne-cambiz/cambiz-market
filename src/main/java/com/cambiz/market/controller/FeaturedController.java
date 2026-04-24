@@ -72,33 +72,30 @@ public class FeaturedController {
         }
     }
 
+    // Force deploy v3 - Simplified featured query
     @GetMapping
     public ResponseEntity<ApiResponse> getFeaturedProducts() {
+        List<Map<String, Object>> featured = new ArrayList<>();
         try {
             List<Product> all = productRepository.findAll();
-            List<Map<String, Object>> featured = new ArrayList<>();
             for (Product p : all) {
-                try {
-                    if (p.getIsFeatured() != null && p.getIsFeatured()) {
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("id", p.getId());
-                        map.put("name", p.getName());
-                        map.put("price", p.getPrice());
-                        map.put("discountedPrice", p.getDiscountedPrice());
-                        map.put("stockQuantity", p.getStockQuantity());
-                        map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : null);
-                        map.put("imageUrl", p.getImageUrl());
-                        map.put("isFeatured", true);
-                        featured.add(map);
-                    }
-                } catch (Exception ex) {
-                    // Skip problematic products
+                if (p.getIsFeatured() != null && p.getIsFeatured()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", p.getId());
+                    map.put("name", p.getName());
+                    map.put("price", p.getPrice());
+                    map.put("discountedPrice", p.getDiscountedPrice());
+                    map.put("stockQuantity", p.getStockQuantity());
+                    map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : null);
+                    map.put("imageUrl", p.getImageUrl());
+                    map.put("isFeatured", true);
+                    featured.add(map);
                 }
             }
-            return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", featured));
         } catch (Exception e) {
-            return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", List.of()));
+            // Return empty list on error
         }
+        return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", featured));
     }
 
     @GetMapping("/status/{productId}")
