@@ -3,7 +3,6 @@ package com.cambiz.market.config;
 import com.cambiz.market.security.JwtAuthFilter;
 import com.cambiz.market.security.RateLimitingFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,8 +28,7 @@ public class SecurityConfig {
     @Autowired
     private RateLimitingFilter rateLimitingFilter;
 
-    @Value("${cors.allowed-origins}")
-    private String allowedOrigins;
+    private String allowedOrigins = "http://localhost:3000,http://localhost:8080,https://cambiz-market.onrender.com";
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -89,25 +87,18 @@ public class SecurityConfig {
                 .requestMatchers("/api/dashboard/seller").hasRole("SELLER")
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
 
-                // ========== AUTHENTICATED USERS (Buyer & Seller) ==========
-                // Cart
+                // ========== AUTHENTICATED USERS ==========
                 .requestMatchers("/api/cart/**").authenticated()
-                
-                // Orders
                 .requestMatchers("/api/orders/**").authenticated()
-                
-                // Makola
                 .requestMatchers("/api/makola/**").authenticated()
-                
-                // Payments
                 .requestMatchers("/api/payments/**").authenticated()
                 
-                // ✅ Products - Create, Update, Delete (authenticated users)
+                // Products - Write operations
                 .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
                 
-                // ✅ Categories - Create, Update, Delete (authenticated users)
+                // Categories - Write operations
                 .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/categories/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/categories/**").authenticated()
