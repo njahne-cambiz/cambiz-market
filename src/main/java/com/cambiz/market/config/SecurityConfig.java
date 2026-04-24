@@ -3,6 +3,7 @@ package com.cambiz.market.config;
 import com.cambiz.market.security.JwtAuthFilter;
 import com.cambiz.market.security.RateLimitingFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,119 +14,114 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
+
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
-    
+
     @Autowired
     private RateLimitingFilter rateLimitingFilter;
+
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
-    
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:3000",
-            "http://localhost:8080",
-            "https://cambiz.cm",
-            "https://www.cambiz.cm"
+
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        configuration.setAllowedOrigins(origins);
+
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS"
         ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
             .authorizeHttpRequests(auth -> auth
-                // ========== PUBLIC ENDPOINTS (No Token Required) ==========
-                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+
+                // ========== PUBLIC ENDPOINTS ==========
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                 .requestMatchers("/api/payments/callback/**").permitAll()
-                
-                // ✅ ADDED: Payment methods - PUBLIC
                 .requestMatchers(HttpMethod.GET, "/api/payments/methods").permitAll()
-                
-                // ✅ API welcome page
                 .requestMatchers("/api").permitAll()
-                
-                // ✅ Dashboard HTML pages - PUBLIC
-                .requestMatchers("/", "/dashboard", "/dashboard/**").permitAll()
-                .requestMatchers("/home", "/index", "/about", "/contact").permitAll()
-                
-                // ✅ Static resources - PUBLIC
+
+                // ========== STATIC & PAGES ==========
+                .requestMatchers("/", "/dashboard/**", "/home", "/index", "/about", "/contact").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
-                
-                // ✅ Actuator health - PUBLIC
+
+                // ========== HEALTH ==========
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers("/test", "/api/test/**").permitAll()
-                
-                // ========== API DASHBOARD ENDPOINTS (Require Authentication) ==========
+
+                // ========== ROLE-BASED DASHBOARDS ==========
                 .requestMatchers("/api/dashboard/buyer").hasRole("BUYER")
                 .requestMatchers("/api/dashboard/seller").hasRole("SELLER")
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
-                .requestMatchers("/api/dashboard/quick-stats").authenticated()
+
+                // ========== AUTHENTICATED USERS (Buyer & Seller) ==========
+                // Cart
+                .requestMatchers("/api/cart/**").authenticated()
                 
-                // ========== PROTECTED ENDPOINTS (Token Required) ==========
-                // Cart endpoints
-                .requestMatchers(HttpMethod.GET, "/api/cart/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/cart/**").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/cart/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/cart/**").authenticated()
-                
-                // Order endpoints
+                // Orders
                 .requestMatchers("/api/orders/**").authenticated()
                 
-                // Makola (Negotiation) endpoints
+                // Makola
                 .requestMatchers("/api/makola/**").authenticated()
                 
-                // Payment endpoints (except callbacks and methods)
-                .requestMatchers("/api/payments/initiate", "/api/payments/status/**").authenticated()
-                .requestMatchers("/api/payments/order/**").authenticated()
+                // Payments
+                .requestMatchers("/api/payments/**").authenticated()
                 
-                // Product write operations (CREATE, UPDATE, DELETE)
+                // ✅ Products - Create, Update, Delete (authenticated users)
                 .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
                 
-                // Category write operations (ADMIN ONLY)
-                .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
-                
-                // Admin endpoints
+                // ✅ Categories - Create, Update, Delete (authenticated users)
+                .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/categories/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").authenticated()
+
+                // ========== ADMIN ONLY ==========
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                
-                // All other requests need authentication
+
+                // ========== EVERYTHING ELSE ==========
                 .anyRequest().authenticated()
             )
+
             .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
 }
