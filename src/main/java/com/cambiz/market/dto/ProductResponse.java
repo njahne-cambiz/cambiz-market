@@ -20,6 +20,7 @@ public class ProductResponse {
     private Long sellerId;
     private String sellerName;
     private String sellerBusinessName;
+    private Long categoryId;        // ✅ ADDED
     private String categoryName;
     private Boolean isFeatured;
     private Integer viewCount;
@@ -40,64 +41,20 @@ public class ProductResponse {
         User seller = product.getSeller();
         if (seller != null) {
             response.setSellerId(seller.getId());
-            
-            // Build seller name safely using reflection
             String sellerName = "Seller";
             try {
-                // Try to get firstName and lastName
-                java.lang.reflect.Method getFirstName = seller.getClass().getMethod("getFirstName");
-                java.lang.reflect.Method getLastName = seller.getClass().getMethod("getLastName");
-                
-                String firstName = (String) getFirstName.invoke(seller);
-                String lastName = (String) getLastName.invoke(seller);
-                
-                if (firstName != null && lastName != null) {
-                    sellerName = firstName + " " + lastName;
-                } else if (firstName != null) {
-                    sellerName = firstName;
-                } else if (lastName != null) {
-                    sellerName = lastName;
-                }
+                sellerName = seller.getFirstName() + " " + seller.getLastName();
             } catch (Exception e) {
-                // Methods don't exist, try other options
-                try {
-                    java.lang.reflect.Method getName = seller.getClass().getMethod("getName");
-                    sellerName = (String) getName.invoke(seller);
-                } catch (Exception e2) {
-                    try {
-                        java.lang.reflect.Method getFullName = seller.getClass().getMethod("getFullName");
-                        sellerName = (String) getFullName.invoke(seller);
-                    } catch (Exception e3) {
-                        sellerName = "Seller #" + seller.getId();
-                    }
-                }
+                sellerName = "Seller #" + seller.getId();
             }
             response.setSellerName(sellerName);
-            
-            // FIXED LINE 77: Safely get business name or set to null
-            try {
-                java.lang.reflect.Method getBusinessName = seller.getClass().getMethod("getBusinessName");
-                String businessName = (String) getBusinessName.invoke(seller);
-                response.setSellerBusinessName(businessName);
-            } catch (Exception e) {
-                // Business name method doesn't exist, set to null or use seller name
-                response.setSellerBusinessName(null);
-            }
+            response.setSellerBusinessName(seller.getBusinessName());
         }
         
-        // Handle category safely
+        // Handle category - SET BOTH ID AND NAME
         if (product.getCategory() != null) {
-            try {
-                java.lang.reflect.Method getNameEn = product.getCategory().getClass().getMethod("getNameEn");
-                response.setCategoryName((String) getNameEn.invoke(product.getCategory()));
-            } catch (Exception e) {
-                try {
-                    java.lang.reflect.Method getName = product.getCategory().getClass().getMethod("getName");
-                    response.setCategoryName((String) getName.invoke(product.getCategory()));
-                } catch (Exception e2) {
-                    response.setCategoryName("Category #" + product.getCategory().getId());
-                }
-            }
+            response.setCategoryId(product.getCategory().getId());       // ✅ ADDED
+            response.setCategoryName(product.getCategory().getNameEn());
         }
         
         response.setIsFeatured(product.getIsFeatured());
