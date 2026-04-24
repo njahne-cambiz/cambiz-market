@@ -188,22 +188,22 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">📦</div>
-                <div class="stat-value" id="productCount">1</div>
+                <div class="stat-value" id="productCount">77</div>
                 <div class="stat-label">Total Products</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
-                <div class="stat-value" id="userCount">5</div>
+                <div class="stat-value" id="userCount">2</div>
                 <div class="stat-label">Registered Users</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">🛒</div>
-                <div class="stat-value" id="orderCount">2</div>
+                <div class="stat-value" id="orderCount">1</div>
                 <div class="stat-label">Total Orders</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">💰</div>
-                <div class="stat-value" id="revenueCount">1,300,000</div>
+                <div class="stat-value" id="revenueCount">650,000</div>
                 <div class="stat-label">Revenue (XAF)</div>
             </div>
         </div>
@@ -302,10 +302,11 @@
     <script>
         async function fetchStats() {
             try {
-                const res = await fetch('/api/products');
+                // Fetch with large page size to get accurate count
+                const res = await fetch('/api/products?page=0&size=100');
                 const data = await res.json();
                 if (data.data) {
-                    document.getElementById('productCount').textContent = data.data.length || 1;
+                    document.getElementById('productCount').textContent = data.data.length;
                 }
             } catch (e) {
                 console.log('Using default stats');
