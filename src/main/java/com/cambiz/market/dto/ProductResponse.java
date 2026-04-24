@@ -20,7 +20,7 @@ public class ProductResponse {
     private Long sellerId;
     private String sellerName;
     private String sellerBusinessName;
-    private Long categoryId;        // ✅ ADDED
+    private Long categoryId;
     private String categoryName;
     private Boolean isFeatured;
     private Integer viewCount;
@@ -37,23 +37,31 @@ public class ProductResponse {
         response.setCondition(product.getProductCondition());
         response.setImageUrls(product.getImageUrls());
         
-        // Handle seller info safely
+        // Handle seller info - FIXED: Check for null values
         User seller = product.getSeller();
         if (seller != null) {
             response.setSellerId(seller.getId());
-            String sellerName = "Seller";
-            try {
-                sellerName = seller.getFirstName() + " " + seller.getLastName();
-            } catch (Exception e) {
-                sellerName = "Seller #" + seller.getId();
+            // Build seller name safely
+            StringBuilder nameBuilder = new StringBuilder();
+            if (seller.getFirstName() != null && !seller.getFirstName().isEmpty()) {
+                nameBuilder.append(seller.getFirstName());
             }
-            response.setSellerName(sellerName);
+            if (seller.getLastName() != null && !seller.getLastName().isEmpty()) {
+                if (nameBuilder.length() > 0) nameBuilder.append(" ");
+                nameBuilder.append(seller.getLastName());
+            }
+            if (nameBuilder.length() == 0) {
+                nameBuilder.append("Seller #").append(seller.getId());
+            }
+            response.setSellerName(nameBuilder.toString());
             response.setSellerBusinessName(seller.getBusinessName());
+        } else {
+            response.setSellerName("Unknown Seller");
         }
         
         // Handle category - SET BOTH ID AND NAME
         if (product.getCategory() != null) {
-            response.setCategoryId(product.getCategory().getId());       // ✅ ADDED
+            response.setCategoryId(product.getCategory().getId());
             response.setCategoryName(product.getCategory().getNameEn());
         }
         
