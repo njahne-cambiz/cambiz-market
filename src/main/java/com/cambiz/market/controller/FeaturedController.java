@@ -10,9 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/featured")
@@ -77,11 +75,26 @@ public class FeaturedController {
     @GetMapping
     public ResponseEntity<ApiResponse> getFeaturedProducts() {
         try {
-            List<Product> allProducts = productRepository.findAll();
-            List<Product> featured = allProducts.stream()
-                .filter(p -> p.getIsFeatured() != null && p.getIsFeatured())
-                .filter(p -> p.getFeaturedUntil() != null && p.getFeaturedUntil().isAfter(LocalDateTime.now()))
-                .collect(Collectors.toList());
+            List<Product> all = productRepository.findAll();
+            List<Map<String, Object>> featured = new ArrayList<>();
+            for (Product p : all) {
+                try {
+                    if (p.getIsFeatured() != null && p.getIsFeatured()) {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("id", p.getId());
+                        map.put("name", p.getName());
+                        map.put("price", p.getPrice());
+                        map.put("discountedPrice", p.getDiscountedPrice());
+                        map.put("stockQuantity", p.getStockQuantity());
+                        map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : null);
+                        map.put("imageUrl", p.getImageUrl());
+                        map.put("isFeatured", true);
+                        featured.add(map);
+                    }
+                } catch (Exception ex) {
+                    // Skip problematic products
+                }
+            }
             return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", featured));
         } catch (Exception e) {
             return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", List.of()));
