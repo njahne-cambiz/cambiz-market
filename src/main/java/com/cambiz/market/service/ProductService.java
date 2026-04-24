@@ -45,7 +45,6 @@ public class ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setDiscountedPrice(request.getDiscountedPrice());
-        // FIXED LINE 48: Changed setQuantity() to setStockQuantity()
         product.setStockQuantity(request.getQuantity());
         product.setProductCondition(request.getCondition());
         product.setImageUrls(request.getImageUrls());
@@ -69,7 +68,6 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         product.setViewCount(product.getViewCount() + 1);
         productRepository.save(product);
-        // Force initialize lazy collection
         product.getImageUrls().size();
         return ProductResponse.fromProduct(product);
     }
@@ -79,7 +77,6 @@ public class ProductService {
     public List<ProductResponse> getAllProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Product> products = productRepository.findByIsActiveTrue(pageable);
-        // Force initialize lazy collections for each product
         products.getContent().forEach(p -> p.getImageUrls().size());
         return ProductResponse.fromProducts(products.getContent());
     }
@@ -111,7 +108,7 @@ public class ProductService {
         return ProductResponse.fromProducts(products.getContent());
     }
     
-    // Update product (only owner)
+    // Update product (only owner) - FIXED: Only update provided fields
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request, Long sellerId) {
         Product product = productRepository.findById(id)
@@ -121,15 +118,17 @@ public class ProductService {
             throw new RuntimeException("You can only update your own products");
         }
         
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setDiscountedPrice(request.getDiscountedPrice());
-        // FIXED LINE 127: Changed setQuantity() to setStockQuantity()
-        product.setStockQuantity(request.getQuantity());
-        product.setProductCondition(request.getCondition());
-        product.setImageUrls(request.getImageUrls());
+        // ✅ Only update fields that are provided (not null)
+        if (request.getName() != null) product.setName(request.getName());
+        if (request.getDescription() != null) product.setDescription(request.getDescription());
+        if (request.getPrice() != null) product.setPrice(request.getPrice());
+        if (request.getDiscountedPrice() != null) product.setDiscountedPrice(request.getDiscountedPrice());
+        if (request.getQuantity() != null) product.setStockQuantity(request.getQuantity());
+        if (request.getCondition() != null) product.setProductCondition(request.getCondition());
+        if (request.getImageUrls() != null) product.setImageUrls(request.getImageUrls());
+        if (request.getIsFeatured() != null) product.setIsFeatured(request.getIsFeatured());
         
+        // ✅ Handle category assignment
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Category not found"));
