@@ -131,7 +131,7 @@
             }
 
             document.getElementById('products').innerHTML = products.map(p => `
-                <div class="product-card" onclick="window.open('/api/products/${p.id}','_blank')">
+                <div class="product-card" onclick="window.location.href='/product?id=${p.id}'">
                     <div class="product-emoji">${categoryEmojis[p.categoryName] || '📦'}</div>
                     <div class="product-category">${p.categoryName || 'General'}</div>
                     <div class="product-name">${p.name}</div>
