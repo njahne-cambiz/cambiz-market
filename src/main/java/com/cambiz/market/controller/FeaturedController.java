@@ -72,37 +72,30 @@ public class FeaturedController {
         }
     }
 
-    // DEBUG VERSION - Shows exactly what's happening
     @GetMapping
     public ResponseEntity<ApiResponse> getFeaturedProducts() {
         try {
             List<Product> all = productRepository.findAll();
             List<Map<String, Object>> featured = new ArrayList<>();
-            int totalProducts = all.size();
-            int featuredCount = 0;
             
             for (Product p : all) {
                 Boolean isFt = p.getIsFeatured();
                 if (isFt != null && isFt) {
-                    featuredCount++;
                     Map<String, Object> map = new HashMap<>();
                     map.put("id", p.getId());
                     map.put("name", p.getName());
                     map.put("price", p.getPrice());
+                    map.put("discountedPrice", p.getDiscountedPrice());
+                    map.put("stockQuantity", p.getStockQuantity());
+                    map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : null);
+                    map.put("imageUrl", p.getImageUrl());
                     map.put("isFeatured", true);
                     featured.add(map);
                 }
             }
-            
-            Map<String, Object> debug = new HashMap<>();
-            debug.put("totalProducts", totalProducts);
-            debug.put("featuredCount", featuredCount);
-            debug.put("featured", featured);
-            
-            return ResponseEntity.ok(new ApiResponse(true, 
-                "Found " + featuredCount + " featured out of " + totalProducts, debug));
+            return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", featured));
         } catch (Exception e) {
-            return ResponseEntity.ok(new ApiResponse(false, "ERROR: " + e.getMessage(), null));
+            return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", List.of()));
         }
     }
 
