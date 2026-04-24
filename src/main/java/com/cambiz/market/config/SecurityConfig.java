@@ -38,35 +38,26 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
         configuration.setAllowedOrigins(origins);
-
-        configuration.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"
-        ));
-
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
             .authorizeHttpRequests(auth -> auth
 
-                // ========== PUBLIC ENDPOINTS ==========
+                // PUBLIC ENDPOINTS
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
@@ -74,45 +65,48 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/payments/methods").permitAll()
                 .requestMatchers("/api").permitAll()
 
-                // ========== STATIC & PAGES ==========
+                // ✅ ADDED: Featured products - public to view
+                .requestMatchers(HttpMethod.GET, "/api/featured/**").permitAll()
+
+                // STATIC & PAGES
                 .requestMatchers("/", "/dashboard/**", "/store/**", "/shop/**", "/product", "/home", "/index", "/about", "/contact").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 
-                // ========== HEALTH ==========
+                // HEALTH
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
 
-                // ========== ROLE-BASED DASHBOARDS ==========
+                // ROLE-BASED DASHBOARDS
                 .requestMatchers("/api/dashboard/buyer").hasRole("BUYER")
                 .requestMatchers("/api/dashboard/seller").hasRole("SELLER")
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
 
-                // ========== AUTHENTICATED USERS ==========
+                // AUTHENTICATED USERS
                 .requestMatchers("/api/cart/**").authenticated()
                 .requestMatchers("/api/orders/**").authenticated()
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
                 
-                // Products - Write operations
+                // ✅ ADDED: Featured POST requires authentication
+                .requestMatchers(HttpMethod.POST, "/api/featured/**").authenticated()
+                
+                // Products - Write
                 .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
                 
-                // Categories - Write operations
+                // Categories - Write
                 .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/categories/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/categories/**").authenticated()
 
-                // ========== ADMIN ONLY ==========
+                // ADMIN ONLY
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                // ========== EVERYTHING ELSE ==========
                 .anyRequest().authenticated()
             )
-
             .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 }

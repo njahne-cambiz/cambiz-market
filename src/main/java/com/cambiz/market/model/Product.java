@@ -30,10 +30,10 @@ public class Product {
     
     private Double discountedPrice;
     
-    private Integer stockQuantity = 1;  // Renamed from 'quantity' to be clearer
+    private Integer stockQuantity = 1;
     
     @Column(name = "product_condition")
-    private String productCondition; // NEW, LIKE_NEW, GOOD, FAIR
+    private String productCondition;
     
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
@@ -50,6 +50,12 @@ public class Product {
     
     private Boolean isFeatured = false;
     
+    @Column(name = "featured_until")
+    private LocalDateTime featuredUntil;          // ✅ ADDED
+    
+    @Column(name = "featured_payment_id")
+    private Long featuredPaymentId;               // ✅ ADDED
+    
     private Boolean isActive = true;
     
     private Integer viewCount = 0;
@@ -60,12 +66,10 @@ public class Product {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    // Helper method to get seller ID (used in CartService)
     public Long getSellerId() {
         return seller != null ? seller.getId() : null;
     }
     
-    // Helper method to get first image URL
     public String getImageUrl() {
         return imageUrls != null && !imageUrls.isEmpty() ? imageUrls.get(0) : null;
     }

@@ -25,9 +25,15 @@
         .stat .value { font-size: 24px; font-weight: bold; color: #667eea; }
         .stat .label { font-size: 12px; color: #666; }
         
+        /* ✅ Featured Section */
+        .featured-section { margin-bottom: 30px; }
+        .featured-section h2 { margin-bottom: 15px; color: #ff6b6b; }
+        .featured-badge { background: #ff6b6b; color: white; padding: 3px 10px; border-radius: 10px; display: inline-block; margin-bottom: 10px; font-size: 12px; font-weight: bold; }
+        
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .product-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: transform 0.3s; cursor: pointer; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .product-card.featured { border: 2px solid #ff6b6b; }
         .product-emoji { font-size: 40px; margin-bottom: 10px; }
         .product-category { font-size: 11px; color: #667eea; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
         .product-name { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 10px; }
@@ -64,6 +70,13 @@
     </div>
 
     <div class="container">
+        <!-- ✅ FEATURED PRODUCTS SECTION -->
+        <div class="featured-section" id="featuredSection" style="display:none;">
+            <h2>⭐ Featured Products</h2>
+            <div class="products-grid" id="featuredProducts"></div>
+        </div>
+
+        <!-- Stats -->
         <div class="stats">
             <div class="stat"><div class="value" id="totalCount">0</div><div class="label">Total Products</div></div>
             <div class="stat"><div class="value" id="shownCount">0</div><div class="label">Showing</div></div>
@@ -71,6 +84,8 @@
             <div class="stat"><div class="value" id="maxPrice">0</div><div class="label">Max Price (XAF)</div></div>
         </div>
         
+        <!-- All Products -->
+        <h2 style="margin-bottom:15px;">📦 All Products</h2>
         <div class="products-grid" id="products">
             <div class="no-results"><div class="emoji">⏳</div><p>Loading products...</p></div>
         </div>
@@ -91,6 +106,33 @@
             'Fashion & Clothing': '👗', 'Food & Essentials': '🍚',
             'Transportation': '🏍️', 'Accessories': '⌚'
         };
+
+        // ✅ Load Featured Products
+        async function loadFeatured() {
+            try {
+                const res = await fetch('/api/featured');
+                const data = await res.json();
+                if (data.success && data.data && data.data.length > 0) {
+                    document.getElementById('featuredSection').style.display = 'block';
+                    document.getElementById('featuredProducts').innerHTML = data.data.map(p => `
+                        <div class="product-card featured" onclick="window.location.href='/product?id=${p.id}'">
+                            <div class="featured-badge">⭐ FEATURED</div>
+                            <div class="product-emoji">${categoryEmojis[p.categoryName] || '📦'}</div>
+                            <div class="product-category">${p.categoryName || 'General'}</div>
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-price">
+                                ${p.discountedPrice ? `<span class="original">${p.price.toLocaleString()} XAF</span>` : ''}
+                                ${(p.discountedPrice || p.price).toLocaleString()} XAF
+                                ${p.discountedPrice ? `<span class="discount">-${Math.round((1 - p.discountedPrice/p.price) * 100)}%</span>` : ''}
+                            </div>
+                            <div class="product-stock">✅ ${p.stockQuantity} in stock</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                console.log('No featured products');
+            }
+        }
 
         async function loadProducts() {
             try {
@@ -185,6 +227,8 @@
             filterByCategory('all', document.querySelector('.cat-btn'));
         }
 
+        // ✅ Load everything
+        loadFeatured();
         loadProducts();
     </script>
 </body>
