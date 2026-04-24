@@ -28,6 +28,13 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> createCategory(@RequestBody Category category) {
+        // If nameEn is not set, use the name field if available
+        if (category.getNameEn() == null || category.getNameEn().isEmpty()) {
+            category.setNameEn(category.getNameFr());
+        }
+        if (category.getNameFr() == null || category.getNameFr().isEmpty()) {
+            category.setNameFr(category.getNameEn());
+        }
         Category saved = categoryRepository.save(category);
         return ResponseEntity.ok(new ApiResponse(true, "Category created", saved));
     }
