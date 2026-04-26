@@ -65,7 +65,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/payments/methods").permitAll()
                 .requestMatchers("/api").permitAll()
 
-                // ✅ Database migration - TEMPORARY PUBLIC ACCESS
+                // ✅ Premium - benefits PUBLIC, status PUBLIC, upgrade AUTHENTICATED
+                .requestMatchers(HttpMethod.GET, "/api/premium/benefits").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/premium/status/**").permitAll()
+
+                // Database migration - temporary public access
                 .requestMatchers("/api/admin/db/**").permitAll()
 
                 // Featured products - public to view
@@ -89,6 +93,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/orders/**").authenticated()
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
+                
+                // Premium upgrade requires authentication
+                .requestMatchers(HttpMethod.POST, "/api/premium/**").authenticated()
                 
                 // Featured POST requires authentication
                 .requestMatchers(HttpMethod.POST, "/api/featured/**").authenticated()
