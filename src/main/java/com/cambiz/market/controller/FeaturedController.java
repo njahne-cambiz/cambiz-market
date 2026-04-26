@@ -1,6 +1,7 @@
 package com.cambiz.market.controller;
 
 import com.cambiz.market.dto.ApiResponse;
+import com.cambiz.market.dto.ProductResponse;
 import com.cambiz.market.model.Product;
 import com.cambiz.market.model.Payment;
 import com.cambiz.market.repository.ProductRepository;
@@ -73,20 +74,14 @@ public class FeaturedController {
     }
 
     @GetMapping
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseEntity<ApiResponse> getFeaturedProducts() {
         List<Product> all = productRepository.findAll();
-        List<Map<String, Object>> featured = new ArrayList<>();
+        List<ProductResponse> featured = new ArrayList<>();
         
         for (Product p : all) {
             if (p.getIsFeatured() != null && p.getIsFeatured()) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", p.getId());
-                map.put("name", p.getName());
-                map.put("price", p.getPrice());
-                map.put("discountedPrice", p.getDiscountedPrice());
-                map.put("stockQuantity", p.getStockQuantity());
-                featured.add(map);
+                featured.add(ProductResponse.fromProduct(p));
             }
         }
         return ResponseEntity.ok(new ApiResponse(true, "Found " + featured.size() + " featured", featured));
