@@ -65,10 +65,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/payments/methods").permitAll()
                 .requestMatchers("/api").permitAll()
 
-                // ✅ Premium - benefits PUBLIC, status PUBLIC, upgrade AUTHENTICATED
+                // Premium - benefits PUBLIC, status PUBLIC
                 .requestMatchers(HttpMethod.GET, "/api/premium/benefits").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/premium/status/**").permitAll()
 
+                // ✅ Admin expiry endpoints - PUBLIC (for testing)
+                .requestMatchers(HttpMethod.POST, "/api/admin/expire-featured").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/admin/expire-premium").permitAll()
+                
                 // Database migration - temporary public access
                 .requestMatchers("/api/admin/db/**").permitAll()
 
