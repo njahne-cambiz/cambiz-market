@@ -65,11 +65,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/payments/methods").permitAll()
                 .requestMatchers("/api").permitAll()
 
+                // ✅ Wallet - public for testing
+                .requestMatchers("/api/wallet/**").permitAll()
+
                 // Premium - benefits PUBLIC, status PUBLIC
                 .requestMatchers(HttpMethod.GET, "/api/premium/benefits").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/premium/status/**").permitAll()
 
-                // ✅ Admin expiry endpoints - PUBLIC (for testing)
+                // Admin expiry endpoints - PUBLIC (for testing)
                 .requestMatchers(HttpMethod.POST, "/api/admin/expire-featured").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/admin/expire-premium").permitAll()
                 
