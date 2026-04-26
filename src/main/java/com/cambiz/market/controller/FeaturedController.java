@@ -74,21 +74,25 @@ public class FeaturedController {
 
     @GetMapping
     public ResponseEntity<ApiResponse> getFeaturedProducts() {
-        List<Map<String, Object>> featured = new ArrayList<>();
-        List<Product> all = productRepository.findAll();
-        for (Product p : all) {
-            if (p.getIsFeatured() != null && p.getIsFeatured()) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", p.getId());
-                map.put("name", p.getName());
-                map.put("price", p.getPrice());
-                map.put("discountedPrice", p.getDiscountedPrice());
-                map.put("stockQuantity", p.getStockQuantity());
-                map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : null);
-                map.put("isFeatured", true);
-                featured.add(map);
+        try {
+            List<Product> all = productRepository.findAll();
+            List<Map<String, Object>> featured = new ArrayList<>();
+            
+            for (Product p : all) {
+                if (p.getIsFeatured() != null && p.getIsFeatured()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", p.getId());
+                    map.put("name", p.getName());
+                    map.put("price", p.getPrice());
+                    map.put("discountedPrice", p.getDiscountedPrice());
+                    map.put("stockQuantity", p.getStockQuantity());
+                    map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : null);
+                    featured.add(map);
+                }
             }
+            return ResponseEntity.ok(new ApiResponse(true, "Found " + featured.size() + " featured", featured));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new ApiResponse(false, "Error: " + e.getClass().getSimpleName() + " - " + e.getMessage(), null));
         }
-        return ResponseEntity.ok(new ApiResponse(true, "Featured products retrieved", featured));
     }
 }
