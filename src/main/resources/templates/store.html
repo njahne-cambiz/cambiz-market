@@ -11,6 +11,10 @@
         .navbar { background: linear-gradient(135deg, #667eea, #764ba2); padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .navbar h1 { font-size: 24px; }
         
+        /* ✅ Premium Banner */
+        .premium-banner { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 10px 20px; text-align: center; font-size: 14px; }
+        .premium-banner a { color: white; text-decoration: underline; font-weight: bold; }
+        
         .search-bar { display: flex; gap: 10px; }
         .search-bar input { padding: 10px 20px; border: none; border-radius: 25px; font-size: 14px; width: 300px; outline: none; }
         .search-bar button { padding: 10px 20px; background: #ff6b6b; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
@@ -25,7 +29,6 @@
         .stat .value { font-size: 24px; font-weight: bold; color: #667eea; }
         .stat .label { font-size: 12px; color: #666; }
         
-        /* ✅ Featured Section */
         .featured-section { margin-bottom: 30px; }
         .featured-section h2 { margin-bottom: 15px; color: #ff6b6b; }
         .featured-badge { background: #ff6b6b; color: white; padding: 3px 10px; border-radius: 10px; display: inline-block; margin-bottom: 10px; font-size: 12px; font-weight: bold; }
@@ -65,18 +68,22 @@
         </div>
     </div>
 
+    <!-- ✅ Premium Seller Banner -->
+    <div class="premium-banner">
+        🏆 <b>Become a Premium Seller!</b> Get verified badge, lower fees (4.5%), and more! 
+        <a href="/api/premium/benefits" target="_blank">Learn More →</a>
+    </div>
+
     <div class="categories" id="categoryFilters">
         <button class="cat-btn active" onclick="filterByCategory('all', this)">📦 All</button>
     </div>
 
     <div class="container">
-        <!-- ✅ FEATURED PRODUCTS SECTION -->
         <div class="featured-section" id="featuredSection" style="display:none;">
             <h2>⭐ Featured Products</h2>
             <div class="products-grid" id="featuredProducts"></div>
         </div>
 
-        <!-- Stats -->
         <div class="stats">
             <div class="stat"><div class="value" id="totalCount">0</div><div class="label">Total Products</div></div>
             <div class="stat"><div class="value" id="shownCount">0</div><div class="label">Showing</div></div>
@@ -84,7 +91,6 @@
             <div class="stat"><div class="value" id="maxPrice">0</div><div class="label">Max Price (XAF)</div></div>
         </div>
         
-        <!-- All Products -->
         <h2 style="margin-bottom:15px;">📦 All Products</h2>
         <div class="products-grid" id="products">
             <div class="no-results"><div class="emoji">⏳</div><p>Loading products...</p></div>
@@ -107,7 +113,6 @@
             'Transportation': '🏍️', 'Accessories': '⌚'
         };
 
-        // ✅ Load Featured Products
         async function loadFeatured() {
             try {
                 const res = await fetch('/api/featured');
@@ -227,7 +232,6 @@
             filterByCategory('all', document.querySelector('.cat-btn'));
         }
 
-        // ✅ Load everything
         loadFeatured();
         loadProducts();
     </script>

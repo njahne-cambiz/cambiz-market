@@ -45,6 +45,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Language language = Language.EN;
     
+    // ✅ PREMIUM SELLER FIELDS
+    @Column(name = "account_type")
+    private String accountType = "REGULAR"; // REGULAR, PREMIUM
+    
+    @Column(name = "premium_until")
+    private LocalDateTime premiumUntil;
+    
+    @Column(name = "commission_rate")
+    private Double commissionRate = 5.0; // 5% default, 4.5% for premium
+    
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
                joinColumns = @JoinColumn(name = "user_id"),
