@@ -55,6 +55,13 @@ public class User {
     @Column(name = "commission_rate")
     private Double commissionRate = 5.0; // 5% default, 4.5% for premium
     
+    // ✅ CAMBIZ WALLET FIELDS
+    @Column(name = "wallet_balance")
+    private Double walletBalance = 0.0;
+    
+    @Column(name = "total_earned")
+    private Double totalEarned = 0.0;
+    
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
                joinColumns = @JoinColumn(name = "user_id"),
