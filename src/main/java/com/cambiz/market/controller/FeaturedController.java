@@ -73,26 +73,22 @@ public class FeaturedController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse> getFeaturedProducts() {
-        try {
-            List<Product> all = productRepository.findAll();
-            List<Map<String, Object>> featured = new ArrayList<>();
-            
-            for (Product p : all) {
-                if (p.getIsFeatured() != null && p.getIsFeatured()) {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("id", p.getId());
-                    map.put("name", p.getName());
-                    map.put("price", p.getPrice());
-                    map.put("discountedPrice", p.getDiscountedPrice());
-                    map.put("stockQuantity", p.getStockQuantity());
-                    map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : null);
-                    featured.add(map);
-                }
+        List<Product> all = productRepository.findAll();
+        List<Map<String, Object>> featured = new ArrayList<>();
+        
+        for (Product p : all) {
+            if (p.getIsFeatured() != null && p.getIsFeatured()) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", p.getId());
+                map.put("name", p.getName());
+                map.put("price", p.getPrice());
+                map.put("discountedPrice", p.getDiscountedPrice());
+                map.put("stockQuantity", p.getStockQuantity());
+                featured.add(map);
             }
-            return ResponseEntity.ok(new ApiResponse(true, "Found " + featured.size() + " featured", featured));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new ApiResponse(false, "Error: " + e.getClass().getSimpleName() + " - " + e.getMessage(), null));
         }
+        return ResponseEntity.ok(new ApiResponse(true, "Found " + featured.size() + " featured", featured));
     }
 }
