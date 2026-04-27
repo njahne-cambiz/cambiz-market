@@ -11,7 +11,6 @@
         .navbar { background: linear-gradient(135deg, #667eea, #764ba2); padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .navbar h1 { font-size: 24px; }
         
-        /* ✅ Premium Banner */
         .premium-banner { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 10px 20px; text-align: center; font-size: 14px; }
         .premium-banner a { color: white; text-decoration: underline; font-weight: bold; }
         
@@ -45,6 +44,9 @@
         .product-price .discount { font-size: 12px; background: #ff6b6b; color: white; padding: 3px 8px; border-radius: 10px; margin-left: 8px; }
         .product-stock { font-size: 11px; color: #10b981; margin-top: 5px; }
         .product-condition { font-size: 10px; color: #f59e0b; margin-top: 3px; }
+        /* ✅ Reviews */
+        .product-reviews { color: #f59e0b; font-size: 12px; margin-top: 5px; }
+        .product-reviews span { color: #666; }
         
         .no-results { text-align: center; padding: 60px; color: #999; }
         .no-results .emoji { font-size: 60px; }
@@ -68,7 +70,6 @@
         </div>
     </div>
 
-    <!-- ✅ Premium Seller Banner -->
     <div class="premium-banner">
         🏆 <b>Become a Premium Seller!</b> Get verified badge, lower fees (4.5%), and more! 
         <a href="/api/premium/benefits" target="_blank">Learn More →</a>
@@ -113,6 +114,24 @@
             'Transportation': '🏍️', 'Accessories': '⌚'
         };
 
+        // ✅ Load reviews for all products
+        async function loadReviewsForProducts(products) {
+            for (let p of products) {
+                try {
+                    const res = await fetch(`/api/reviews/product/${p.id}`);
+                    const data = await res.json();
+                    if (data.success && data.data && data.data.stats) {
+                        p.averageRating = data.data.stats.averageRating;
+                        p.totalReviews = data.data.stats.totalReviews;
+                    }
+                } catch (e) {
+                    p.averageRating = 0;
+                    p.totalReviews = 0;
+                }
+            }
+            displayProducts(products);
+        }
+
         async function loadFeatured() {
             try {
                 const res = await fetch('/api/featured');
@@ -142,7 +161,7 @@
         async function loadProducts() {
             try {
                 const [prodRes, catRes] = await Promise.all([
-                    fetch('/api/products?page=0&size=100'),
+                    fetch('/api/products?page=0&size=200'),
                     fetch('/api/categories')
                 ]);
                 const prodData = await prodRes.json();
@@ -151,7 +170,7 @@
                 if (prodData.success && prodData.data) {
                     allProducts = prodData.data;
                     updateStats(allProducts);
-                    displayProducts(allProducts);
+                    loadReviewsForProducts(allProducts); // ✅ Load reviews
                 }
                 
                 if (catData.success && catData.data) {
@@ -177,11 +196,15 @@
                 return;
             }
 
-            document.getElementById('products').innerHTML = products.map(p => `
+            document.getElementById('products').innerHTML = products.map(p => {
+                const stars = '⭐'.repeat(Math.round(p.averageRating || 0));
+                const reviewCount = p.totalReviews || 0;
+                return `
                 <div class="product-card" onclick="window.location.href='/product?id=${p.id}'">
                     <div class="product-emoji">${categoryEmojis[p.categoryName] || '📦'}</div>
                     <div class="product-category">${p.categoryName || 'General'}</div>
                     <div class="product-name">${p.name}</div>
+                    <div class="product-reviews">${stars} <span>(${reviewCount} reviews)</span></div>
                     <div class="product-price">
                         ${p.discountedPrice ? `<span class="original">${p.price.toLocaleString()} XAF</span>` : ''}
                         ${(p.discountedPrice || p.price).toLocaleString()} XAF
@@ -190,7 +213,7 @@
                     <div class="product-stock">✅ ${p.stockQuantity} in stock</div>
                     <div class="product-condition">🏷️ ${p.condition || 'NEW'}</div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function updateStats(products) {
