@@ -9,9 +9,7 @@ import com.cambiz.market.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/tracking")
@@ -48,30 +46,29 @@ public class OrderTrackingController {
             Long userId = getUserIdFromToken(authHeader);
             OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
             
-            // Update order status in OrderService
             orderService.updateOrderStatus(orderId, newStatus.name());
-            
-            // Add tracking event
             TrackingEvent event = trackingService.addTrackingEvent(orderId, newStatus, note, userId);
             
-            Map<String, Object> response = new HashMap<>();
+            Map<String, Object> response = new LinkedHashMap<>();
             response.put("success", true);
             response.put("message", "Order status updated to " + newStatus.getDisplayName());
-            response.put("data", Map.of(
-                "status", event.getStatus().name(),
-                "displayName", event.getStatus().getDisplayName(),
-                "description", event.getStatus().getDescription(),
-                "note", event.getNote(),
-                "timestamp", event.getTimestamp().toString()
-            ));
+            
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("status", event.getStatus().name());
+            data.put("displayName", event.getStatus().getDisplayName());
+            data.put("description", event.getStatus().getDescription());
+            data.put("note", event.getNote());
+            data.put("timestamp", event.getTimestamp().toString());
+            response.put("data", data);
+            
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            Map<String, Object> response = new HashMap<>();
+            Map<String, Object> response = new LinkedHashMap<>();
             response.put("success", false);
             response.put("message", "Invalid status. Valid values: " + java.util.Arrays.toString(OrderStatus.values()));
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
+            Map<String, Object> response = new LinkedHashMap<>();
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
@@ -85,23 +82,24 @@ public class OrderTrackingController {
         try {
             List<TrackingEvent> history = trackingService.getTrackingHistory(orderId);
             
-            List<Map<String, Object>> timeline = history.stream().map(t -> {
-                Map<String, Object> event = new HashMap<>();
+            List<Map<String, Object>> timeline = new ArrayList<>();
+            for (TrackingEvent t : history) {
+                Map<String, Object> event = new LinkedHashMap<>();
                 event.put("status", t.getStatus().name());
                 event.put("displayName", t.getStatus().getDisplayName());
                 event.put("description", t.getStatus().getDescription());
                 event.put("note", t.getNote() != null ? t.getNote() : "");
                 event.put("timestamp", t.getTimestamp().toString());
-                return event;
-            }).toList();
+                timeline.add(event);
+            }
             
-            Map<String, Object> response = new HashMap<>();
+            Map<String, Object> response = new LinkedHashMap<>();
             response.put("success", true);
             response.put("data", timeline);
             response.put("count", timeline.size());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
+            Map<String, Object> response = new LinkedHashMap<>();
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
@@ -114,22 +112,25 @@ public class OrderTrackingController {
             @PathVariable Long orderId) {
         try {
             TrackingEvent latest = trackingService.getLatestStatus(orderId);
-            Map<String, Object> response = new HashMap<>();
+            Map<String, Object> response = new LinkedHashMap<>();
             response.put("success", true);
             
             if (latest == null) {
-                response.put("data", Map.of("status", "PENDING", "displayName", "Pending"));
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("status", "PENDING");
+                data.put("displayName", "Pending");
+                response.put("data", data);
             } else {
-                response.put("data", Map.of(
-                    "status", latest.getStatus().name(),
-                    "displayName", latest.getStatus().getDisplayName(),
-                    "description", latest.getStatus().getDescription(),
-                    "timestamp", latest.getTimestamp().toString()
-                ));
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("status", latest.getStatus().name());
+                data.put("displayName", latest.getStatus().getDisplayName());
+                data.put("description", latest.getStatus().getDescription());
+                data.put("timestamp", latest.getTimestamp().toString());
+                response.put("data", data);
             }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
+            Map<String, Object> response = new LinkedHashMap<>();
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
