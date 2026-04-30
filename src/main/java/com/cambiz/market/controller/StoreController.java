@@ -22,4 +22,19 @@ public class StoreController {
     public String wishlist() {
         return "wishlist";
     }
+    
+    @GetMapping("/order-tracking")
+    public String orderTracking() {
+        return "order-tracking";
+    }
+    
+    @GetMapping("/track")
+    public String track() {
+        return "order-tracking";
+    }
+    
+    @GetMapping("/orders")
+    public String myOrders() {
+        return "my-orders";
+    }
 }

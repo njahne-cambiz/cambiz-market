@@ -24,18 +24,20 @@
         .product-condition { font-size: 12px; color: #f59e0b; margin-top: 3px; }
         .seller-info { background: #f0f4ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
         .seller-name { font-weight: bold; color: #333; }
-        .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn { padding: 15px 30px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; text-decoration: none; flex: 1; text-align: center; min-width: 150px; }
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { padding: 15px 20px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; display: inline-block; transition: transform 0.1s, opacity 0.2s; }
+        .btn:hover { transform: scale(1.02); opacity: 0.9; }
+        .btn:active { transform: scale(0.98); }
         .btn-buy { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
-        .btn-makola { background: #ff6b6b; color: white; }
         .btn-cart { background: #10b981; color: white; }
+        .btn-makola { background: #ff6b6b; color: white; }
         .btn-whatsapp { background: #25D366; color: white; }
         .loading { text-align: center; padding: 60px; font-size: 18px; color: #666; }
         .error { text-align: center; padding: 60px; color: #ff6b6b; font-size: 18px; }
         @media (max-width: 600px) {
             .product-name { font-size: 22px; }
             .product-price { font-size: 24px; }
-            .action-buttons { flex-direction: column; }
+            .action-buttons { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -106,6 +108,7 @@
                             
                             <div class="action-buttons">
                                 <button class="btn btn-cart" onclick="addToCart(${p.id})">🛒 Add to Cart</button>
+                                <button class="btn btn-buy" onclick="buyNow(${p.id})">⚡ Buy Now</button>
                                 <button class="btn btn-makola" onclick="makeOffer(${p.id})">💰 Make Offer</button>
                                 <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp">📱 Share on WhatsApp</a>
                             </div>
@@ -119,30 +122,80 @@
             }
         }
 
-        function addToCart(id) {
-            const token = prompt("Enter your JWT token (or login at /api/auth/login):");
+        function getToken() {
+            return localStorage.getItem('token') || sessionStorage.getItem('token');
+        }
+
+        function requireToken(callback) {
+            let token = getToken();
             if (token) {
-                fetch(`/api/cart/add/${id}?quantity=1`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }).then(r => r.json()).then(d => {
-                    alert(d.message || 'Added to cart!');
-                });
+                callback(token);
+            } else {
+                token = prompt("Please login first. Enter your JWT token:");
+                if (token) {
+                    localStorage.setItem('token', token);
+                    callback(token);
+                } else {
+                    alert("Token required to continue.");
+                }
             }
         }
 
-        function makeOffer(id) {
-            const token = prompt("Enter your JWT token:");
-            const offer = prompt("Enter your offer amount (XAF):");
-            if (token && offer) {
-                fetch('/api/makola/offer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ productId: id, offerAmount: parseFloat(offer), message: "Offer from store" })
-                }).then(r => r.json()).then(d => {
-                    alert(d.message || 'Offer submitted!');
-                });
-            }
+        async function addToCart(id) {
+            requireToken(async (token) => {
+                try {
+                    const res = await fetch(`/api/cart/add/${id}?quantity=1`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const d = await res.json();
+                    alert(d.message || 'Added to cart!');
+                } catch (e) {
+                    alert('Failed to add to cart.');
+                }
+            });
+        }
+
+        async function buyNow(id) {
+            requireToken(async (token) => {
+                try {
+                    // Add to cart first
+                    await fetch(`/api/cart/add/${id}?quantity=1`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    // Redirect to cart/checkout
+                    window.location.href = '/cart';
+                } catch (e) {
+                    alert('Failed to process. Please try again.');
+                }
+            });
+        }
+
+        async function makeOffer(id) {
+            requireToken(async (token) => {
+                const offer = prompt("Enter your offer amount (XAF):");
+                if (offer) {
+                    try {
+                        const res = await fetch('/api/makola/offer', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json', 
+                                'Authorization': `Bearer ${token}` 
+                            },
+                            body: JSON.stringify({ 
+                                productId: id, 
+                                offerAmount: parseFloat(offer), 
+                                message: "Offer from product page" 
+                            })
+                        });
+                        const d = await res.json();
+                        alert(d.message || 'Offer submitted!');
+                    } catch (e) {
+                        alert('Failed to submit offer.');
+                    }
+                }
+            });
         }
 
         loadProduct();

@@ -85,7 +85,7 @@ public class SecurityConfig {
                 // Featured products - public to view
                 .requestMatchers(HttpMethod.GET, "/api/featured/**").permitAll()
 
-                // ✅ Uploaded images - public read access
+                // Uploaded images - public read access
                 .requestMatchers("/uploads/**").permitAll()
 
                 // STATIC & PAGES
@@ -96,7 +96,11 @@ public class SecurityConfig {
                 // HEALTH
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
 
-                // ✅ Wishlist page (Thymeleaf)
+                // Order tracking pages - public (can share tracking link)
+                .requestMatchers("/order-tracking", "/track").permitAll()
+                .requestMatchers("/orders").authenticated()
+
+                // Wishlist page (Thymeleaf)
                 .requestMatchers("/wishlist").authenticated()
 
                 // ROLE-BASED DASHBOARDS
@@ -110,7 +114,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
                 
-                // ✅ Wishlist API
+                // Wishlist API
                 .requestMatchers("/api/wishlist/**").authenticated()
                 
                 // Premium upgrade requires authentication
