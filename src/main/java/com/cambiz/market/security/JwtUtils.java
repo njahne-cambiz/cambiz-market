@@ -36,7 +36,6 @@ public class JwtUtils {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         signingKey = Keys.hmacShaKeyFor(keyBytes);
         logger.info("JWT initialized with expiration: {} ms", expiration);
-        // NEVER log the secret!
     }
 
     private Key getSigningKey() {
@@ -80,5 +79,19 @@ public class JwtUtils {
 
     public boolean validateToken(String token, UserDetails userDetails) {
         return extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    /**
+     * Extract user ID from JWT token.
+     * Assumes the user ID is stored as the subject claim during token generation.
+     * If you're using email as subject, you'll need to look up the user by email instead.
+     */
+    public Long getUserIdFromToken(String token) {
+        String subject = extractUsername(token);
+        try {
+            return Long.parseLong(subject);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Cannot extract user ID from token. Subject is not a numeric ID: " + subject);
+        }
     }
 }

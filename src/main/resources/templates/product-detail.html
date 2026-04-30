@@ -29,6 +29,7 @@
         .btn-buy { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
         .btn-makola { background: #ff6b6b; color: white; }
         .btn-cart { background: #10b981; color: white; }
+        .btn-whatsapp { background: #25D366; color: white; }
         .loading { text-align: center; padding: 60px; font-size: 18px; color: #666; }
         .error { text-align: center; padding: 60px; color: #ff6b6b; font-size: 18px; }
         @media (max-width: 600px) {
@@ -77,6 +78,8 @@
                     const emoji = categoryEmojis[p.categoryName] || '📦';
                     const price = p.discountedPrice || p.price;
                     const hasDiscount = p.discountedPrice && p.discountedPrice < p.price;
+                    const shareUrl = `https://cambiz-market.onrender.com/product?id=${p.id}`;
+                    const shareText = `🛍️ ${p.name} - ${price.toLocaleString()} XAF on CamBiz Market! ${shareUrl}`;
                     
                     document.getElementById('productDetail').innerHTML = `
                         <div class="product-card">
@@ -103,8 +106,8 @@
                             
                             <div class="action-buttons">
                                 <button class="btn btn-cart" onclick="addToCart(${p.id})">🛒 Add to Cart</button>
-                                <button class="btn btn-makola" onclick="makeOffer(${p.id})">💰 Make Offer (Makola)</button>
-                                <button class="btn btn-buy" onclick="buyNow(${p.id})">🛍️ Buy Now</button>
+                                <button class="btn btn-makola" onclick="makeOffer(${p.id})">💰 Make Offer</button>
+                                <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp">📱 Share on WhatsApp</a>
                             </div>
                         </div>
                     `;
@@ -138,24 +141,6 @@
                     body: JSON.stringify({ productId: id, offerAmount: parseFloat(offer), message: "Offer from store" })
                 }).then(r => r.json()).then(d => {
                     alert(d.message || 'Offer submitted!');
-                });
-            }
-        }
-
-        function buyNow(id) {
-            const token = prompt("Enter your JWT token:");
-            if (token) {
-                fetch(`/api/cart/add/${id}?quantity=1`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }).then(() => {
-                    fetch('/api/orders/checkout', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ shippingAddress: "Cameroon", shippingCity: "Douala", shippingPhone: "670000001", paymentMethod: "MTN_MONEY" })
-                    }).then(r => r.json()).then(d => {
-                        alert(d.message || 'Order placed!');
-                    });
                 });
             }
         }

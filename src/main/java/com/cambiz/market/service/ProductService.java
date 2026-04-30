@@ -118,7 +118,7 @@ public class ProductService {
             throw new RuntimeException("You can only update your own products");
         }
         
-        // ✅ Only update fields that are provided (not null)
+        // Only update fields that are provided (not null)
         if (request.getName() != null) product.setName(request.getName());
         if (request.getDescription() != null) product.setDescription(request.getDescription());
         if (request.getPrice() != null) product.setPrice(request.getPrice());
@@ -128,7 +128,7 @@ public class ProductService {
         if (request.getImageUrls() != null) product.setImageUrls(request.getImageUrls());
         if (request.getIsFeatured() != null) product.setIsFeatured(request.getIsFeatured());
         
-        // ✅ Handle category assignment
+        // Handle category assignment
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -161,5 +161,20 @@ public class ProductService {
         List<Product> products = productRepository.findBySeller(seller);
         products.forEach(p -> p.getImageUrls().size());
         return ProductResponse.fromProducts(products);
+    }
+    
+    // ✅ Get Product entity by ID (not DTO) — used for image upload operations
+    @Transactional(readOnly = true)
+    public Product getProductEntity(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+        product.getImageUrls().size(); // Initialize lazy collection
+        return product;
+    }
+    
+    // ✅ Save/update a Product entity directly — used for image upload/deletion
+    @Transactional
+    public void updateProductEntity(Product product) {
+        productRepository.save(product);
     }
 }

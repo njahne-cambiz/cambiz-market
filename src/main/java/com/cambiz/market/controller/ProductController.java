@@ -3,6 +3,8 @@ package com.cambiz.market.controller;
 import com.cambiz.market.dto.ApiResponse;
 import com.cambiz.market.dto.ProductRequest;
 import com.cambiz.market.dto.ProductResponse;
+import com.cambiz.market.model.Product;
+import com.cambiz.market.service.FileStorageService;
 import com.cambiz.market.service.ProductService;
 import com.cambiz.market.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -23,6 +29,9 @@ public class ProductController {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private FileStorageService fileStorageService;
 
     // CREATE PRODUCT (SELLER only)
     @PostMapping
@@ -143,6 +152,80 @@ public class ProductController {
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse(false, e.getMessage(), null));
+        }
+    }
+
+    // ✅ UPLOAD PRODUCT IMAGES
+    @PostMapping("/{productId}/images")
+    public ResponseEntity<?> uploadProductImages(
+            @PathVariable Long productId,
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            Long userId = getCurrentUserId();
+            Product product = productService.getProductEntity(productId);
+            
+            if (!product.getSellerId().equals(userId)) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "You can only upload images for your own products");
+                return ResponseEntity.status(403).body(response);
+            }
+            
+            List<String> imageUrls = new ArrayList<>(product.getImageUrls() != null ? product.getImageUrls() : new ArrayList<>());
+            for (MultipartFile file : files) {
+                if (!file.isEmpty() && file.getContentType() != null && file.getContentType().startsWith("image/")) {
+                    String imageUrl = fileStorageService.storeFile(file);
+                    imageUrls.add(imageUrl);
+                }
+            }
+            
+            product.setImageUrls(imageUrls);
+            productService.updateProductEntity(product);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Images uploaded successfully");
+            response.put("imageUrls", imageUrls);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // ✅ DELETE PRODUCT IMAGE
+    @DeleteMapping("/{productId}/images")
+    public ResponseEntity<?> deleteProductImage(
+            @PathVariable Long productId,
+            @RequestParam String imageUrl,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            Long userId = getCurrentUserId();
+            Product product = productService.getProductEntity(productId);
+            
+            if (!product.getSellerId().equals(userId)) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "You can only delete images for your own products");
+                return ResponseEntity.status(403).body(response);
+            }
+            
+            fileStorageService.deleteFile(imageUrl);
+            product.getImageUrls().remove(imageUrl);
+            productService.updateProductEntity(product);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Image deleted");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
     }
 

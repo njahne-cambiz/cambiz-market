@@ -51,10 +51,10 @@ public class Product {
     private Boolean isFeatured = false;
     
     @Column(name = "featured_until")
-    private LocalDateTime featuredUntil;          // ✅ ADDED
+    private LocalDateTime featuredUntil;
     
     @Column(name = "featured_payment_id")
-    private Long featuredPaymentId;               // ✅ ADDED
+    private Long featuredPaymentId;
     
     private Boolean isActive = true;
     
@@ -65,6 +65,9 @@ public class Product {
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    @Transient
+    public static final int MAX_IMAGES = 8;
     
     public Long getSellerId() {
         return seller != null ? seller.getId() : null;

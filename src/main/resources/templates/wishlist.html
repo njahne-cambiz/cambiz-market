@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; min-height: 100vh; }
+        
+        .header {
+            background: linear-gradient(135deg, #2d3436, #636e72);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
+        .header nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .header nav a { color: white; text-decoration: none; font-size: 0.95rem; transition: opacity 0.2s; }
+        .header nav a:hover { opacity: 0.8; }
+        
+        .wishlist-badge {
+            background: #e17055;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+        .container h1 { color: #2d3436; margin-bottom: 0.5rem; font-size: 2rem; }
+        .container .subtitle { color: #636e72; margin-bottom: 2rem; }
+        
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+        
+        .product-image {
+            height: 220px;
+            background: #dfe6e9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .no-image { font-size: 4rem; color: #b2bec3; }
+        
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border: 2px solid #ff7675;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+        .remove-btn:hover { transform: scale(1.1); background: #ff7675; }
+        
+        .product-info { padding: 1.2rem; }
+        .product-info h3 { 
+            font-size: 1rem; 
+            margin-bottom: 0.4rem; 
+            color: #2d3436;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .product-info .seller { 
+            color: #636e72; 
+            font-size: 0.8rem; 
+            margin-bottom: 0.6rem; 
+        }
+        
+        .price { margin: 0.6rem 0; }
+        .price .current { font-size: 1.25rem; font-weight: bold; color: #00b894; }
+        .price .original { 
+            font-size: 0.85rem; 
+            color: #b2bec3; 
+            text-decoration: line-through; 
+            margin-left: 0.5rem; 
+        }
+        
+        .added-date { color: #b2bec3; font-size: 0.75rem; margin-bottom: 0.6rem; }
+        
+        .stock-badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+        .in-stock { background: #dfe6e9; color: #00b894; }
+        .out-stock { background: #ffeaa7; color: #d63031; }
+        
+        .btn-view {
+            display: block;
+            text-align: center;
+            background: #0984e3;
+            color: white;
+            text-decoration: none;
+            padding: 0.6rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .btn-view:hover { background: #0773c5; }
+        
+        .empty-state { 
+            text-align: center; 
+            padding: 4rem 2rem; 
+            display: none;
+        }
+        .empty-state .icon { font-size: 5rem; margin-bottom: 1.5rem; }
+        .empty-state h2 { color: #2d3436; margin-bottom: 0.5rem; }
+        .empty-state p { color: #636e72; margin-bottom: 2rem; font-size: 1.1rem; }
+        
+        .btn-browse {
+            background: #0984e3;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+        .btn-browse:hover { background: #0773c5; }
+        
+        #loading { text-align: center; padding: 3rem; color: #636e72; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/store" class="logo">🛒 CamBiz Market</a>
+        <nav>
+            <a href="/store">📦 Products</a>
+            <a href="/cart">🛒 Cart</a>
+            <a href="/wishlist">❤️ Wishlist <span id="wishlist-count-badge" class="wishlist-badge">0</span></a>
+            <a href="/dashboard">👤 Dashboard</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>❤️ My Wishlist</h1>
+        <p class="subtitle">Products you've saved for later</p>
+        
+        <div id="loading"><p>Loading your wishlist...</p></div>
+        
+        <div id="wishlist-grid" class="wishlist-grid"></div>
+        
+        <div id="empty-state" class="empty-state">
+            <div class="icon">💔</div>
+            <h2>Your wishlist is empty</h2>
+            <p>Save items you love and come back to them anytime!</p>
+            <a href="/store" class="btn-browse">🛍️ Browse Products</a>
+        </div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/login?redirect=/wishlist';
+        }
+        
+        async function loadWishlist() {
+            try {
+                const response = await fetch('/api/wishlist', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    document.getElementById('wishlist-grid').innerHTML = data.data.map(item => `
+                        <div class="product-card" id="wishlist-item-${item.productId}">
+                            <div class="product-image">
+                                ${item.imageUrl 
+                                    ? `<img src="${item.imageUrl}" alt="${item.productName}" onerror="this.parentElement.innerHTML='<span class=no-image>📷</span>'">`
+                                    : '<span class="no-image">📷</span>'}
+                                <button class="remove-btn" onclick="removeItem(${item.productId})" title="Remove from wishlist">
+                                    💔
+                                </button>
+                            </div>
+                            <div class="product-info">
+                                <h3 title="${item.productName}">${item.productName}</h3>
+                                <p class="seller">${item.sellerBusinessName}</p>
+                                <div class="price">
+                                    <span class="current">${item.discountedPrice.toLocaleString()} XAF</span>
+                                    ${item.discountedPrice < item.price 
+                                        ? `<span class="original">${item.price.toLocaleString()} XAF</span>` 
+                                        : ''}
+                                </div>
+                                <p class="added-date">💾 Saved ${new Date(item.addedDate).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}</p>
+                                <span class="stock-badge ${item.inStock ? 'in-stock' : 'out-stock'}">
+                                    ${item.inStock ? '✅ In Stock' : '❌ Out of Stock'}
+                                </span>
+                                <a href="/product/${item.productId}" class="btn-view">🔍 View Details</a>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    updateBadge(data.count);
+                    document.getElementById('empty-state').style.display = 'none';
+                } else {
+                    showEmpty();
+                }
+            } catch (error) {
+                document.getElementById('loading').innerHTML = 
+                    '<p style="color:#d63031;">⚠️ Error loading wishlist. Please refresh or try again later.</p>';
+                console.error('Wishlist load error:', error);
+            }
+        }
+        
+        async function removeItem(productId) {
+            try {
+                const response = await fetch(`/api/wishlist/remove/${productId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const card = document.getElementById(`wishlist-item-${productId}`);
+                    if (card) {
+                        card.style.transition = 'opacity 0.3s, transform 0.3s';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            card.remove();
+                            checkEmpty();
+                        }, 300);
+                    }
+                }
+            } catch (error) {
+                console.error('Remove item error:', error);
+            }
+        }
+        
+        async function checkEmpty() {
+            const remaining = document.querySelectorAll('.product-card');
+            if (remaining.length === 0) {
+                showEmpty();
+                updateBadge(0);
+            } else {
+                const response = await fetch('/api/wishlist/count', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                updateBadge(data.count);
+            }
+        }
+        
+        function showEmpty() {
+            document.getElementById('wishlist-grid').style.display = 'none';
+            document.getElementById('empty-state').style.display = 'block';
+        }
+        
+        function updateBadge(count) {
+            const badge = document.getElementById('wishlist-count-badge');
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'inline' : 'none';
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadWishlist);
+    </script>
+</body>
+</html>

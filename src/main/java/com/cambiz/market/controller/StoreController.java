@@ -17,4 +17,9 @@ public class StoreController {
     public String shop() {
         return "redirect:/store";
     }
+    
+    @GetMapping("/wishlist")
+    public String wishlist() {
+        return "wishlist";
+    }
 }

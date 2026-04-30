@@ -65,7 +65,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/payments/methods").permitAll()
                 .requestMatchers("/api").permitAll()
 
-                // ✅ Reviews - public
+                // Reviews - public
                 .requestMatchers("/api/reviews/**").permitAll()
 
                 // Wallet - public for testing
@@ -85,6 +85,9 @@ public class SecurityConfig {
                 // Featured products - public to view
                 .requestMatchers(HttpMethod.GET, "/api/featured/**").permitAll()
 
+                // ✅ Uploaded images - public read access
+                .requestMatchers("/uploads/**").permitAll()
+
                 // STATIC & PAGES
                 .requestMatchers("/", "/dashboard/**", "/store/**", "/shop/**", "/product", "/home", "/index", "/about", "/contact").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
@@ -92,6 +95,9 @@ public class SecurityConfig {
 
                 // HEALTH
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+
+                // ✅ Wishlist page (Thymeleaf)
+                .requestMatchers("/wishlist").authenticated()
 
                 // ROLE-BASED DASHBOARDS
                 .requestMatchers("/api/dashboard/buyer").hasRole("BUYER")
@@ -103,6 +109,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/orders/**").authenticated()
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
+                
+                // ✅ Wishlist API
+                .requestMatchers("/api/wishlist/**").authenticated()
                 
                 // Premium upgrade requires authentication
                 .requestMatchers(HttpMethod.POST, "/api/premium/**").authenticated()
