@@ -50,14 +50,26 @@ public class WishlistService {
         return "Removed from wishlist";
     }
     
+    @Transactional(readOnly = true)
     public List<WishlistResponse> getWishlist(Long userId) {
         List<WishlistItem> items = wishlistRepository.findByUserId(userId);
         return items.stream().map(item -> {
             Product product = item.getProduct();
             String imageUrl = (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) 
                 ? product.getImageUrls().get(0) : null;
-            String sellerBusinessName = (product.getSeller() != null && product.getSeller().getBusinessName() != null) 
-                ? product.getSeller().getBusinessName() : "Unknown Seller";
+            
+            // Safe seller name extraction with fallback chain
+            String sellerName = "Unknown Seller";
+            User seller = product.getSeller();
+            if (seller != null) {
+                if (seller.getBusinessName() != null && !seller.getBusinessName().isBlank()) {
+                    sellerName = seller.getBusinessName();
+                } else if (seller.getFirstName() != null && !seller.getFirstName().isBlank()) {
+                    sellerName = seller.getFirstName();
+                } else if (seller.getEmail() != null) {
+                    sellerName = seller.getEmail();
+                }
+            }
             
             return new WishlistResponse(
                 item.getId(),
@@ -68,7 +80,7 @@ public class WishlistService {
                 product.getDiscountedPrice(),
                 imageUrl,
                 product.getProductCondition() != null ? product.getProductCondition() : "NEW",
-                sellerBusinessName,
+                sellerName,
                 item.getAddedDate(),
                 product.getStockQuantity() > 0
             );
