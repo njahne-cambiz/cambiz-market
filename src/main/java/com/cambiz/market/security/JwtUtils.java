@@ -5,6 +5,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +21,13 @@ import java.util.function.Function;
 @Component
 public class JwtUtils {
 
-    // ✅ HARDCODED - No @Value annotation
-    private String secret = "Y2FtYml6LW1hcmtldC1zZWNyZXQta2V5LTIwMjYtbXVzYS02Nzctc2VjdXJpdHktdG9rZW4tY2FtZXJvb24tbWFya2V0";
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    private Long expiration = 86400000L;
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration:86400000}")
+    private Long expiration;
 
     private Key signingKey;
 
@@ -29,11 +35,8 @@ public class JwtUtils {
     public void init() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         signingKey = Keys.hmacShaKeyFor(keyBytes);
-        System.out.println("=== JWT PROPERTIES LOADED ===");
-        System.out.println("Secret: " + secret);
-        System.out.println("Expiration: " + expiration + " ms");
-        System.out.println("Secret length: " + secret.length() + " chars");
-        System.out.println("First 10 chars: " + secret.substring(0, 10) + "...");
+        logger.info("JWT initialized with expiration: {} ms", expiration);
+        // NEVER log the secret!
     }
 
     private Key getSigningKey() {
