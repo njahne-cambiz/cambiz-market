@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/tracking")
 public class OrderTrackingController {
     
     private final OrderTrackingService trackingService;
@@ -78,7 +78,7 @@ public class OrderTrackingController {
         }
     }
     
-    @GetMapping("/{orderId}/tracking")
+    @GetMapping("/{orderId}")
     public ResponseEntity<?> getOrderTracking(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable Long orderId) {
@@ -108,7 +108,7 @@ public class OrderTrackingController {
         }
     }
     
-    @GetMapping("/{orderId}/status")
+    @GetMapping("/{orderId}/latest")
     public ResponseEntity<?> getOrderStatus(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable Long orderId) {
