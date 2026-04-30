@@ -65,7 +65,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/payments/methods").permitAll()
                 .requestMatchers("/api").permitAll()
 
-                // ✅ Wallet - public for testing
+                // ✅ Reviews - public
+                .requestMatchers("/api/reviews/**").permitAll()
+
+                // Wallet - public for testing
                 .requestMatchers("/api/wallet/**").permitAll()
 
                 // Premium - benefits PUBLIC, status PUBLIC
