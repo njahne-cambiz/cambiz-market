@@ -9,6 +9,7 @@ import com.cambiz.market.repository.ReviewRepository;
 import com.cambiz.market.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -56,6 +57,7 @@ public class ReviewController {
     }
 
     @GetMapping("/product/{productId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse> getProductReviews(@PathVariable Long productId) {
         List<Review> reviews = reviewRepository.findByProductIdOrderByCreatedAtDesc(productId);
         List<Map<String, Object>> result = new ArrayList<>();
@@ -64,7 +66,8 @@ public class ReviewController {
             map.put("id", r.getId());
             map.put("rating", r.getRating());
             map.put("comment", r.getComment());
-            map.put("userName", r.getUser().getFirstName() != null ? r.getUser().getFirstName() : "User");
+            // ✅ Fixed: Use simple approach to avoid lazy loading
+            map.put("userName", "User #" + r.getUser().getId());
             map.put("createdAt", r.getCreatedAt());
             result.add(map);
         }
