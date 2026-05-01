@@ -40,9 +40,6 @@
         .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
         .badge-pending { background: #ffeaa7; color: #d68910; }
         .badge-confirmed { background: #74b9ff; color: white; }
-        .btn-sm { padding: 6px 14px; font-size: 0.8rem; border-radius: 6px; text-decoration: none; font-weight: bold; }
-        .btn-confirm { background: #00b894; color: white; border: none; cursor: pointer; }
-        .btn-track { background: #0984e3; color: white; }
         .api-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
         .api-card { background: white; border-radius: 10px; padding: 1.2rem; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
         .method-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; margin-bottom: 0.5rem; }
@@ -64,11 +61,10 @@
     </header>
 
     <div class="container">
-        <!-- LOGGED IN DASHBOARD -->
         <div id="userDashboard" style="display:none;">
             <div class="welcome-banner">
                 <h1>👋 Welcome back!</h1>
-                <p><span id="premiumStatus"></span> 🟢 Online | <span id="userEmail"></span></p>
+                <p><span id="premiumStatus"></span> 🟢 Online | <span id="userTypeDisplay"></span></p>
             </div>
             <div class="stats-grid" id="userStats"></div>
             <h3 class="section-title">🚀 Quick Actions</h3>
@@ -79,7 +75,6 @@
             </div>
         </div>
         
-        <!-- PUBLIC DASHBOARD -->
         <div id="publicDashboard">
             <div class="welcome-banner">
                 <h1>🛒 Welcome to CamBiz Market</h1>
@@ -140,16 +135,20 @@
             document.getElementById('userDashboard').style.display = 'block';
             document.getElementById('logoutLink').style.display = 'inline';
             
-            // Detect user type from token
+            // Detect user type from JWT token
             try {
                 var payload = JSON.parse(atob(token.split('.')[1]));
-                userType = payload.userType || payload.roles || '';
-                if (Array.isArray(userType)) userType = userType[0];
-                if (userType === 'ROLE_SELLER' || userType === 'SELLER') userType = 'SELLER';
-                else userType = 'BUYER';
+                var roles = payload.roles || [];
+                if (Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) {
+                    userType = 'SELLER';
+                } else if (payload.userType === 'SELLER') {
+                    userType = 'SELLER';
+                } else {
+                    userType = 'BUYER';
+                }
             } catch(e) { userType = 'BUYER'; }
             
-            document.getElementById('userEmail').textContent = userType;
+            document.getElementById('userTypeDisplay').textContent = userType === 'SELLER' ? '🏪 Seller' : '🛒 Buyer';
             
             if (userType === 'SELLER') {
                 loadSellerDashboard();
@@ -194,14 +193,12 @@
                 <a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>
             `;
             
-            // Load seller stats
             try {
                 var pRes = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token } });
                 var pData = await pRes.json();
                 if (pData.success && pData.data) document.getElementById('sellerProductCount').textContent = pData.data.length;
             } catch(e) { document.getElementById('sellerProductCount').textContent = '0'; }
             
-            // Load seller orders
             try {
                 var oRes = await fetch('/api/orders/seller-orders', { headers: { 'Authorization': 'Bearer ' + token } });
                 var oData = await oRes.json();
@@ -213,7 +210,6 @@
                     }
                     document.getElementById('sellerRevenue').textContent = revenue.toLocaleString();
                     
-                    // Show seller order list
                     document.getElementById('sellerOrders').style.display = 'block';
                     var html = '';
                     for (var j = 0; j < oData.data.length; j++) {
