@@ -33,6 +33,7 @@
         .btn-makola { background: #ff6b6b; color: white; }
         .btn-whatsapp { background: #25D366; color: white; }
         .btn-feature { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
+        .btn-upload { background: #6c5ce7; color: white; }
         .loading { text-align: center; padding: 60px; font-size: 18px; color: #666; }
         .error { text-align: center; padding: 60px; color: #ff6b6b; font-size: 18px; }
         
@@ -135,6 +136,7 @@
                                 <button class="btn btn-buy" onclick="buyNow(${p.id})">⚡ Buy Now</button>
                                 <button class="btn btn-makola" onclick="makeOffer(${p.id})">💰 Make Offer</button>
                                 <button class="btn btn-feature" onclick="showFeatureModal(${p.id})">⭐ Feature Product</button>
+                                <button class="btn btn-upload" onclick="window.location.href='/upload-images'">📷 Add Images</button>
                                 <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp">📱 Share on WhatsApp</a>
                             </div>
                         </div>
@@ -219,7 +221,6 @@
             });
         }
 
-        // Feature Product Functions
         function showFeatureModal(productId) {
             currentFeatureProductId = productId;
             document.getElementById('featureModal').style.display = 'flex';
@@ -236,9 +237,7 @@
                 document.getElementById('featureMsg').textContent = '❌ Please log in first.';
                 return;
             }
-            
             document.getElementById('featureMsg').textContent = '⏳ Processing...';
-            
             try {
                 const res = await fetch('/api/featured/boost', {
                     method: 'POST',
@@ -246,7 +245,6 @@
                     body: JSON.stringify({ productId: currentFeatureProductId, sellerId: 1, duration: duration })
                 });
                 const data = await res.json();
-                
                 if (data.success) {
                     document.getElementById('featureMsg').textContent = '✅ Featured! Pay via ' + data.data.ussdCode;
                     setTimeout(closeFeatureModal, 2500);
