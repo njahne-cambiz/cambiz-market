@@ -42,4 +42,9 @@ public class StoreController {
     public String premium() {
         return "premium";
     }
+    
+    @GetMapping("/register")
+    public String register() {
+        return "register";
+    }
 }

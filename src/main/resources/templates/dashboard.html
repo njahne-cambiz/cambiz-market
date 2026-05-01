@@ -36,10 +36,10 @@
         .login-prompt h2 { margin-bottom: 1rem; color: #2d3436; }
         .login-prompt p { color: #636e72; margin-bottom: 1.5rem; }
         
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 5px; }
         .btn-primary { background: #0984e3; color: white; }
         .btn-outline { background: white; color: #0984e3; border: 2px solid #0984e3; }
-        .btn-whatsapp { background: #25D366; color: white; }
+        .btn-register { background: #00b894; color: white; }
         
         .login-form { display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; }
         .login-form input { display: block; width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #dfe6e9; border-radius: 8px; font-size: 14px; }
@@ -73,8 +73,8 @@
         <!-- LOGGED IN DASHBOARD -->
         <div id="userDashboard" style="display:none;">
             <div class="welcome-banner">
-                <h1>👋 Welcome back, <span id="userName">User</span>!</h1>
-                <p><span id="userBadge"></span> | <span id="userEmail"></span></p>
+                <h1>👋 Welcome back!</h1>
+                <p>🟢 Online | <span id="userEmail"></span></p>
             </div>
             
             <div class="stats-grid" id="userStats"></div>
@@ -101,6 +101,7 @@
                 <h2>🔐 Login to Your Dashboard</h2>
                 <p>Access your orders, products, wishlist, and more.</p>
                 <button class="btn btn-primary" onclick="showLogin()">🔑 Login Now</button>
+                <a href="/register" class="btn btn-register">📝 Create Account</a>
                 <a href="/store" class="btn btn-outline">🛒 Browse Store</a>
                 
                 <div class="login-form" id="loginForm">
@@ -128,71 +129,47 @@
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         
         async function init() {
-            // Load public product count
             try {
                 const res = await fetch('/api/products?page=0&size=200');
                 const data = await res.json();
-                if (data.data) {
-                    document.getElementById('pubProductCount').textContent = data.data.length;
-                }
+                if (data.data) document.getElementById('pubProductCount').textContent = data.data.length;
             } catch(e) {}
             
-            if (token) {
-                await loadUserDashboard();
-            }
+            if (token) await loadUserDashboard();
         }
         
         async function loadUserDashboard() {
             document.getElementById('publicDashboard').style.display = 'none';
             document.getElementById('userDashboard').style.display = 'block';
             document.getElementById('logoutLink').style.display = 'inline';
+            document.getElementById('userEmail').textContent = 'Logged in';
+            
+            document.getElementById('userStats').innerHTML = `
+                <div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist Items</div></div>
+                <div class="stat-card"><div class="icon">🛒</div><div class="value" id="myOrderCount">-</div><div class="label">My Orders</div></div>
+            `;
+            
+            document.getElementById('userActions').innerHTML = `
+                <a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div></a>
+                <a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">My Wishlist</div></a>
+                <a href="/orders" class="action-card"><div class="icon">📦</div><div class="title">My Orders</div></a>
+                <a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>
+            `;
             
             try {
-                const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: 'buyer@cambiz.cm', password: 'Buyer@123' })
-                });
-                // We already have a token, so try to decode user info from it
-                // For now, show basic info
-                document.getElementById('userName').textContent = 'User';
-                document.getElementById('userEmail').textContent = 'Logged in';
-                document.getElementById('userBadge').textContent = '🟢 Online';
-                
-                document.getElementById('userStats').innerHTML = `
-                    <div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist Items</div></div>
-                    <div class="stat-card"><div class="icon">🛒</div><div class="value" id="myOrderCount">-</div><div class="label">My Orders</div></div>
-                `;
-                
-                document.getElementById('userActions').innerHTML = `
-                    <a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div></a>
-                    <a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">My Wishlist</div></a>
-                    <a href="/orders" class="action-card"><div class="icon">📦</div><div class="title">My Orders</div></a>
-                    <a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>
-                `;
-                
-                // Load wishlist count
-                try {
-                    const wRes = await fetch('/api/wishlist/count', { headers: { 'Authorization': `Bearer ${token}` } });
-                    const wData = await wRes.json();
-                    if (wData.success) document.getElementById('wishlistCount').textContent = wData.count;
-                } catch(e) { document.getElementById('wishlistCount').textContent = '0'; }
-                
-                // Load order count
-                try {
-                    const oRes = await fetch('/api/orders/my-orders', { headers: { 'Authorization': `Bearer ${token}` } });
-                    const oData = await oRes.json();
-                    if (oData.success && oData.data) document.getElementById('myOrderCount').textContent = oData.data.length;
-                } catch(e) { document.getElementById('myOrderCount').textContent = '0'; }
-                
-            } catch(e) {
-                console.log('Could not load user details');
-            }
+                const wRes = await fetch('/api/wishlist/count', { headers: { 'Authorization': `Bearer ${token}` } });
+                const wData = await wRes.json();
+                if (wData.success) document.getElementById('wishlistCount').textContent = wData.count;
+            } catch(e) { document.getElementById('wishlistCount').textContent = '0'; }
+            
+            try {
+                const oRes = await fetch('/api/orders/my-orders', { headers: { 'Authorization': `Bearer ${token}` } });
+                const oData = await oRes.json();
+                if (oData.success && oData.data) document.getElementById('myOrderCount').textContent = oData.data.length;
+            } catch(e) { document.getElementById('myOrderCount').textContent = '0'; }
         }
         
-        function showLogin() {
-            document.getElementById('loginForm').style.display = 'block';
-        }
+        function showLogin() { document.getElementById('loginForm').style.display = 'block'; }
         
         async function doLogin() {
             const email = document.getElementById('loginEmail').value;
@@ -201,8 +178,7 @@
             
             try {
                 const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
                 const data = await res.json();
@@ -216,17 +192,10 @@
                     errorEl.textContent = data.message || 'Login failed';
                     errorEl.style.display = 'block';
                 }
-            } catch(e) {
-                errorEl.textContent = 'Network error';
-                errorEl.style.display = 'block';
-            }
+            } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
         }
         
-        function logout() {
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            location.href = '/dashboard';
-        }
+        function logout() { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; }
         
         init();
     </script>

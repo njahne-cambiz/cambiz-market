@@ -91,6 +91,7 @@ public class SecurityConfig {
                 // STATIC & PAGES
                 .requestMatchers("/", "/dashboard/**", "/store/**", "/shop/**", "/product", "/home", "/index", "/about", "/contact").permitAll()
                 .requestMatchers("/premium").permitAll()
+                .requestMatchers("/register").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 

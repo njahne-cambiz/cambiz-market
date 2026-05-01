@@ -12,11 +12,9 @@
         .header nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
         .header nav a { color: white; text-decoration: none; font-size: 0.95rem; }
         .header nav a:hover { opacity: 0.8; }
-        
         .wishlist-badge { background: #e17055; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; display: none; }
         .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
         .container h1 { color: #2d3436; margin-bottom: 0.5rem; font-size: 2rem; }
-        
         .wishlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s; position: relative; }
         .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
@@ -37,20 +35,18 @@
         .out-stock { background: #ffeaa7; color: #d63031; }
         .btn-view { display: block; text-align: center; background: #0984e3; color: white; text-decoration: none; padding: 0.6rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
         .btn-view:hover { background: #0773c5; }
-        
         .empty-state { text-align: center; padding: 4rem 2rem; display: none; }
         .empty-state .icon { font-size: 5rem; margin-bottom: 1.5rem; }
         .empty-state h2 { color: #2d3436; margin-bottom: 0.5rem; }
         .empty-state p { color: #636e72; margin-bottom: 2rem; font-size: 1.1rem; }
-        
         .login-box { background: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-width: 450px; margin: 2rem auto; }
         .login-box h2 { margin-bottom: 0.5rem; }
         .login-box p { color: #636e72; margin-bottom: 1rem; }
         .login-box input { display: block; width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #dfe6e9; border-radius: 8px; font-size: 14px; }
-        
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 5px; }
         .btn-primary { background: #0984e3; color: white; }
         .btn-outline { background: white; color: #0984e3; border: 2px solid #0984e3; }
+        .btn-register { background: #00b894; color: white; }
     </style>
 </head>
 <body>
@@ -66,7 +62,6 @@
     <main class="container">
         <h1>❤️ My Wishlist</h1>
         
-        <!-- Not logged in -->
         <div id="loginSection" style="display:none;">
             <div class="login-box">
                 <h2>🔐 Login Required</h2>
@@ -76,17 +71,14 @@
                 <button class="btn btn-primary" onclick="doLogin()" style="width:100%;">Login</button>
                 <p id="loginError" style="color:#d63031; margin-top:8px; display:none;"></p>
                 <p style="margin-top:10px; font-size:0.8rem; color:#636e72;">Test: buyer@cambiz.cm / Buyer@123</p>
+                <a href="/register" class="btn btn-register" style="margin-top:10px;">📝 Create Account</a>
                 <a href="/store" class="btn btn-outline" style="margin-top:10px;">🛒 Browse Store</a>
             </div>
         </div>
         
-        <!-- Loading -->
         <div id="loading"><p style="text-align:center; padding:3rem;">Loading your wishlist...</p></div>
-        
-        <!-- Wishlist grid -->
         <div id="wishlist-grid" class="wishlist-grid"></div>
         
-        <!-- Empty state -->
         <div id="empty-state" class="empty-state">
             <div class="icon">💔</div>
             <h2>Your wishlist is empty</h2>
@@ -112,11 +104,7 @@
             const errorEl = document.getElementById('loginError');
             
             try {
-                const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
+                const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
                 const data = await res.json();
                 
                 if (data.success && data.data && data.data.token) {
@@ -130,10 +118,7 @@
                     errorEl.textContent = data.message || 'Login failed';
                     errorEl.style.display = 'block';
                 }
-            } catch(e) {
-                errorEl.textContent = 'Network error';
-                errorEl.style.display = 'block';
-            }
+            } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
         }
         
         async function loadWishlist() {
@@ -180,8 +165,7 @@
                     const card = document.getElementById(`wishlist-item-${productId}`);
                     if (card) {
                         card.style.transition = 'opacity 0.3s, transform 0.3s';
-                        card.style.opacity = '0';
-                        card.style.transform = 'scale(0.9)';
+                        card.style.opacity = '0'; card.style.transform = 'scale(0.9)';
                         setTimeout(() => { card.remove(); checkEmpty(); }, 300);
                     }
                 }
@@ -190,20 +174,15 @@
         
         async function checkEmpty() {
             const remaining = document.querySelectorAll('.product-card');
-            if (remaining.length === 0) {
-                showEmpty();
-                updateBadge(0);
-            } else {
+            if (remaining.length === 0) { showEmpty(); updateBadge(0); }
+            else {
                 const response = await fetch('/api/wishlist/count', { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await response.json();
                 updateBadge(data.count);
             }
         }
         
-        function showEmpty() {
-            document.getElementById('wishlist-grid').style.display = 'none';
-            document.getElementById('empty-state').style.display = 'block';
-        }
+        function showEmpty() { document.getElementById('wishlist-grid').style.display = 'none'; document.getElementById('empty-state').style.display = 'block'; }
         
         function updateBadge(count) {
             const badge = document.getElementById('wishlist-count-badge');
