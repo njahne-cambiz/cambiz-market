@@ -41,51 +41,45 @@
     <main class="container">
         <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
         <h1 style="margin-bottom:1.5rem;">📦 My Orders</h1>
-        
         <div id="loginSection" style="display:none;">
             <div class="login-prompt">
-                <h2>🔐 Login Required</h2>
+                <h2>Login Required</h2>
                 <p>Please log in to view your orders.</p>
                 <input type="email" id="loginEmail" placeholder="Email">
                 <input type="password" id="loginPassword" placeholder="Password">
                 <button onclick="doLogin()">Login</button>
                 <p id="loginError" style="color:#d63031; margin-top:8px; display:none;"></p>
-                <a href="/register" style="display:inline-block; margin-top:10px; color:#00b894; font-weight:bold;">📝 Create Account</a>
+                <a href="/register" style="display:inline-block; margin-top:10px; color:#00b894; font-weight:bold;">Create Account</a>
             </div>
         </div>
-        
         <div id="ordersList"></div>
         <div id="emptyState" class="empty-state" style="display:none;">
             <div class="icon">📭</div>
             <h2>No orders yet</h2>
             <p>Start shopping and your orders will appear here.</p>
-            <a href="/store" class="btn-primary">🛒 Browse Products</a>
+            <a href="/store" class="btn-primary">Browse Products</a>
         </div>
         <div id="loading" style="text-align:center; padding:3rem;">Loading orders...</div>
     </main>
 
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        
         if (!token) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('loginSection').style.display = 'block';
         } else {
             loadOrders();
         }
-        
         async function doLogin() {
             var email = document.getElementById('loginEmail').value;
             var password = document.getElementById('loginPassword').value;
             var errorEl = document.getElementById('loginError');
-            
             try {
                 var res = await fetch('/api/auth/login', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email, password: password })
                 });
                 var data = await res.json();
-                
                 if (data.success && data.data && data.data.token) {
                     token = data.data.token;
                     localStorage.setItem('token', token);
@@ -99,7 +93,6 @@
                 }
             } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
         }
-        
         async function loadOrders() {
             document.getElementById('loading').style.display = 'block';
             try {
@@ -108,7 +101,6 @@
                 });
                 var data = await res.json();
                 document.getElementById('loading').style.display = 'none';
-                
                 if (data.success && data.data && data.data.length > 0) {
                     var html = '';
                     for (var i = 0; i < data.data.length; i++) {
