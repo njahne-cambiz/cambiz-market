@@ -52,10 +52,22 @@
             cursor: pointer; text-decoration: none; display: inline-block; 
         }
         .btn-upgrade:disabled { background: #b2bec3; cursor: not-allowed; }
+        .btn-login { 
+            background: #0984e3; color: white; border: none; 
+            padding: 0.75rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: bold; 
+            cursor: pointer; text-decoration: none; display: inline-block; margin-right: 10px;
+        }
         
         .message { text-align: center; margin-top: 1rem; padding: 1rem; border-radius: 10px; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
+        .message.info { background: #d1ecf1; color: #0c5460; display: block; }
+        
+        .login-box { 
+            text-align: center; padding: 2rem; background: white; border-radius: 16px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 1rem;
+        }
+        .login-box p { margin-bottom: 1rem; color: #636e72; }
         
         @media (max-width: 600px) {
             .features { grid-template-columns: 1fr; }
@@ -130,10 +142,8 @@
             </div>
         </div>
         
-        <div class="cta">
-            <button id="upgradeBtn" class="btn-upgrade" disabled onclick="upgradeToPremium()">
-                🚀 Select a Plan to Upgrade
-            </button>
+        <div class="cta" id="actionArea">
+            <!-- This area changes based on login state -->
         </div>
         
         <div id="message" class="message"></div>
@@ -143,30 +153,43 @@
         let selectedPlan = null;
         let selectedAmount = null;
         
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
         function selectPlan(plan, element) {
-            // Remove selected from all
             document.querySelectorAll('.price-card').forEach(card => card.classList.remove('selected'));
-            // Add selected to clicked
             element.classList.add('selected');
-            // Store selection
             selectedPlan = plan;
             selectedAmount = element.dataset.amount;
-            // Enable button
-            const btn = document.getElementById('upgradeBtn');
-            btn.disabled = false;
-            btn.textContent = `🚀 Upgrade to ${plan.charAt(0) + plan.slice(1).toLowerCase()} — ${parseInt(selectedAmount).toLocaleString()} XAF`;
-            // Hide message
+            renderActionButton();
             document.getElementById('message').className = 'message';
         }
         
-        async function upgradeToPremium() {
-            if (!selectedPlan) return;
+        function renderActionButton() {
+            const area = document.getElementById('actionArea');
             
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             if (!token) {
-                showMessage('Please log in first. Go to Dashboard to sign in.', 'error');
-                return;
+                area.innerHTML = `
+                    <div class="login-box">
+                        <p>🔐 You need to log in as a seller to upgrade.</p>
+                        <a href="/login?redirect=/premium" class="btn-login">🔑 Log In</a>
+                        <a href="/dashboard" class="btn-login" style="background:#636e72;">👤 Go to Dashboard</a>
+                    </div>
+                `;
+            } else if (!selectedPlan) {
+                area.innerHTML = `
+                    <button class="btn-upgrade" disabled>👆 Select a Plan Above</button>
+                `;
+            } else {
+                area.innerHTML = `
+                    <button id="upgradeBtn" class="btn-upgrade" onclick="upgradeToPremium()">
+                        🚀 Upgrade to ${selectedPlan.charAt(0) + selectedPlan.slice(1).toLowerCase()} — ${parseInt(selectedAmount).toLocaleString()} XAF
+                    </button>
+                `;
             }
+        }
+        
+        async function upgradeToPremium() {
+            if (!selectedPlan || !token) return;
             
             const btn = document.getElementById('upgradeBtn');
             btn.disabled = true;
@@ -191,15 +214,16 @@
                     showMessage('🎉 ' + data.message, 'success');
                     btn.textContent = '✅ Premium Activated!';
                     btn.style.background = '#00b894';
+                    btn.onclick = null;
                 } else {
                     showMessage('❌ ' + (data.message || 'Upgrade failed. Please try again.'), 'error');
                     btn.disabled = false;
-                    btn.textContent = `🚀 Upgrade to ${selectedPlan} — ${parseInt(selectedAmount).toLocaleString()} XAF`;
+                    btn.textContent = `🚀 Upgrade to ${selectedPlan.charAt(0) + selectedPlan.slice(1).toLowerCase()} — ${parseInt(selectedAmount).toLocaleString()} XAF`;
                 }
             } catch (e) {
                 showMessage('❌ Network error. Please try again.', 'error');
                 btn.disabled = false;
-                btn.textContent = `🚀 Upgrade to ${selectedPlan} — ${parseInt(selectedAmount).toLocaleString()} XAF`;
+                btn.textContent = `🚀 Upgrade to ${selectedPlan.charAt(0) + selectedPlan.slice(1).toLowerCase()} — ${parseInt(selectedAmount).toLocaleString()} XAF`;
             }
         }
         
@@ -208,6 +232,9 @@
             el.textContent = msg;
             el.className = 'message ' + type;
         }
+        
+        // Initial render
+        renderActionButton();
     </script>
 </body>
 </html>

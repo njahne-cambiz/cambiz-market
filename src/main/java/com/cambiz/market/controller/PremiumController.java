@@ -3,6 +3,8 @@ package com.cambiz.market.controller;
 import com.cambiz.market.dto.ApiResponse;
 import com.cambiz.market.model.User;
 import com.cambiz.market.repository.UserRepository;
+import com.cambiz.market.security.JwtUtils;
+import com.cambiz.market.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +19,24 @@ public class PremiumController {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
+    
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/upgrade")
-    public ResponseEntity<ApiResponse> upgradeToPremium(@RequestBody Map<String, Object> request) {
-        Long userId = Long.valueOf(request.get("userId").toString());
-        String plan = request.get("plan").toString(); // monthly, quarterly, yearly
+    public ResponseEntity<ApiResponse> upgradeToPremium(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, Object> request) {
+        
+        // Extract user from JWT
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtUtils.extractUsername(token);
+        Long userId = userService.getUserIdByEmail(email);
+        
+        String plan = request.get("plan").toString(); // MONTHLY, QUARTERLY, YEARLY
         
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
@@ -30,20 +45,20 @@ public class PremiumController {
         
         double price;
         LocalDateTime premiumUntil;
-        switch (plan) {
-            case "monthly": price = 10000; premiumUntil = LocalDateTime.now().plusMonths(1); break;
-            case "quarterly": price = 27000; premiumUntil = LocalDateTime.now().plusMonths(3); break;
-            case "yearly": price = 96000; premiumUntil = LocalDateTime.now().plusYears(1); break;
-            default: return ResponseEntity.badRequest().body(new ApiResponse(false, "Invalid plan", null));
+        switch (plan.toUpperCase()) {
+            case "MONTHLY": price = 10000; premiumUntil = LocalDateTime.now().plusMonths(1); break;
+            case "QUARTERLY": price = 27000; premiumUntil = LocalDateTime.now().plusMonths(3); break;
+            case "YEARLY": price = 96000; premiumUntil = LocalDateTime.now().plusYears(1); break;
+            default: return ResponseEntity.badRequest().body(new ApiResponse(false, "Invalid plan: " + plan, null));
         }
         
         user.setAccountType("PREMIUM");
         user.setPremiumUntil(premiumUntil);
-        user.setCommissionRate(4.5); // Lower commission for premium
+        user.setCommissionRate(4.5);
         userRepository.save(user);
         
         return ResponseEntity.ok(new ApiResponse(true, 
-            "Upgraded to Premium! Dial *126*1*1*" + (int)price + "# to pay",
+            "🎉 You are now a Premium Seller! Plan: " + plan + " | Valid until: " + premiumUntil.toLocalDate(),
             Map.of("userId", userId, "plan", plan, "price", price,
                    "premiumUntil", premiumUntil.toString(),
                    "ussdCode", "*126*1*1*" + (int)price + "#")));
