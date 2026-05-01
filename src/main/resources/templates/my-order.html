@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f5f6fa; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #2d3436, #636e72); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
+        .header nav a { color: white; text-decoration: none; margin-left: 1.5rem; }
+        .container { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; }
+        .back-btn { color: #0984e3; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; }
+        
+        .order-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1rem; }
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .order-id { font-weight: bold; color: #2d3436; }
+        .order-date { color: #636e72; font-size: 0.85rem; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .status-PENDING { background: #ffeaa7; color: #d68910; }
+        .status-CONFIRMED { background: #74b9ff; color: white; }
+        .status-DELIVERED { background: #00b894; color: white; }
+        .status-CANCELLED { background: #d63031; color: white; }
+        
+        .order-items { margin: 0.5rem 0; color: #636e72; }
+        .order-total { font-weight: bold; color: #2d3436; margin-top: 0.5rem; }
+        .btn-track { display: inline-block; background: #0984e3; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: bold; margin-top: 0.5rem; }
+        
+        .empty-state { text-align: center; padding: 4rem 2rem; }
+        .empty-state .icon { font-size: 4rem; margin-bottom: 1rem; }
+        .empty-state h2 { color: #2d3436; }
+        .empty-state p { color: #636e72; margin: 1rem 0; }
+        .btn-primary { background: #0984e3; color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; }
+        
+        .login-prompt { background: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-width: 400px; margin: 2rem auto; }
+        .login-prompt input { display: block; width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #dfe6e9; border-radius: 8px; }
+        .login-prompt button { width: 100%; padding: 12px; background: #0984e3; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/store" class="logo">🛒 CamBiz Market</a>
+        <nav>
+            <a href="/store">📦 Products</a>
+            <a href="/wishlist">❤️ Wishlist</a>
+            <a href="/dashboard">👤 Dashboard</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+        <h1 style="margin-bottom:1.5rem;">📦 My Orders</h1>
+        
+        <div id="loginSection" style="display:none;">
+            <div class="login-prompt">
+                <h2>🔐 Login Required</h2>
+                <p>Please log in to view your orders.</p>
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button onclick="doLogin()">Login</button>
+                <p id="loginError" style="color:#d63031; margin-top:8px; display:none;"></p>
+                <a href="/register" style="display:inline-block; margin-top:10px; color:#00b894; font-weight:bold;">📝 Create Account</a>
+            </div>
+        </div>
+        
+        <div id="ordersList"></div>
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="icon">📭</div>
+            <h2>No orders yet</h2>
+            <p>Start shopping and your orders will appear here.</p>
+            <a href="/store" class="btn-primary">🛒 Browse Products</a>
+        </div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
+        if (!token) {
+            document.getElementById('loginSection').style.display = 'block';
+        } else {
+            loadOrders();
+        }
+        
+        async function doLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (data.success && data.data && data.data.token) {
+                    localStorage.setItem('token', data.data.token);
+                    errorEl.style.display = 'none';
+                    document.getElementById('loginSection').style.display = 'none';
+                    loadOrders();
+                } else {
+                    errorEl.textContent = data.message || 'Login failed';
+                    errorEl.style.display = 'block';
+                }
+            } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
+        }
+        
+        async function loadOrders() {
+            try {
+                const res = await fetch('/api/orders/my-orders', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    document.getElementById('ordersList').innerHTML = data.data.map(order => `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <span class="order-id">📦 ${order.orderNumber}</span>
+                                <span class="status-badge status-${order.status}">${order.status}</span>
+                            </div>
+                            <div class="order-date">📅 ${new Date(order.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</div>
+                            <div class="order-items">🛍️ ${order.sellerOrders ? order.sellerOrders.map(s => s.items.map(i => i.productName).join(', ')).join(', ') : 'Items'}</div>
+                            <div class="order-total">💰 ${order.totalAmount.toLocaleString()} XAF</div>
+                            <a href="/order-tracking?id=${order.orderId}" class="btn-track">📋 Track Order</a>
+                        </div>
+                    `).join('');
+                    document.getElementById('emptyState').style.display = 'none';
+                } else {
+                    document.getElementById('emptyState').style.display = 'block';
+                }
+            } catch(e) {
+                document.getElementById('ordersList').innerHTML = '<p style="text-align:center; color:#d63031;">Error loading orders.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

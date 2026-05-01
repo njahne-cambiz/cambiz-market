@@ -10,12 +10,9 @@
         
         .navbar { background: linear-gradient(135deg, #667eea, #764ba2); padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .navbar h1 { font-size: 24px; }
-        
         .premium-badge { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; display: none; }
-        
         .premium-banner { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 10px 20px; text-align: center; font-size: 14px; }
         .premium-banner a { color: white; text-decoration: underline; font-weight: bold; }
-        
         .search-bar { display: flex; gap: 10px; }
         .search-bar input { padding: 10px 20px; border: none; border-radius: 25px; font-size: 14px; width: 300px; outline: none; }
         .search-bar button { padding: 10px 20px; background: #ff6b6b; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
@@ -50,6 +47,11 @@
         .product-reviews span { color: #666; }
         .whatsapp-share { color: #25D366; text-decoration: none; font-size: 11px; display: block; margin-top: 5px; font-weight: 500; }
         .whatsapp-share:hover { text-decoration: underline; }
+        
+        .wishlist-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; position: absolute; top: 12px; right: 12px; transition: transform 0.2s; padding: 0; line-height: 1; }
+        .wishlist-btn:hover { transform: scale(1.3); }
+        .wishlist-btn.wishlisted { animation: heartPop 0.3s ease; }
+        @keyframes heartPop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
         
         .no-results { text-align: center; padding: 60px; color: #999; }
         .no-results .emoji { font-size: 60px; }
@@ -144,6 +146,7 @@
                     document.getElementById('featuredProducts').innerHTML = data.data.map(p => `
                         <div class="product-card featured" onclick="window.location.href='/product?id=${p.id}'">
                             <div class="featured-badge">⭐ FEATURED</div>
+                            <button class="wishlist-btn" data-product-id="${p.id}" onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)" title="Add to Wishlist">🤍</button>
                             <div class="product-emoji">${categoryEmojis[p.categoryName] || '📦'}</div>
                             <div class="product-category">${p.categoryName || 'General'}</div>
                             <div class="product-name">${p.name}</div>
@@ -156,9 +159,7 @@
                         </div>
                     `).join('');
                 }
-            } catch (e) {
-                console.log('No featured products');
-            }
+            } catch (e) {}
         }
 
         async function loadProducts() {
@@ -205,6 +206,7 @@
                 const shareText = encodeURIComponent('🛍️ ' + p.name + ' - ' + ((p.discountedPrice || p.price).toLocaleString()) + ' XAF on CamBiz Market! https://cambiz-market.onrender.com/product?id=' + p.id);
                 return `
                 <div class="product-card" onclick="window.location.href='/product?id=${p.id}'">
+                    <button class="wishlist-btn" data-product-id="${p.id}" onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)" title="Add to Wishlist">🤍</button>
                     <div class="product-emoji">${categoryEmojis[p.categoryName] || '📦'}</div>
                     <div class="product-category">${p.categoryName || 'General'}</div>
                     <div class="product-name">${p.name}</div>
@@ -235,7 +237,6 @@
             currentFilter = categoryId;
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
-            
             let filtered = categoryId === 'all' ? allProducts : allProducts.filter(p => p.categoryId == categoryId);
             updateStats(filtered);
             displayProducts(filtered);
@@ -244,7 +245,6 @@
         function searchProducts() {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             if (!query) { filterByCategory('all', document.querySelector('.cat-btn')); return; }
-            
             const filtered = allProducts.filter(p => 
                 p.name.toLowerCase().includes(query) || 
                 (p.description && p.description.toLowerCase().includes(query)) ||
@@ -260,14 +260,43 @@
             filterByCategory('all', document.querySelector('.cat-btn'));
         }
 
-        // Check premium status for badge
+        // Wishlist toggle
+        async function toggleWishlist(productId, heartElement) {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            if (!token) {
+                alert('Please login first to use wishlist.');
+                return;
+            }
+            
+            const isWishlisted = heartElement.classList.contains('wishlisted');
+            const url = isWishlisted ? `/api/wishlist/remove/${productId}` : `/api/wishlist/add/${productId}`;
+            const method = isWishlisted ? 'DELETE' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (isWishlisted) {
+                        heartElement.classList.remove('wishlisted');
+                        heartElement.innerHTML = '🤍';
+                    } else {
+                        heartElement.classList.add('wishlisted');
+                        heartElement.innerHTML = '❤️';
+                    }
+                }
+            } catch (error) {}
+        }
+
+        // Premium badge
         (async function() {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             if (token) {
                 try {
-                    const res = await fetch('/api/premium/my-status', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const res = await fetch('/api/premium/my-status', { headers: { 'Authorization': `Bearer ${token}` } });
                     const data = await res.json();
                     if (data.success && data.data && data.data.isPremium) {
                         document.getElementById('premiumBadge').style.display = 'inline-block';
