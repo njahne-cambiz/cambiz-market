@@ -93,6 +93,7 @@ public class SecurityConfig {
                 .requestMatchers("/premium").permitAll()
                 .requestMatchers("/register").permitAll()
                 .requestMatchers("/wishlist").permitAll()
+                .requestMatchers("/orders").permitAll()
                 .requestMatchers("/upload-images").authenticated()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
@@ -102,7 +103,6 @@ public class SecurityConfig {
 
                 // Order tracking pages - public
                 .requestMatchers("/order-tracking", "/track").permitAll()
-                .requestMatchers("/orders").authenticated()
 
                 // ROLE-BASED DASHBOARDS
                 .requestMatchers("/api/dashboard/buyer").hasRole("BUYER")
