@@ -7,6 +7,8 @@ import com.cambiz.market.model.User;
 import com.cambiz.market.repository.ProductRepository;
 import com.cambiz.market.repository.ReviewRepository;
 import com.cambiz.market.repository.UserRepository;
+import com.cambiz.market.security.JwtUtils;
+import com.cambiz.market.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,29 +29,40 @@ public class ReviewController {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
+    
+    @Autowired
+    private UserService userService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> addReview(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<ApiResponse> addReview(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, Object> request) {
         try {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtUtils.extractUsername(token);
+            Long userId = userService.getUserIdByEmail(email);
+            
             Long productId = Long.valueOf(request.get("productId").toString());
-            Long userId = Long.valueOf(request.get("userId").toString());
             int rating = Integer.parseInt(request.get("rating").toString());
             String comment = request.getOrDefault("comment", "").toString();
-            
+
             Product product = productRepository.findById(productId).orElse(null);
             User user = userRepository.findById(userId).orElse(null);
-            
+
             if (product == null) return ResponseEntity.badRequest().body(new ApiResponse(false, "Product not found", null));
             if (user == null) return ResponseEntity.badRequest().body(new ApiResponse(false, "User not found", null));
             if (rating < 1 || rating > 5) return ResponseEntity.badRequest().body(new ApiResponse(false, "Rating must be 1-5", null));
-            
+
             Review review = new Review();
             review.setProduct(product);
             review.setUser(user);
             review.setRating(rating);
             review.setComment(comment);
             reviewRepository.save(review);
-            
+
             return ResponseEntity.ok(new ApiResponse(true, "Review added!", getProductStats(productId)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage(), null));
@@ -66,7 +79,6 @@ public class ReviewController {
             map.put("id", r.getId());
             map.put("rating", r.getRating());
             map.put("comment", r.getComment());
-            // ✅ Fixed: Use simple approach to avoid lazy loading
             map.put("userName", "User #" + r.getUser().getId());
             map.put("createdAt", r.getCreatedAt());
             result.add(map);

@@ -34,6 +34,8 @@
         .btn-whatsapp { background: #25D366; color: white; }
         .btn-feature { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
         .btn-upload { background: #6c5ce7; color: white; }
+        .review-section { margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
+        .review-item { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
         .loading { text-align: center; padding: 60px; font-size: 18px; color: #666; }
         .error { text-align: center; padding: 60px; color: #ff6b6b; font-size: 18px; }
         
@@ -139,8 +141,31 @@
                                 <button class="btn btn-upload" onclick="window.location.href='/upload-images'">📷 Add Images</button>
                                 <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp">📱 Share on WhatsApp</a>
                             </div>
+                            
+                            <div class="review-section">
+                                <h3 style="margin-bottom:10px;">⭐ Reviews</h3>
+                                <div id="reviews-${p.id}">Loading reviews...</div>
+                                <div style="margin-top:15px; padding:15px; background:#f8f9fa; border-radius:10px;">
+                                    <h4 style="margin-bottom:10px;">Write a Review</h4>
+                                    <div style="margin-bottom:10px;">
+                                        <span>Rating: </span>
+                                        <select id="reviewRating-${p.id}" style="padding:5px; border-radius:5px;">
+                                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                                            <option value="3">⭐⭐⭐ (3)</option>
+                                            <option value="2">⭐⭐ (2)</option>
+                                            <option value="1">⭐ (1)</option>
+                                        </select>
+                                    </div>
+                                    <textarea id="reviewComment-${p.id}" placeholder="Write your review..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #dfe6e9; margin-bottom:10px; min-height:60px;"></textarea>
+                                    <button onclick="submitReview(${p.id})" style="padding:10px 20px; background:#0984e3; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Submit Review</button>
+                                    <p id="reviewMsg-${p.id}" style="margin-top:5px;"></p>
+                                </div>
+                            </div>
                         </div>
                     `;
+                    
+                    setTimeout(function() { loadReviews(p.id); }, 300);
                 } else {
                     document.getElementById('productDetail').innerHTML = '<div class="error">Product not found</div>';
                 }
@@ -153,107 +178,114 @@
             return localStorage.getItem('token') || sessionStorage.getItem('token');
         }
 
-        function requireToken(callback) {
-            let token = getToken();
-            if (token) {
-                callback(token);
-            } else {
-                token = prompt("Please login first. Enter your JWT token:");
-                if (token) {
-                    localStorage.setItem('token', token);
-                    callback(token);
-                } else {
-                    alert("Token required to continue.");
-                }
-            }
-        }
-
         async function addToCart(id) {
-            requireToken(async (token) => {
-                try {
-                    const res = await fetch(`/api/cart/add/${id}?quantity=1`, {
-                        method: 'POST', headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const d = await res.json();
-                    alert(d.success ? '✅ Added to cart!' : (d.message || 'Failed to add to cart.'));
-                } catch (e) { alert('Failed to add to cart.'); }
-            });
+            var token = getToken();
+            if (!token) { alert('Please login first.'); return; }
+            try {
+                var res = await fetch(`/api/cart/add/${id}?quantity=1`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                var d = await res.json();
+                alert(d.success ? '✅ Added to cart!' : (d.message || 'Failed'));
+            } catch (e) { alert('Failed to add to cart.'); }
         }
 
         async function buyNow(id) {
-            requireToken(async (token) => {
-                try {
-                    await fetch(`/api/cart/add/${id}?quantity=1`, {
-                        method: 'POST', headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const res = await fetch('/api/orders/checkout', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ paymentMethod: 'MTN_MONEY' })
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        alert('✅ Order placed! Order #' + data.data.orderNumber);
-                        window.location.href = '/order-tracking?id=' + data.data.orderId;
-                    } else {
-                        alert('❌ ' + (data.message || 'Checkout failed'));
-                    }
-                } catch (e) { alert('Failed to process.'); }
-            });
+            var token = getToken();
+            if (!token) { alert('Please login first.'); return; }
+            try {
+                await fetch(`/api/cart/add/${id}?quantity=1`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                var res = await fetch('/api/orders/checkout', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ paymentMethod: 'MTN_MONEY' })
+                });
+                var data = await res.json();
+                if (data.success) {
+                    alert('✅ Order placed! Order #' + data.data.orderNumber);
+                    window.location.href = '/order-tracking?id=' + data.data.orderId;
+                } else { alert('❌ ' + (data.message || 'Checkout failed')); }
+            } catch (e) { alert('Failed to process.'); }
         }
 
         async function makeOffer(id) {
-            requireToken(async (token) => {
-                const offer = prompt("Enter your offer amount (XAF):");
-                if (offer && !isNaN(offer) && parseFloat(offer) > 0) {
-                    try {
-                        const res = await fetch('/api/makola/offer', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                            body: JSON.stringify({ productId: id, offerAmount: parseFloat(offer), message: "Offer from product page" })
-                        });
-                        const d = await res.json();
-                        alert(d.message || '✅ Offer submitted! Seller will review it.');
-                    } catch (e) { alert('Failed to submit offer.'); }
-                } else {
-                    alert('Please enter a valid amount.');
-                }
-            });
+            var token = getToken();
+            if (!token) { alert('Please login first.'); return; }
+            var offer = prompt("Enter your offer amount (XAF):");
+            if (offer && !isNaN(offer) && parseFloat(offer) > 0) {
+                try {
+                    var res = await fetch('/api/makola/offer', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ productId: id, offerAmount: parseFloat(offer), message: "Offer from product page" })
+                    });
+                    var d = await res.json();
+                    alert(d.message || '✅ Offer submitted!');
+                } catch (e) { alert('Failed to submit offer.'); }
+            } else { alert('Please enter a valid amount.'); }
         }
 
         function showFeatureModal(productId) {
             currentFeatureProductId = productId;
             document.getElementById('featureModal').style.display = 'flex';
         }
-
         function closeFeatureModal() {
             document.getElementById('featureModal').style.display = 'none';
             document.getElementById('featureMsg').textContent = '';
         }
-
         async function featureProduct(duration) {
-            const token = getToken();
-            if (!token) {
-                document.getElementById('featureMsg').textContent = '❌ Please log in first.';
-                return;
-            }
+            var token = getToken();
+            if (!token) { document.getElementById('featureMsg').textContent = '❌ Please log in first.'; return; }
             document.getElementById('featureMsg').textContent = '⏳ Processing...';
             try {
-                const res = await fetch('/api/featured/boost', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                var res = await fetch('/api/featured/boost', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ productId: currentFeatureProductId, sellerId: 1, duration: duration })
                 });
-                const data = await res.json();
+                var data = await res.json();
                 if (data.success) {
                     document.getElementById('featureMsg').textContent = '✅ Featured! Pay via ' + data.data.ussdCode;
                     setTimeout(closeFeatureModal, 2500);
+                } else { document.getElementById('featureMsg').textContent = '❌ ' + (data.message || 'Failed.'); }
+            } catch(e) { document.getElementById('featureMsg').textContent = '❌ Network error.'; }
+        }
+
+        async function submitReview(productId) {
+            var token = getToken();
+            if (!token) { alert('Please login to write a review.'); return; }
+            var rating = document.getElementById('reviewRating-' + productId).value;
+            var comment = document.getElementById('reviewComment-' + productId).value;
+            var msg = document.getElementById('reviewMsg-' + productId);
+            msg.textContent = 'Submitting...';
+            try {
+                var res = await fetch('/api/reviews', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ productId: productId, rating: parseInt(rating), comment: comment })
+                });
+                var data = await res.json();
+                if (data.success) {
+                    msg.textContent = '✅ Review submitted!';
+                    document.getElementById('reviewComment-' + productId).value = '';
+                    loadReviews(productId);
+                } else { msg.textContent = data.message || 'Failed to submit review'; }
+            } catch(e) { msg.textContent = 'Network error'; }
+        }
+
+        async function loadReviews(productId) {
+            try {
+                var res = await fetch('/api/reviews/product/' + productId);
+                var data = await res.json();
+                var container = document.getElementById('reviews-' + productId);
+                if (data.success && data.data && data.data.reviews && data.data.reviews.length > 0) {
+                    var html = '';
+                    for (var i = 0; i < data.data.reviews.length; i++) {
+                        var r = data.data.reviews[i];
+                        html += '<div class="review-item"><strong>' + '⭐'.repeat(r.rating) + '</strong> ' + (r.comment || '') + ' <small style="color:#999;">- ' + r.userName + '</small></div>';
+                    }
+                    if (data.data.stats) {
+                        html += '<div style="margin-top:5px; color:#666; font-size:0.85rem;">' + data.data.stats.averageRating + ' avg (' + data.data.stats.totalReviews + ' reviews)</div>';
+                    }
+                    container.innerHTML = html;
                 } else {
-                    document.getElementById('featureMsg').textContent = '❌ ' + (data.message || 'Failed.');
+                    container.innerHTML = '<p style="color:#999;">No reviews yet. Be the first!</p>';
                 }
-            } catch(e) {
-                document.getElementById('featureMsg').textContent = '❌ Network error.';
-            }
+            } catch(e) {}
         }
 
         loadProduct();
