@@ -33,9 +33,14 @@ public class JwtUtils {
 
     @PostConstruct
     public void init() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        signingKey = Keys.hmacShaKeyFor(keyBytes);
-        logger.info("JWT initialized with expiration: {} ms", expiration);
+        try {
+            byte[] keyBytes = Decoders.BASE64.decode(secret);
+            signingKey = Keys.hmacShaKeyFor(keyBytes);
+            logger.info("JWT initialized with expiration: {} ms", expiration);
+        } catch (Exception e) {
+            logger.error("Failed to initialize JWT signing key: {}", e.getMessage());
+            throw new RuntimeException("JWT initialization failed", e);
+        }
     }
 
     private Key getSigningKey() {
@@ -78,14 +83,17 @@ public class JwtUtils {
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
-        return extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
+        boolean usernameMatches = extractUsername(token).equals(userDetails.getUsername());
+        boolean notExpired = !isTokenExpired(token);
+        if (!usernameMatches) {
+            logger.warn("Token username doesn't match user: {} vs {}", extractUsername(token), userDetails.getUsername());
+        }
+        if (!notExpired) {
+            logger.warn("Token expired for user: {}", userDetails.getUsername());
+        }
+        return usernameMatches && notExpired;
     }
 
-    /**
-     * Extract user ID from JWT token.
-     * Assumes the user ID is stored as the subject claim during token generation.
-     * If you're using email as subject, you'll need to look up the user by email instead.
-     */
     public Long getUserIdFromToken(String token) {
         String subject = extractUsername(token);
         try {

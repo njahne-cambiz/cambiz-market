@@ -96,11 +96,11 @@ public class SecurityConfig {
                 // HEALTH
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
 
-                // Order tracking pages - public (can share tracking link)
+                // Order tracking pages - public
                 .requestMatchers("/order-tracking", "/track").permitAll()
                 .requestMatchers("/orders").authenticated()
 
-                // Wishlist page (Thymeleaf)
+                // Wishlist page
                 .requestMatchers("/wishlist").authenticated()
 
                 // ROLE-BASED DASHBOARDS
@@ -111,7 +111,7 @@ public class SecurityConfig {
                 // AUTHENTICATED USERS
                 .requestMatchers("/api/cart/**").authenticated()
                 .requestMatchers("/api/orders/**").authenticated()
-                .requestMatchers("/api/tracking/**").authenticated()
+                .requestMatchers("/api/store-tracking/**").authenticated()
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
                 

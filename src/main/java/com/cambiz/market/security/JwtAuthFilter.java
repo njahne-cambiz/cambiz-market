@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +19,8 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     private final JwtUtils jwtUtils;
     private final CustomUserDetailsService userDetailsService;
@@ -39,12 +43,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (jwt != null && !jwt.isBlank()) {
                 String username = jwtUtils.extractUsername(jwt);
+                logger.debug("JWT found for user: {}", username);
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    logger.debug("User loaded: {}", userDetails.getUsername());
 
                     if (jwtUtils.validateToken(jwt, userDetails)) {
+                        logger.debug("Token validated successfully for: {}", username);
 
                         UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(
@@ -58,12 +65,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         );
 
                         SecurityContextHolder.getContext().setAuthentication(authToken);
+                        logger.info("User authenticated: {}", username);
+                    } else {
+                        logger.warn("Token validation failed for: {}", username);
                     }
                 }
+            } else {
+                logger.debug("No JWT token found in request to: {}", path);
             }
 
-        } catch (Exception ignored) {
-            // Never crash the request because of JWT
+        } catch (Exception e) {
+            logger.error("JWT authentication error for path {}: {}", path, e.getMessage());
+            logger.debug("Stack trace:", e);
         }
 
         filterChain.doFilter(request, response);
