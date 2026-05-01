@@ -15,6 +15,7 @@ import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -57,6 +58,19 @@ public class JwtUtils {
                 .signWith(getSigningKey())
                 .compact();
     }
+    
+    public String generateTokenWithRoles(String username, List<String> roles, String userType) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roles);
+        claims.put("userType", userType);
+        return Jwts.builder()
+                .claims(claims)
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -85,12 +99,6 @@ public class JwtUtils {
     public boolean validateToken(String token, UserDetails userDetails) {
         boolean usernameMatches = extractUsername(token).equals(userDetails.getUsername());
         boolean notExpired = !isTokenExpired(token);
-        if (!usernameMatches) {
-            logger.warn("Token username doesn't match user: {} vs {}", extractUsername(token), userDetails.getUsername());
-        }
-        if (!notExpired) {
-            logger.warn("Token expired for user: {}", userDetails.getUsername());
-        }
         return usernameMatches && notExpired;
     }
 

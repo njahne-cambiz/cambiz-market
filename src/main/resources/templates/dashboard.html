@@ -39,11 +39,6 @@
         .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
         .badge-pending { background: #ffeaa7; color: #d68910; }
         .badge-confirmed { background: #74b9ff; color: white; }
-        .api-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
-        .api-card { background: white; border-radius: 10px; padding: 1.2rem; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-        .method-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; margin-bottom: 0.5rem; }
-        .get { background: #00b894; color: white; }
-        .post { background: #0984e3; color: white; }
     </style>
 </head>
 <body>
@@ -202,20 +197,14 @@
                 if (oData.success && oData.data) {
                     document.getElementById('sellerOrderCount').textContent = oData.data.length;
                     var revenue = 0;
-                    for (var i = 0; i < oData.data.length; i++) {
-                        revenue += oData.data[i].sellerPayout || 0;
-                    }
+                    for (var i = 0; i < oData.data.length; i++) { revenue += oData.data[i].sellerPayout || 0; }
                     document.getElementById('sellerRevenue').textContent = revenue.toLocaleString();
                     
                     document.getElementById('sellerOrders').style.display = 'block';
                     var html = '';
                     for (var j = 0; j < oData.data.length; j++) {
                         var order = oData.data[j];
-                        html += '<div class="order-item">' +
-                            '<div><strong>Order #' + order.sellerOrderId + '</strong><br><small>' + (order.items ? order.items.map(function(i){return i.productName;}).join(', ') : '') + '</small></div>' +
-                            '<div><span class="badge badge-pending">' + order.status + '</span></div>' +
-                            '<div><strong>' + order.sellerPayout.toLocaleString() + ' XAF</strong></div>' +
-                            '</div>';
+                        html += '<div class="order-item"><div><strong>Order #' + order.sellerOrderId + '</strong><br><small>' + (order.items ? order.items.map(function(i){return i.productName;}).join(', ') : '') + '</small></div><div><span class="badge badge-pending">' + order.status + '</span></div><div><strong>' + order.sellerPayout.toLocaleString() + ' XAF</strong></div></div>';
                     }
                     document.getElementById('sellerOrderList').innerHTML = html || '<p style="padding:1.5rem; text-align:center; color:#636e72;">No orders yet.</p>';
                 }

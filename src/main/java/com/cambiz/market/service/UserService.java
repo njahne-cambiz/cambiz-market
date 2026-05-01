@@ -34,7 +34,6 @@ public class UserService {
         return passwordEncoder.encode(password);
     }
 
-    // REGISTER METHOD
     public User registerUser(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered!");
@@ -65,7 +64,6 @@ public class UserService {
             user.setLanguage(User.Language.EN);
         }
 
-        // ✅ FIXED: Auto-create role if it doesn't exist
         Role userRole;
         if (user.getUserType() == User.UserType.SELLER) {
             userRole = roleRepository.findByName(Role.ROLE_SELLER)
@@ -91,7 +89,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // LOGIN METHOD
     public JwtResponse login(String email, String phone, String password) {
         User user = null;
         if (email != null && !email.isEmpty()) {
@@ -108,7 +105,11 @@ public class UserService {
             throw new RuntimeException("Invalid password!");
         }
 
-        String token = jwtUtils.generateToken(user.getEmail());
+        String token = jwtUtils.generateTokenWithRoles(
+            user.getEmail(),
+            user.getRoles().stream().map(Role::getName).collect(Collectors.toList()),
+            user.getUserType().name()
+        );
 
         return new JwtResponse(
                 token,
