@@ -52,4 +52,4 @@ uploads/
 
 # OS files
 .DS_Store
-Thumbs.db
+Thumbs.dbsrc/main/resources/application.properties
