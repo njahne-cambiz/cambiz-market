@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Seller | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f5f6fa; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #2d3436, #636e72); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
+        .header nav a { color: white; text-decoration: none; margin-left: 1.5rem; }
+        .container { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; }
+        .back-btn { color: #0984e3; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; }
+        
+        .hero { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; border-radius: 16px; padding: 2.5rem 2rem; text-align: center; margin-bottom: 2rem; }
+        .hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .hero .badge { font-size: 3rem; margin-bottom: 1rem; }
+        .hero p { font-size: 1.1rem; opacity: 0.9; }
+        
+        .features { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+        .feature-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .feature-card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .feature-card h3 { color: #2d3436; margin-bottom: 0.3rem; }
+        .feature-card p { color: #636e72; font-size: 0.9rem; }
+        
+        .pricing { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .pricing h2 { text-align: center; margin-bottom: 1.5rem; color: #2d3436; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .price-card { text-align: center; padding: 1.5rem 1rem; border-radius: 12px; border: 2px solid #dfe6e9; transition: transform 0.2s; }
+        .price-card:hover { transform: translateY(-3px); border-color: #ff6b6b; }
+        .price-card.best { border-color: #ff6b6b; background: #fff5f5; position: relative; }
+        .price-card.best::before { content: '🏆 Best Value'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #ff6b6b; color: white; padding: 2px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; }
+        .price-card h3 { color: #2d3436; margin-bottom: 0.5rem; }
+        .price-card .price { font-size: 1.5rem; font-weight: bold; color: #ff6b6b; margin-bottom: 0.3rem; }
+        .price-card .savings { color: #00b894; font-size: 0.85rem; }
+        .price-card .period { color: #636e72; font-size: 0.85rem; }
+        
+        .cta { text-align: center; margin-top: 2rem; }
+        .btn-upgrade { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; border: none; padding: 1rem 3rem; border-radius: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        
+        @media (max-width: 600px) {
+            .features { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/store" class="logo">🛒 CamBiz Market</a>
+        <nav>
+            <a href="/store">📦 Products</a>
+            <a href="/dashboard">👤 Dashboard</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <a href="/store" class="back-btn">← Back to Store</a>
+        
+        <div class="hero">
+            <div class="badge">🏆</div>
+            <h1>Become a Premium Seller</h1>
+            <p>Get verified, boost sales, and enjoy exclusive benefits</p>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <div class="icon">✅</div>
+                <h3>Verified Badge</h3>
+                <p>Stand out with a blue checkmark — buyers trust verified sellers more</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">💰</div>
+                <h3>Lower Commission</h3>
+                <p>Pay only 4.5% instead of 5% — keep more of your earnings</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🎯</div>
+                <h3>20% Off Featured Listings</h3>
+                <p>Promote your products at a discount and reach more buyers</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚡</div>
+                <h3>Priority Support</h3>
+                <p>Get help within 4 hours — we prioritize premium sellers</p>
+            </div>
+        </div>
+        
+        <div class="pricing">
+            <h2>Choose Your Plan</h2>
+            <div class="pricing-grid">
+                <div class="price-card">
+                    <h3>Monthly</h3>
+                    <div class="price">10,000 XAF</div>
+                    <div class="period">per month</div>
+                </div>
+                <div class="price-card best">
+                    <h3>Quarterly</h3>
+                    <div class="price">27,000 XAF</div>
+                    <div class="savings">Save 3,000 XAF</div>
+                    <div class="period">every 3 months</div>
+                </div>
+                <div class="price-card">
+                    <h3>Yearly</h3>
+                    <div class="price">96,000 XAF</div>
+                    <div class="savings">Save 24,000 XAF</div>
+                    <div class="period">per year</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta">
+            <a href="/dashboard" class="btn-upgrade">🚀 Upgrade to Premium</a>
+        </div>
+    </main>
+</body>
+</html>

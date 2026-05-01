@@ -37,4 +37,9 @@ public class StoreController {
     public String myOrders() {
         return "my-orders";
     }
+    
+    @GetMapping("/premium")
+    public String premium() {
+        return "premium";
+    }
 }
