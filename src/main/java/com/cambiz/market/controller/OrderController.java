@@ -62,9 +62,9 @@ public class OrderController {
         }
     }
     
-    // ========== ORDER TRACKING ==========
+    // ========== ORDER TRACKING (separate path to avoid conflicts) ==========
     
-    @PutMapping("/{orderId}/status")
+    @PutMapping("/tracking/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(
             @PathVariable Long orderId,
             @RequestParam String status,
@@ -102,7 +102,7 @@ public class OrderController {
         }
     }
     
-    @GetMapping("/{orderId}/tracking")
+    @GetMapping("/tracking/{orderId}")
     public ResponseEntity<?> getOrderTracking(@PathVariable Long orderId) {
         try {
             List<TrackingEvent> history = trackingService.getTrackingHistory(orderId);
