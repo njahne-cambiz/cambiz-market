@@ -111,9 +111,7 @@ public class SecurityConfig {
 
                 // AUTHENTICATED USERS
                 .requestMatchers("/api/cart/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/orders/**").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/orders/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/orders/**").authenticated()
+                .requestMatchers("/api/orders/**").authenticated()
                 .requestMatchers("/api/store-tracking/**").authenticated()
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
