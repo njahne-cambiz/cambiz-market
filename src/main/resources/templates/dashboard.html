@@ -28,7 +28,6 @@
         .login-prompt { background: white; border-radius: 16px; padding: 3rem 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 5px; }
         .btn-primary { background: #0984e3; color: white; }
-        .btn-outline { background: white; color: #0984e3; border: 2px solid #0984e3; }
         .btn-register { background: #00b894; color: white; }
         .login-form { display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; }
         .login-form input { display: block; width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #dfe6e9; border-radius: 8px; font-size: 14px; }
@@ -91,7 +90,6 @@
                 <p>Access your orders, products, wishlist, and more.</p>
                 <button class="btn btn-primary" onclick="showLogin()">🔑 Login Now</button>
                 <a href="/register" class="btn btn-register">📝 Create Account</a>
-                <a href="/store" class="btn btn-outline">🛒 Browse Store</a>
                 <div class="login-form" id="loginForm">
                     <input type="email" id="loginEmail" placeholder="Email (e.g. buyer@cambiz.cm)">
                     <input type="password" id="loginPassword" placeholder="Password (e.g. Buyer@123)">
@@ -135,7 +133,6 @@
             document.getElementById('userDashboard').style.display = 'block';
             document.getElementById('logoutLink').style.display = 'inline';
             
-            // Detect user type from JWT token
             try {
                 var payload = JSON.parse(atob(token.split('.')[1]));
                 var roles = payload.roles || [];
