@@ -97,22 +97,22 @@
             <div class="feature-card">
                 <div class="icon">✅</div>
                 <h3>Verified Badge</h3>
-                <p>Stand out with a blue checkmark — buyers trust verified sellers more</p>
+                <p>Stand out — buyers trust verified sellers more</p>
             </div>
             <div class="feature-card">
                 <div class="icon">💰</div>
                 <h3>Lower Commission</h3>
-                <p>Pay only 4.5% instead of 5% — keep more of your earnings</p>
+                <p>Pay only 4.5% instead of 5%</p>
             </div>
             <div class="feature-card">
                 <div class="icon">🎯</div>
                 <h3>20% Off Featured Listings</h3>
-                <p>Promote your products at a discount and reach more buyers</p>
+                <p>Promote products at a discount</p>
             </div>
             <div class="feature-card">
                 <div class="icon">⚡</div>
                 <h3>Priority Support</h3>
-                <p>Get help within 4 hours — we prioritize premium sellers</p>
+                <p>Get help within 4 hours</p>
             </div>
         </div>
         
@@ -217,8 +217,8 @@
                     localStorage.setItem('token', token);
                     errorEl.style.display = 'none';
                     document.getElementById('loginForm').style.display = 'none';
-                    renderActionButton();
-                    showMessage('✅ Logged in successfully! Select a plan to upgrade.', 'success');
+                    showMessage('✅ Logged in! Redirecting to dashboard...', 'success');
+                    setTimeout(() => { window.location.href = '/dashboard'; }, 800);
                 } else {
                     errorEl.textContent = data.message || 'Login failed';
                     errorEl.style.display = 'block';
