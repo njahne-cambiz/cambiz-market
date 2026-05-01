@@ -36,26 +36,20 @@
 <body>
     <header class="header">
         <a href="/store" class="logo">🛒 CamBiz Market</a>
-        <nav>
-            <a href="/store">📦 Products</a>
-            <a href="/dashboard">👤 Dashboard</a>
-        </nav>
+        <nav><a href="/store">📦 Products</a><a href="/dashboard">👤 Dashboard</a></nav>
     </header>
-
     <main class="container">
         <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
         <div class="upload-card">
             <h1>📷 Upload Product Images</h1>
             <div class="form-group">
                 <label>Select Product</label>
-                <select id="productSelect">
-                    <option value="">Loading your products...</option>
-                </select>
+                <select id="productSelect"><option value="">Loading...</option></select>
             </div>
             <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
                 <div class="icon">📁</div>
                 <p>Click or drag images here</p>
-                <p style="font-size:0.8rem; color:#b2bec3;">Max 8 images, 10MB each</p>
+                <p style="font-size:0.8rem;color:#b2bec3;">Max 8 images, 10MB each</p>
             </div>
             <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
             <div class="preview-grid" id="previewGrid"></div>
@@ -63,12 +57,10 @@
             <div id="message" class="message"></div>
         </div>
     </main>
-
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         var selectedFiles = [];
         if (!token) { window.location.href = '/dashboard'; }
-        
         async function loadMyProducts() {
             try {
                 var res = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token } });
@@ -80,37 +72,25 @@
                 } else {
                     select.innerHTML = '<option value="">No products found</option>';
                 }
-            } catch(e) { document.getElementById('productSelect').innerHTML = '<option value="">Error loading</option>'; }
+            } catch(e) {}
         }
-        
         function handleFiles(files) {
             selectedFiles = Array.from(files).slice(0, 8);
             renderPreviews();
             document.getElementById('uploadBtn').disabled = selectedFiles.length === 0 || !document.getElementById('productSelect').value;
         }
-        
         function renderPreviews() {
             var grid = document.getElementById('previewGrid');
             grid.innerHTML = selectedFiles.map(function(file, i) {
                 return '<div class="preview-item"><img src="' + URL.createObjectURL(file) + '" alt="Preview"><button class="remove" onclick="removeFile(' + i + ')">✕</button></div>';
             }).join('');
         }
-        
-        function removeFile(index) {
-            selectedFiles.splice(index, 1);
-            renderPreviews();
-            document.getElementById('uploadBtn').disabled = selectedFiles.length === 0 || !document.getElementById('productSelect').value;
-        }
-        
-        document.getElementById('productSelect').addEventListener('change', function() {
-            document.getElementById('uploadBtn').disabled = selectedFiles.length === 0 || !this.value;
-        });
-        
+        function removeFile(index) { selectedFiles.splice(index, 1); renderPreviews(); document.getElementById('uploadBtn').disabled = selectedFiles.length === 0 || !document.getElementById('productSelect').value; }
+        document.getElementById('productSelect').addEventListener('change', function() { document.getElementById('uploadBtn').disabled = selectedFiles.length === 0 || !this.value; });
         var dropZone = document.getElementById('dropZone');
         dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.style.borderColor = '#667eea'; });
         dropZone.addEventListener('dragleave', function() { dropZone.style.borderColor = '#dfe6e9'; });
         dropZone.addEventListener('drop', function(e) { e.preventDefault(); dropZone.style.borderColor = '#dfe6e9'; handleFiles(e.dataTransfer.files); });
-        
         async function uploadImages() {
             var productId = document.getElementById('productSelect').value;
             if (!productId || selectedFiles.length === 0) return;
@@ -120,9 +100,7 @@
             var formData = new FormData();
             selectedFiles.forEach(function(file) { formData.append('files', file); });
             try {
-                var res = await fetch('/api/products/' + productId + '/images', {
-                    method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData
-                });
+                var res = await fetch('/api/products/' + productId + '/images', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData });
                 var data = await res.json();
                 if (data.success) {
                     msg.textContent = 'Images uploaded successfully!';
