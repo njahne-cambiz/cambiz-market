@@ -47,4 +47,9 @@ public class StoreController {
     public String register() {
         return "register";
     }
+    
+    @GetMapping("/upload-images")
+    public String uploadImages() {
+        return "upload-images";
+    }
 }
