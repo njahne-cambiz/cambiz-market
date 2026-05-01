@@ -27,6 +27,8 @@ public class OrderController {
         try {
             Long userId = getCurrentUserId();
             OrderResponse order = orderService.checkout(userId, request);
+            // Auto-add tracking entry for new order
+            StoreTrackingController.addTrackingEntry(order.getOrderId(), "PENDING", "Order placed");
             return ResponseEntity.ok(new ApiResponse(true, "Order placed successfully!", order));
         } catch (RuntimeException e) {
             log.error("Checkout error: {}", e.getMessage());
@@ -73,6 +75,8 @@ public class OrderController {
             @RequestParam String status) {
         try {
             orderService.updateOrderStatus(orderId, status);
+            // Sync with tracking
+            StoreTrackingController.addTrackingEntry(orderId, status, "Status updated to " + status);
             return ResponseEntity.ok(new ApiResponse(true, "Order status updated to " + status, null));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage(), null));

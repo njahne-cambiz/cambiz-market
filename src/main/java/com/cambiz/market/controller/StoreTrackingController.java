@@ -7,15 +7,10 @@ import java.util.*;
 @RequestMapping("/api/store-tracking")
 public class StoreTrackingController {
     
-    // Simple in-memory tracking
-    private final Map<Long, List<Map<String, Object>>> trackingStore = new LinkedHashMap<>();
+    // Static in-memory tracking shared across all instances
+    private static final Map<Long, List<Map<String, Object>>> trackingStore = new LinkedHashMap<>();
     
-    @PutMapping("/{orderId}")
-    public Map<String, Object> updateStatus(
-            @PathVariable Long orderId,
-            @RequestParam String status,
-            @RequestParam(required = false, defaultValue = "") String note) {
-        
+    public static void addTrackingEntry(Long orderId, String status, String note) {
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("status", status);
         event.put("displayName", status);
@@ -24,11 +19,20 @@ public class StoreTrackingController {
         event.put("timestamp", new Date().toString());
         
         trackingStore.computeIfAbsent(orderId, k -> new ArrayList<>()).add(0, event);
+    }
+    
+    @PutMapping("/{orderId}")
+    public Map<String, Object> updateStatus(
+            @PathVariable Long orderId,
+            @RequestParam String status,
+            @RequestParam(required = false, defaultValue = "") String note) {
+        
+        addTrackingEntry(orderId, status, note.isEmpty() ? "Status updated to " + status : note);
         
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("success", true);
         response.put("message", "Status updated to " + status);
-        response.put("data", event);
+        response.put("data", trackingStore.get(orderId).get(0));
         return response;
     }
     
