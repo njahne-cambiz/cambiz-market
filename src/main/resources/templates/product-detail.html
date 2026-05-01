@@ -134,7 +134,7 @@
                                 <button class="btn btn-cart" onclick="addToCart(${p.id})">🛒 Add to Cart</button>
                                 <button class="btn btn-buy" onclick="buyNow(${p.id})">⚡ Buy Now</button>
                                 <button class="btn btn-makola" onclick="makeOffer(${p.id})">💰 Make Offer</button>
-                                <button class="btn btn-feature" id="featureBtn" onclick="showFeatureModal(${p.id})">⭐ Feature Product</button>
+                                <button class="btn btn-feature" onclick="showFeatureModal(${p.id})">⭐ Feature Product</button>
                                 <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp">📱 Share on WhatsApp</a>
                             </div>
                         </div>
@@ -173,7 +173,7 @@
                         method: 'POST', headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const d = await res.json();
-                    alert(d.message || 'Added to cart!');
+                    alert(d.success ? '✅ Added to cart!' : (d.message || 'Failed to add to cart.'));
                 } catch (e) { alert('Failed to add to cart.'); }
             });
         }
@@ -184,7 +184,18 @@
                     await fetch(`/api/cart/add/${id}?quantity=1`, {
                         method: 'POST', headers: { 'Authorization': `Bearer ${token}` }
                     });
-                    window.location.href = '/cart';
+                    const res = await fetch('/api/orders/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ paymentMethod: 'MTN_MONEY' })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('✅ Order placed! Order #' + data.data.orderNumber);
+                        window.location.href = '/order-tracking?id=' + data.data.orderId;
+                    } else {
+                        alert('❌ ' + (data.message || 'Checkout failed'));
+                    }
                 } catch (e) { alert('Failed to process.'); }
             });
         }
@@ -192,7 +203,7 @@
         async function makeOffer(id) {
             requireToken(async (token) => {
                 const offer = prompt("Enter your offer amount (XAF):");
-                if (offer) {
+                if (offer && !isNaN(offer) && parseFloat(offer) > 0) {
                     try {
                         const res = await fetch('/api/makola/offer', {
                             method: 'POST',
@@ -200,8 +211,10 @@
                             body: JSON.stringify({ productId: id, offerAmount: parseFloat(offer), message: "Offer from product page" })
                         });
                         const d = await res.json();
-                        alert(d.message || 'Offer submitted!');
+                        alert(d.message || '✅ Offer submitted! Seller will review it.');
                     } catch (e) { alert('Failed to submit offer.'); }
+                } else {
+                    alert('Please enter a valid amount.');
                 }
             });
         }
