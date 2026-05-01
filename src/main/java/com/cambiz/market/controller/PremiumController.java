@@ -31,12 +31,11 @@ public class PremiumController {
             @RequestHeader("Authorization") String authHeader,
             @RequestBody Map<String, Object> request) {
         
-        // Extract user from JWT
         String token = authHeader.replace("Bearer ", "");
         String email = jwtUtils.extractUsername(token);
         Long userId = userService.getUserIdByEmail(email);
         
-        String plan = request.get("plan").toString(); // MONTHLY, QUARTERLY, YEARLY
+        String plan = request.get("plan").toString();
         
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
@@ -62,6 +61,29 @@ public class PremiumController {
             Map.of("userId", userId, "plan", plan, "price", price,
                    "premiumUntil", premiumUntil.toString(),
                    "ussdCode", "*126*1*1*" + (int)price + "#")));
+    }
+
+    @GetMapping("/my-status")
+    public ResponseEntity<ApiResponse> getMyPremiumStatus(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtUtils.extractUsername(token);
+        Long userId = userService.getUserIdByEmail(email);
+        
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, "User not found", null));
+        }
+        
+        boolean isPremium = "PREMIUM".equals(user.getAccountType()) 
+                && user.getPremiumUntil() != null 
+                && user.getPremiumUntil().isAfter(LocalDateTime.now());
+        
+        return ResponseEntity.ok(new ApiResponse(true, "Premium status", Map.of(
+            "isPremium", isPremium,
+            "accountType", user.getAccountType(),
+            "premiumUntil", user.getPremiumUntil() != null ? user.getPremiumUntil().toString() : null,
+            "commissionRate", user.getCommissionRate()
+        )));
     }
 
     @GetMapping("/status/{userId}")

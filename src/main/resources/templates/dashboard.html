@@ -10,9 +10,10 @@
         
         .header { background: linear-gradient(135deg, #2d3436, #636e72); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
-        .header nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .header nav { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center; }
         .header nav a { color: white; text-decoration: none; font-size: 0.95rem; }
         .header nav a:hover { opacity: 0.8; }
+        .premium-badge { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; display: none; }
         
         .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
         
@@ -61,6 +62,7 @@
     <header class="header">
         <a href="/store" class="logo">🛒 CamBiz Market</a>
         <nav>
+            <span id="premiumBadge" class="premium-badge">🏆 PREMIUM</span>
             <a href="/store">📦 Store</a>
             <a href="/wishlist">❤️ Wishlist</a>
             <a href="/dashboard">👤 Dashboard</a>
@@ -70,11 +72,10 @@
     </header>
 
     <div class="container">
-        <!-- LOGGED IN DASHBOARD -->
         <div id="userDashboard" style="display:none;">
             <div class="welcome-banner">
                 <h1>👋 Welcome back!</h1>
-                <p>🟢 Online | <span id="userEmail"></span></p>
+                <p><span id="premiumStatus"></span> 🟢 Online | <span id="userEmail"></span></p>
             </div>
             
             <div class="stats-grid" id="userStats"></div>
@@ -83,7 +84,6 @@
             <div class="quick-actions" id="userActions"></div>
         </div>
         
-        <!-- PUBLIC LANDING DASHBOARD -->
         <div id="publicDashboard">
             <div class="welcome-banner">
                 <h1>🛒 Welcome to CamBiz Market</h1>
@@ -135,7 +135,23 @@
                 if (data.data) document.getElementById('pubProductCount').textContent = data.data.length;
             } catch(e) {}
             
-            if (token) await loadUserDashboard();
+            if (token) {
+                await loadUserDashboard();
+                checkPremiumStatus();
+            }
+        }
+        
+        async function checkPremiumStatus() {
+            try {
+                const res = await fetch('/api/premium/my-status', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success && data.data && data.data.isPremium) {
+                    document.getElementById('premiumBadge').style.display = 'inline-block';
+                    document.getElementById('premiumStatus').textContent = '🏆 Premium Seller |';
+                }
+            } catch(e) {}
         }
         
         async function loadUserDashboard() {
@@ -177,10 +193,7 @@
             const errorEl = document.getElementById('loginError');
             
             try {
-                const res = await fetch('/api/auth/login', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
+                const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
                 const data = await res.json();
                 
                 if (data.success && data.data && data.data.token) {

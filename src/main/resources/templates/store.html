@@ -11,6 +11,8 @@
         .navbar { background: linear-gradient(135deg, #667eea, #764ba2); padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .navbar h1 { font-size: 24px; }
         
+        .premium-badge { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; display: none; }
+        
         .premium-banner { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 10px 20px; text-align: center; font-size: 14px; }
         .premium-banner a { color: white; text-decoration: underline; font-weight: bold; }
         
@@ -63,6 +65,7 @@
 <body>
     <div class="navbar">
         <h1>🛒 CamBiz Market</h1>
+        <span id="premiumBadge" class="premium-badge">🏆 PREMIUM</span>
         <span style="font-size:12px;opacity:0.8;">Cameroon's #1 Marketplace</span>
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="🔍 Search products..." onkeyup="if(event.key==='Enter')searchProducts()">
@@ -73,7 +76,7 @@
 
     <div class="premium-banner">
         🏆 <b>Become a Premium Seller!</b> Get verified badge, lower fees (4.5%), and more! 
-		<a href="/premium">Learn More →</a>
+        <a href="/premium">Learn More →</a>
     </div>
 
     <div class="categories" id="categoryFilters">
@@ -256,6 +259,22 @@
             document.getElementById('searchInput').value = '';
             filterByCategory('all', document.querySelector('.cat-btn'));
         }
+
+        // Check premium status for badge
+        (async function() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            if (token) {
+                try {
+                    const res = await fetch('/api/premium/my-status', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (data.success && data.data && data.data.isPremium) {
+                        document.getElementById('premiumBadge').style.display = 'inline-block';
+                    }
+                } catch(e) {}
+            }
+        })();
 
         loadFeatured();
         loadProducts();
