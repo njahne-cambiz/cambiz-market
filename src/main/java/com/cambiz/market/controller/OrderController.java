@@ -45,12 +45,35 @@ public class OrderController {
         }
     }
     
+    @GetMapping("/seller-orders")
+    public ResponseEntity<ApiResponse> getSellerOrders() {
+        try {
+            Long userId = getCurrentUserId();
+            var orders = orderService.getSellerOrders(userId);
+            return ResponseEntity.ok(new ApiResponse(true, "Seller orders retrieved", orders));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage(), null));
+        }
+    }
+    
     @GetMapping("/{orderId}")
     public ResponseEntity<ApiResponse> getOrder(@PathVariable Long orderId) {
         try {
             Long userId = getCurrentUserId();
             OrderResponse order = orderService.getOrder(orderId, userId);
             return ResponseEntity.ok(new ApiResponse(true, "Order retrieved successfully", order));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage(), null));
+        }
+    }
+    
+    @PutMapping("/{orderId}/update-status")
+    public ResponseEntity<ApiResponse> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestParam String status) {
+        try {
+            orderService.updateOrderStatus(orderId, status);
+            return ResponseEntity.ok(new ApiResponse(true, "Order status updated to " + status, null));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage(), null));
         }
