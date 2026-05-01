@@ -40,9 +40,7 @@
         .price-card .price { font-size: 1.5rem; font-weight: bold; color: #ff6b6b; margin-bottom: 0.3rem; }
         .price-card .savings { color: #00b894; font-size: 0.85rem; }
         .price-card .period { color: #636e72; font-size: 0.85rem; }
-        .price-card .select-indicator { 
-            display: none; color: #ff6b6b; font-size: 1.5rem; margin-top: 0.5rem; 
-        }
+        .price-card .select-indicator { display: none; color: #ff6b6b; font-size: 1.5rem; margin-top: 0.5rem; }
         .price-card.selected .select-indicator { display: block; }
         
         .cta { text-align: center; margin-top: 2rem; }
@@ -68,6 +66,8 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 1rem;
         }
         .login-box p { margin-bottom: 1rem; color: #636e72; }
+        
+        #loginForm input { display: block; width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #dfe6e9; border-radius: 8px; font-size: 14px; }
         
         @media (max-width: 600px) {
             .features { grid-template-columns: 1fr; }
@@ -142,18 +142,14 @@
             </div>
         </div>
         
-        <div class="cta" id="actionArea">
-            <!-- This area changes based on login state -->
-        </div>
-        
+        <div class="cta" id="actionArea"></div>
         <div id="message" class="message"></div>
     </main>
 
     <script>
         let selectedPlan = null;
         let selectedAmount = null;
-        
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        let token = localStorage.getItem('token') || sessionStorage.getItem('token');
         
         function selectPlan(plan, element) {
             document.querySelectorAll('.price-card').forEach(card => card.classList.remove('selected'));
@@ -171,21 +167,76 @@
                 area.innerHTML = `
                     <div class="login-box">
                         <p>🔐 You need to log in as a seller to upgrade.</p>
-                        <a href="/login?redirect=/premium" class="btn-login">🔑 Log In</a>
-                        <a href="/dashboard" class="btn-login" style="background:#636e72;">👤 Go to Dashboard</a>
+                        <button class="btn-login" onclick="showLoginForm()">🔑 Log In Now</button>
+                        <a href="/store" class="btn-login" style="background:#636e72;">🛒 Browse Store</a>
+                    </div>
+                    <div id="loginForm" style="display:none; margin-top:1rem; padding:1.5rem; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                        <h3 style="margin-bottom:1rem;">Login to CamBiz Market</h3>
+                        <input type="email" id="loginEmail" placeholder="Email">
+                        <input type="password" id="loginPassword" placeholder="Password">
+                        <button onclick="doLogin()" style="width:100%; padding:12px; background:#0984e3; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Login</button>
+                        <p style="margin-top:10px; font-size:0.85rem; color:#636e72;">Test: seller@cambiz.cm / Seller@123</p>
+                        <p id="loginError" style="color:#d63031; margin-top:5px; display:none;"></p>
                     </div>
                 `;
             } else if (!selectedPlan) {
                 area.innerHTML = `
                     <button class="btn-upgrade" disabled>👆 Select a Plan Above</button>
+                    <p style="text-align:center; margin-top:0.5rem; color:#636e72; font-size:0.85rem;">✅ Logged in | <a href="#" onclick="logout()" style="color:#d63031;">Logout</a></p>
                 `;
             } else {
+                const planDisplay = selectedPlan.charAt(0) + selectedPlan.slice(1).toLowerCase();
                 area.innerHTML = `
                     <button id="upgradeBtn" class="btn-upgrade" onclick="upgradeToPremium()">
-                        🚀 Upgrade to ${selectedPlan.charAt(0) + selectedPlan.slice(1).toLowerCase()} — ${parseInt(selectedAmount).toLocaleString()} XAF
+                        🚀 Upgrade to ${planDisplay} — ${parseInt(selectedAmount).toLocaleString()} XAF
                     </button>
+                    <p style="text-align:center; margin-top:0.5rem; color:#636e72; font-size:0.85rem;">✅ Logged in | <a href="#" onclick="logout()" style="color:#d63031;">Logout</a></p>
                 `;
             }
+        }
+        
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+        }
+        
+        async function doLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (data.success && data.data && data.data.token) {
+                    token = data.data.token;
+                    localStorage.setItem('token', token);
+                    errorEl.style.display = 'none';
+                    document.getElementById('loginForm').style.display = 'none';
+                    renderActionButton();
+                    showMessage('✅ Logged in successfully! Select a plan to upgrade.', 'success');
+                } else {
+                    errorEl.textContent = data.message || 'Login failed';
+                    errorEl.style.display = 'block';
+                }
+            } catch (e) {
+                errorEl.textContent = 'Network error. Please try again.';
+                errorEl.style.display = 'block';
+            }
+        }
+        
+        function logout() {
+            token = null;
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            selectedPlan = null;
+            document.querySelectorAll('.price-card').forEach(card => card.classList.remove('selected'));
+            renderActionButton();
+            showMessage('👋 Logged out.', 'info');
         }
         
         async function upgradeToPremium() {
@@ -216,14 +267,16 @@
                     btn.style.background = '#00b894';
                     btn.onclick = null;
                 } else {
-                    showMessage('❌ ' + (data.message || 'Upgrade failed. Please try again.'), 'error');
+                    showMessage('❌ ' + (data.message || 'Upgrade failed.'), 'error');
                     btn.disabled = false;
-                    btn.textContent = `🚀 Upgrade to ${selectedPlan.charAt(0) + selectedPlan.slice(1).toLowerCase()} — ${parseInt(selectedAmount).toLocaleString()} XAF`;
+                    const planDisplay = selectedPlan.charAt(0) + selectedPlan.slice(1).toLowerCase();
+                    btn.textContent = '🚀 Upgrade to ' + planDisplay + ' — ' + parseInt(selectedAmount).toLocaleString() + ' XAF';
                 }
             } catch (e) {
-                showMessage('❌ Network error. Please try again.', 'error');
+                showMessage('❌ Network error.', 'error');
                 btn.disabled = false;
-                btn.textContent = `🚀 Upgrade to ${selectedPlan.charAt(0) + selectedPlan.slice(1).toLowerCase()} — ${parseInt(selectedAmount).toLocaleString()} XAF`;
+                const planDisplay = selectedPlan.charAt(0) + selectedPlan.slice(1).toLowerCase();
+                btn.textContent = '🚀 Upgrade to ' + planDisplay + ' — ' + parseInt(selectedAmount).toLocaleString() + ' XAF';
             }
         }
         
@@ -233,7 +286,6 @@
             el.className = 'message ' + type;
         }
         
-        // Initial render
         renderActionButton();
     </script>
 </body>

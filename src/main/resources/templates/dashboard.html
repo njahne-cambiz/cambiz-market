@@ -3,316 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CamBiz Market | Dashboard</title>
+    <title>Dashboard | CamBiz Market</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .header {
-            background: white;
-            border-radius: 15px;
-            padding: 20px 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo h1 {
-            color: #667eea;
-            font-size: 28px;
-        }
-        .logo span {
-            color: #764ba2;
-            font-size: 14px;
-        }
-        .status-badge {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .stat-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-        .stat-value {
-            font-size: 36px;
-            font-weight: bold;
-            color: #333;
-        }
-        .stat-label {
-            color: #666;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        .main-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            margin: 5px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #333;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
-        .endpoint-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .endpoint-card {
-            background: #f9fafb;
-            border-radius: 10px;
-            padding: 15px;
-        }
-        .method {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .get { background: #10b981; color: white; }
-        .post { background: #3b82f6; color: white; }
-        .put { background: #f59e0b; color: white; }
-        .delete { background: #ef4444; color: white; }
-        .endpoint-path {
-            font-family: monospace;
-            font-size: 13px;
-            margin-bottom: 5px;
-        }
-        .footer {
-            text-align: center;
-            color: white;
-            margin-top: 30px;
-            opacity: 0.8;
-        }
-        .link-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .link-item {
-            background: #f3f4f6;
-            padding: 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            color: #667eea;
-        }
-        .link-item:hover {
-            background: #e5e7eb;
-        }
-        @media (max-width: 768px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-            .endpoint-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f5f6fa; min-height: 100vh; }
+        
+        .header { background: linear-gradient(135deg, #2d3436, #636e72); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
+        .header nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .header nav a { color: white; text-decoration: none; font-size: 0.95rem; }
+        .header nav a:hover { opacity: 0.8; }
+        
+        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+        
+        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; }
+        .welcome-banner h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .welcome-banner p { opacity: 0.9; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+        .stat-card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .stat-card .value { font-size: 1.8rem; font-weight: bold; color: #2d3436; }
+        .stat-card .label { color: #636e72; font-size: 0.85rem; }
+        
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .action-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; text-decoration: none; color: #2d3436; transition: transform 0.2s; cursor: pointer; border: none; display: block; }
+        .action-card:hover { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+        .action-card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .action-card .title { font-weight: bold; font-size: 0.95rem; }
+        
+        .login-prompt { background: white; border-radius: 16px; padding: 3rem 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .login-prompt h2 { margin-bottom: 1rem; color: #2d3436; }
+        .login-prompt p { color: #636e72; margin-bottom: 1.5rem; }
+        
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; }
+        .btn-primary { background: #0984e3; color: white; }
+        .btn-outline { background: white; color: #0984e3; border: 2px solid #0984e3; }
+        .btn-whatsapp { background: #25D366; color: white; }
+        
+        .login-form { display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; }
+        .login-form input { display: block; width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #dfe6e9; border-radius: 8px; font-size: 14px; }
+        .login-form button { width: 100%; }
+        
+        .message { text-align: center; margin-top: 1rem; padding: 1rem; border-radius: 10px; display: none; }
+        .message.success { background: #d4edda; color: #155724; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; display: block; }
+        
+        #publicDashboard .section-title { color: #2d3436; margin: 2rem 0 1rem; font-size: 1.3rem; }
+        #publicDashboard .api-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        #publicDashboard .api-card { background: white; border-radius: 10px; padding: 1.2rem; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        #publicDashboard .method-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .get { background: #00b894; color: white; }
+        .post { background: #0984e3; color: white; }
     </style>
 </head>
 <body>
+    <header class="header">
+        <a href="/store" class="logo">🛒 CamBiz Market</a>
+        <nav>
+            <a href="/store">📦 Store</a>
+            <a href="/wishlist">❤️ Wishlist</a>
+            <a href="/dashboard">👤 Dashboard</a>
+            <a href="/premium">🏆 Premium</a>
+            <a href="#" id="logoutLink" style="display:none; color:#ff7675;" onclick="logout()">🚪 Logout</a>
+        </nav>
+    </header>
+
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">
-                <h1>🛒 CamBiz Market</h1>
-                <span>v1.0.0 | Cameroon's Premier Marketplace</span>
+        <!-- LOGGED IN DASHBOARD -->
+        <div id="userDashboard" style="display:none;">
+            <div class="welcome-banner">
+                <h1>👋 Welcome back, <span id="userName">User</span>!</h1>
+                <p><span id="userBadge"></span> | <span id="userEmail"></span></p>
             </div>
-            <div>
-                <span class="status-badge">🟢 System Online</span>
-            </div>
+            
+            <div class="stats-grid" id="userStats"></div>
+            
+            <h3 style="margin-bottom:1rem; color:#2d3436;">🚀 Quick Actions</h3>
+            <div class="quick-actions" id="userActions"></div>
         </div>
-
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">📦</div>
-                <div class="stat-value" id="productCount">77</div>
-                <div class="stat-label">Total Products</div>
+        
+        <!-- PUBLIC LANDING DASHBOARD -->
+        <div id="publicDashboard">
+            <div class="welcome-banner">
+                <h1>🛒 Welcome to CamBiz Market</h1>
+                <p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-value" id="userCount">2</div>
-                <div class="stat-label">Registered Users</div>
+            
+            <div class="stats-grid">
+                <div class="stat-card"><div class="icon">📦</div><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
+                <div class="stat-card"><div class="icon">👥</div><div class="value">2</div><div class="label">Users</div></div>
+                <div class="stat-card"><div class="icon">🛒</div><div class="value">1</div><div class="label">Orders</div></div>
+                <div class="stat-card"><div class="icon">💰</div><div class="value">650K</div><div class="label">Revenue (XAF)</div></div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">🛒</div>
-                <div class="stat-value" id="orderCount">1</div>
-                <div class="stat-label">Total Orders</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💰</div>
-                <div class="stat-value" id="revenueCount">650,000</div>
-                <div class="stat-label">Revenue (XAF)</div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-grid">
-            <div class="card">
-                <div class="card-title">🚀 Quick Actions</div>
-                <div>
-                    <a href="/api/products" target="_blank" class="btn btn-primary">📦 View Products API</a>
-                    <a href="/api/payments/methods" target="_blank" class="btn btn-secondary">💳 Payment Methods</a>
-                    <a href="/actuator/health" target="_blank" class="btn btn-secondary">❤️ Health Check</a>
-                </div>
+            
+            <div class="login-prompt">
+                <h2>🔐 Login to Your Dashboard</h2>
+                <p>Access your orders, products, wishlist, and more.</p>
+                <button class="btn btn-primary" onclick="showLogin()">🔑 Login Now</button>
+                <a href="/store" class="btn btn-outline">🛒 Browse Store</a>
                 
-                <div class="card-title" style="margin-top: 30px;">📋 API Endpoints</div>
-                <div class="endpoint-grid">
-                    <div class="endpoint-card">
-                        <span class="method get">GET</span>
-                        <div class="endpoint-path">/api/products</div>
-                        <div style="font-size: 12px; color: #666;">Get all products</div>
-                    </div>
-                    <div class="endpoint-card">
-                        <span class="method post">POST</span>
-                        <div class="endpoint-path">/api/auth/login</div>
-                        <div style="font-size: 12px; color: #666;">User authentication</div>
-                    </div>
-                    <div class="endpoint-card">
-                        <span class="method post">POST</span>
-                        <div class="endpoint-path">/api/cart/add/{id}</div>
-                        <div style="font-size: 12px; color: #666;">Add to cart</div>
-                    </div>
-                    <div class="endpoint-card">
-                        <span class="method post">POST</span>
-                        <div class="endpoint-path">/api/orders/checkout</div>
-                        <div style="font-size: 12px; color: #666;">Place order</div>
-                    </div>
-                    <div class="endpoint-card">
-                        <span class="method post">POST</span>
-                        <div class="endpoint-path">/api/makola/offer</div>
-                        <div style="font-size: 12px; color: #666;">AI Price Negotiation</div>
-                    </div>
-                    <div class="endpoint-card">
-                        <span class="method post">POST</span>
-                        <div class="endpoint-path">/api/payments/initiate</div>
-                        <div style="font-size: 12px; color: #666;">Process payment</div>
-                    </div>
+                <div class="login-form" id="loginForm">
+                    <input type="email" id="loginEmail" placeholder="Email (e.g. buyer@cambiz.cm)">
+                    <input type="password" id="loginPassword" placeholder="Password (e.g. Buyer@123)">
+                    <button class="btn btn-primary" onclick="doLogin()">Login</button>
+                    <p id="loginError" style="color:#d63031; margin-top:8px; display:none;"></p>
+                    <p style="margin-top:8px; font-size:0.8rem; color:#636e72;">Test: buyer@cambiz.cm / Buyer@123</p>
                 </div>
             </div>
-
-            <div class="card">
-                <div class="card-title">🔗 Quick Links</div>
-                <div class="link-list">
-                    <a href="/api/products" class="link-item">📦 GET /api/products - View all products</a>
-                    <a href="/api/products/1" class="link-item">📱 GET /api/products/1 - View iPhone</a>
-                    <a href="/api/payments/methods" class="link-item">💳 GET /api/payments/methods - Payment options</a>
-                    <a href="/api/dashboard/buyer" class="link-item">🛒 GET /api/dashboard/buyer - Buyer dashboard (needs token)</a>
-                    <a href="/api/dashboard/seller" class="link-item">🏪 GET /api/dashboard/seller - Seller dashboard (needs token)</a>
-                </div>
-                
-                <div class="card-title" style="margin-top: 30px;">🔐 Test Credentials</div>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="padding: 8px 0; color: #666;">Buyer Email:</td>
-                        <td style="padding: 8px 0;"><code>buyer@cambiz.cm</code></td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px 0; color: #666;">Buyer Password:</td>
-                        <td style="padding: 8px 0;"><code>Buyer@123</code></td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px 0; color: #666;">Seller Email:</td>
-                        <td style="padding: 8px 0;"><code>seller@cambiz.cm</code></td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px 0; color: #666;">Seller Password:</td>
-                        <td style="padding: 8px 0;"><code>Seller@123</code></td>
-                    </tr>
-                </table>
-
-                <div class="card-title" style="margin-top: 30px;">📞 Support</div>
-                <p style="color: #666; line-height: 1.6;">
-                    📧 Email: support@cambiz.cm<br>
-                    📱 Phone: +237 670 000 000<br>
-                    🌐 Website: www.cambiz.cm
-                </p>
+            
+            <h3 class="section-title">📋 API Endpoints</h3>
+            <div class="api-grid">
+                <div class="api-card"><span class="method-badge get">GET</span><div style="font-family:monospace;">/api/products</div><div style="font-size:0.8rem;color:#636e72;">Get all products</div></div>
+                <div class="api-card"><span class="method-badge post">POST</span><div style="font-family:monospace;">/api/auth/login</div><div style="font-size:0.8rem;color:#636e72;">User authentication</div></div>
+                <div class="api-card"><span class="method-badge post">POST</span><div style="font-family:monospace;">/api/cart/add/{id}</div><div style="font-size:0.8rem;color:#636e72;">Add to cart</div></div>
+                <div class="api-card"><span class="method-badge post">POST</span><div style="font-family:monospace;">/api/orders/checkout</div><div style="font-size:0.8rem;color:#636e72;">Place order</div></div>
+                <div class="api-card"><span class="method-badge post">POST</span><div style="font-family:monospace;">/api/makola/offer</div><div style="font-size:0.8rem;color:#636e72;">AI Price Negotiation</div></div>
+                <div class="api-card"><span class="method-badge post">POST</span><div style="font-family:monospace;">/api/payments/initiate</div><div style="font-size:0.8rem;color:#636e72;">Process payment</div></div>
             </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>© 2026 CamBiz Market - Cameroon's Premier E-Commerce Platform</p>
-            <p style="margin-top: 10px; font-size: 12px;">Built with ❤️ by Musa | Makola Mode | MTN & Orange Money Ready</p>
         </div>
     </div>
 
     <script>
-        async function fetchStats() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
+        async function init() {
+            // Load public product count
             try {
-                // Fetch with large page size to get accurate count
-                const res = await fetch('/api/products?page=0&size=100');
+                const res = await fetch('/api/products?page=0&size=200');
                 const data = await res.json();
                 if (data.data) {
-                    document.getElementById('productCount').textContent = data.data.length;
+                    document.getElementById('pubProductCount').textContent = data.data.length;
                 }
-            } catch (e) {
-                console.log('Using default stats');
+            } catch(e) {}
+            
+            if (token) {
+                await loadUserDashboard();
             }
         }
-        fetchStats();
+        
+        async function loadUserDashboard() {
+            document.getElementById('publicDashboard').style.display = 'none';
+            document.getElementById('userDashboard').style.display = 'block';
+            document.getElementById('logoutLink').style.display = 'inline';
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'buyer@cambiz.cm', password: 'Buyer@123' })
+                });
+                // We already have a token, so try to decode user info from it
+                // For now, show basic info
+                document.getElementById('userName').textContent = 'User';
+                document.getElementById('userEmail').textContent = 'Logged in';
+                document.getElementById('userBadge').textContent = '🟢 Online';
+                
+                document.getElementById('userStats').innerHTML = `
+                    <div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist Items</div></div>
+                    <div class="stat-card"><div class="icon">🛒</div><div class="value" id="myOrderCount">-</div><div class="label">My Orders</div></div>
+                `;
+                
+                document.getElementById('userActions').innerHTML = `
+                    <a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div></a>
+                    <a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">My Wishlist</div></a>
+                    <a href="/orders" class="action-card"><div class="icon">📦</div><div class="title">My Orders</div></a>
+                    <a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>
+                `;
+                
+                // Load wishlist count
+                try {
+                    const wRes = await fetch('/api/wishlist/count', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const wData = await wRes.json();
+                    if (wData.success) document.getElementById('wishlistCount').textContent = wData.count;
+                } catch(e) { document.getElementById('wishlistCount').textContent = '0'; }
+                
+                // Load order count
+                try {
+                    const oRes = await fetch('/api/orders/my-orders', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const oData = await oRes.json();
+                    if (oData.success && oData.data) document.getElementById('myOrderCount').textContent = oData.data.length;
+                } catch(e) { document.getElementById('myOrderCount').textContent = '0'; }
+                
+            } catch(e) {
+                console.log('Could not load user details');
+            }
+        }
+        
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+        }
+        
+        async function doLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (data.success && data.data && data.data.token) {
+                    localStorage.setItem('token', data.data.token);
+                    errorEl.style.display = 'none';
+                    document.getElementById('loginForm').style.display = 'none';
+                    location.reload();
+                } else {
+                    errorEl.textContent = data.message || 'Login failed';
+                    errorEl.style.display = 'block';
+                }
+            } catch(e) {
+                errorEl.textContent = 'Network error';
+                errorEl.style.display = 'block';
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            location.href = '/dashboard';
+        }
+        
+        init();
     </script>
 </body>
 </html>
