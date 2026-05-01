@@ -1,5 +1,24 @@
 package com.cambiz.market.controller;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.cambiz.market.dto.ApiResponse;
 import com.cambiz.market.dto.CheckoutRequest;
 import com.cambiz.market.dto.OrderResponse;
@@ -8,25 +27,25 @@ import com.cambiz.market.model.TrackingEvent;
 import com.cambiz.market.service.OrderService;
 import com.cambiz.market.service.OrderTrackingService;
 import com.cambiz.market.service.UserService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/orders")
-@RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")
 public class OrderController {
     
     private final OrderService orderService;
     private final UserService userService;
-    private final OrderTrackingService trackingService;
+    
+    @Autowired(required = false)
+    private OrderTrackingService trackingService;
+    
+    public OrderController(OrderService orderService, UserService userService) {
+        this.orderService = orderService;
+        this.userService = userService;
+    }
     
     @PostMapping("/checkout")
     public ResponseEntity<ApiResponse> checkout(@RequestBody CheckoutRequest request) {
@@ -62,13 +81,16 @@ public class OrderController {
         }
     }
     
-    // ========== ORDER TRACKING (separate path to avoid conflicts) ==========
+    // ========== ORDER TRACKING ==========
     
     @PutMapping("/tracking/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(
             @PathVariable Long orderId,
             @RequestParam String status,
             @RequestParam(required = false, defaultValue = "") String note) {
+        if (trackingService == null) {
+            return ResponseEntity.status(503).body(Map.of("success", false, "message", "Tracking service unavailable"));
+        }
         try {
             Long userId = getCurrentUserId();
             OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
@@ -90,20 +112,17 @@ public class OrderController {
             
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            Map<String, Object> response = new LinkedHashMap<>();
-            response.put("success", false);
-            response.put("message", "Invalid status. Values: " + Arrays.toString(OrderStatus.values()));
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid status"));
         } catch (Exception e) {
-            Map<String, Object> response = new LinkedHashMap<>();
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
     
     @GetMapping("/tracking/{orderId}")
     public ResponseEntity<?> getOrderTracking(@PathVariable Long orderId) {
+        if (trackingService == null) {
+            return ResponseEntity.status(503).body(Map.of("success", false, "message", "Tracking service unavailable"));
+        }
         try {
             List<TrackingEvent> history = trackingService.getTrackingHistory(orderId);
             
@@ -124,10 +143,7 @@ public class OrderController {
             response.put("count", timeline.size());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> response = new LinkedHashMap<>();
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
     
