@@ -38,14 +38,12 @@
         .review-item { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
         .loading { text-align: center; padding: 60px; font-size: 18px; color: #666; }
         .error { text-align: center; padding: 60px; color: #ff6b6b; font-size: 18px; }
-        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
         .modal-box { background: white; border-radius: 16px; padding: 2rem; max-width: 450px; width: 90%; text-align: center; }
         .modal-box h2 { color: #2d3436; margin-bottom: 0.5rem; }
         .modal-box p { color: #636e72; margin: 1rem 0; }
         .modal-option { display: block; width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; font-size: 14px; }
         .modal-cancel { padding: 10px 20px; background: #b2bec3; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        
         @media (max-width: 600px) {
             .product-name { font-size: 22px; }
             .product-price { font-size: 24px; }
@@ -66,7 +64,6 @@
         </div>
     </div>
 
-    <!-- Feature Modal -->
     <div class="modal-overlay" id="featureModal">
         <div class="modal-box">
             <h2>⭐ Feature Your Product</h2>
@@ -84,7 +81,13 @@
             'Smartphones & Tablets': '📱', 'Laptops & Computers': '💻',
             'Electronics & Audio': '🎧', 'Home Appliances': '🏠',
             'Fashion & Clothing': '👗', 'Food & Essentials': '🍚',
-            'Transportation': '🏍️', 'Accessories': '⌚'
+            'Transportation': '🏍️', 'Accessories': '⌚',
+            'Sports and Fitness': '⚽', 'Books and Stationery': '📚',
+            'Jewelry and Watches': '💍', 'Toys and Games': '🎮',
+            'Pet Supplies': '🐾', 'Beauty and Personal Care': '💄',
+            'Baby and Kids': '👶', 'Health and Medical': '🏥',
+            'Agriculture and Farming': '🌾', 'Building and Construction': '🏗️',
+            'Auto and Spare Parts': '🔧', 'Services and Repairs': '🛠️'
         };
         
         let currentFeatureProductId = null;
@@ -92,16 +95,10 @@
         async function loadProduct() {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
-            
-            if (!productId) {
-                document.getElementById('productDetail').innerHTML = '<div class="error">No product specified</div>';
-                return;
-            }
-
+            if (!productId) { document.getElementById('productDetail').innerHTML = '<div class="error">No product specified</div>'; return; }
             try {
                 const res = await fetch(`/api/products/${productId}`);
                 const data = await res.json();
-                
                 if (data.success && data.data) {
                     const p = data.data;
                     const emoji = categoryEmojis[p.categoryName] || '📦';
@@ -116,7 +113,6 @@
                             <div class="product-category">${p.categoryName || 'General'}</div>
                             <div class="product-name">${p.name}</div>
                             <div class="product-description">${p.description || 'No description available.'}</div>
-                            
                             <div class="price-section">
                                 <div class="product-price">
                                     ${hasDiscount ? `<span class="original">${p.price.toLocaleString()} XAF</span>` : ''}
@@ -126,13 +122,7 @@
                                 <div class="product-stock">✅ ${p.stockQuantity > 0 ? 'In Stock' : 'Out of Stock'} (${p.stockQuantity} available)</div>
                                 <div class="product-condition">🏷️ Condition: ${p.condition || 'NEW'}</div>
                             </div>
-                            
-                            ${p.sellerName ? `
-                            <div class="seller-info">
-                                <span class="seller-name">🏪 Seller: ${p.sellerName}</span>
-                                ${p.sellerBusinessName ? `<br>${p.sellerBusinessName}` : ''}
-                            </div>` : ''}
-                            
+                            ${p.sellerName ? `<div class="seller-info"><span class="seller-name">🏪 Seller: ${p.sellerName}</span>${p.sellerBusinessName ? `<br>${p.sellerBusinessName}` : ''}</div>` : ''}
                             <div class="action-buttons">
                                 <button class="btn btn-cart" onclick="addToCart(${p.id})">🛒 Add to Cart</button>
                                 <button class="btn btn-buy" onclick="buyNow(${p.id})">⚡ Buy Now</button>
@@ -141,22 +131,12 @@
                                 <button class="btn btn-upload" onclick="window.location.href='/upload-images'">📷 Add Images</button>
                                 <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp">📱 Share on WhatsApp</a>
                             </div>
-                            
                             <div class="review-section">
                                 <h3 style="margin-bottom:10px;">⭐ Reviews</h3>
                                 <div id="reviews-${p.id}">Loading reviews...</div>
                                 <div style="margin-top:15px; padding:15px; background:#f8f9fa; border-radius:10px;">
                                     <h4 style="margin-bottom:10px;">Write a Review</h4>
-                                    <div style="margin-bottom:10px;">
-                                        <span>Rating: </span>
-                                        <select id="reviewRating-${p.id}" style="padding:5px; border-radius:5px;">
-                                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
-                                            <option value="4">⭐⭐⭐⭐ (4)</option>
-                                            <option value="3">⭐⭐⭐ (3)</option>
-                                            <option value="2">⭐⭐ (2)</option>
-                                            <option value="1">⭐ (1)</option>
-                                        </select>
-                                    </div>
+                                    <div style="margin-bottom:10px;"><span>Rating: </span><select id="reviewRating-${p.id}" style="padding:5px; border-radius:5px;"><option value="5">⭐⭐⭐⭐⭐ (5)</option><option value="4">⭐⭐⭐⭐ (4)</option><option value="3">⭐⭐⭐ (3)</option><option value="2">⭐⭐ (2)</option><option value="1">⭐ (1)</option></select></div>
                                     <textarea id="reviewComment-${p.id}" placeholder="Write your review..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #dfe6e9; margin-bottom:10px; min-height:60px;"></textarea>
                                     <button onclick="submitReview(${p.id})" style="padding:10px 20px; background:#0984e3; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Submit Review</button>
                                     <p id="reviewMsg-${p.id}" style="margin-top:5px;"></p>
@@ -164,106 +144,64 @@
                             </div>
                         </div>
                     `;
-                    
                     setTimeout(function() { loadReviews(p.id); }, 300);
-                } else {
-                    document.getElementById('productDetail').innerHTML = '<div class="error">Product not found</div>';
-                }
-            } catch (e) {
-                document.getElementById('productDetail').innerHTML = '<div class="error">Failed to load product</div>';
-            }
+                } else { document.getElementById('productDetail').innerHTML = '<div class="error">Product not found</div>'; }
+            } catch (e) { document.getElementById('productDetail').innerHTML = '<div class="error">Failed to load product</div>'; }
         }
 
-        function getToken() {
-            return localStorage.getItem('token') || sessionStorage.getItem('token');
-        }
+        function getToken() { return localStorage.getItem('token') || sessionStorage.getItem('token'); }
 
         async function addToCart(id) {
-            var token = getToken();
-            if (!token) { alert('Please login first.'); return; }
-            try {
-                var res = await fetch(`/api/cart/add/${id}?quantity=1`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-                var d = await res.json();
-                alert(d.success ? '✅ Added to cart!' : (d.message || 'Failed'));
-            } catch (e) { alert('Failed to add to cart.'); }
+            var token = getToken(); if (!token) { alert('Please login first.'); return; }
+            try { var res = await fetch(`/api/cart/add/${id}?quantity=1`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }); var d = await res.json(); alert(d.success ? '✅ Added to cart!' : (d.message || 'Failed')); } catch (e) { alert('Failed to add to cart.'); }
         }
 
         async function buyNow(id) {
-            var token = getToken();
-            if (!token) { alert('Please login first.'); return; }
+            var token = getToken(); if (!token) { alert('Please login first.'); return; }
             try {
                 await fetch(`/api/cart/add/${id}?quantity=1`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-                var res = await fetch('/api/orders/checkout', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ paymentMethod: 'MTN_MONEY' })
-                });
+                var res = await fetch('/api/orders/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ paymentMethod: 'MTN_MONEY' }) });
                 var data = await res.json();
-                if (data.success) {
-                    alert('✅ Order placed! Order #' + data.data.orderNumber);
-                    window.location.href = '/order-tracking?id=' + data.data.orderId;
-                } else { alert('❌ ' + (data.message || 'Checkout failed')); }
+                if (data.success) { alert('✅ Order placed! Order #' + data.data.orderNumber); window.location.href = '/order-tracking?id=' + data.data.orderId; }
+                else { alert('❌ ' + (data.message || 'Checkout failed')); }
             } catch (e) { alert('Failed to process.'); }
         }
 
         async function makeOffer(id) {
-            var token = getToken();
-            if (!token) { alert('Please login first.'); return; }
+            var token = getToken(); if (!token) { alert('Please login first.'); return; }
             var offer = prompt("Enter your offer amount (XAF):");
             if (offer && !isNaN(offer) && parseFloat(offer) > 0) {
                 try {
-                    var res = await fetch('/api/makola/offer', {
-                        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ productId: id, offerAmount: parseFloat(offer), message: "Offer from product page" })
-                    });
-                    var d = await res.json();
-                    alert(d.message || '✅ Offer submitted!');
+                    var res = await fetch('/api/makola/offer', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ productId: id, offerAmount: parseFloat(offer), message: "Offer from product page" }) });
+                    var d = await res.json(); alert(d.message || '✅ Offer submitted!');
                 } catch (e) { alert('Failed to submit offer.'); }
             } else { alert('Please enter a valid amount.'); }
         }
 
-        function showFeatureModal(productId) {
-            currentFeatureProductId = productId;
-            document.getElementById('featureModal').style.display = 'flex';
-        }
-        function closeFeatureModal() {
-            document.getElementById('featureModal').style.display = 'none';
-            document.getElementById('featureMsg').textContent = '';
-        }
+        function showFeatureModal(productId) { currentFeatureProductId = productId; document.getElementById('featureModal').style.display = 'flex'; }
+        function closeFeatureModal() { document.getElementById('featureModal').style.display = 'none'; document.getElementById('featureMsg').textContent = ''; }
         async function featureProduct(duration) {
-            var token = getToken();
-            if (!token) { document.getElementById('featureMsg').textContent = '❌ Please log in first.'; return; }
+            var token = getToken(); if (!token) { document.getElementById('featureMsg').textContent = '❌ Please log in first.'; return; }
             document.getElementById('featureMsg').textContent = '⏳ Processing...';
             try {
-                var res = await fetch('/api/featured/boost', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ productId: currentFeatureProductId, sellerId: 1, duration: duration })
-                });
+                var res = await fetch('/api/featured/boost', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ productId: currentFeatureProductId, sellerId: 1, duration: duration }) });
                 var data = await res.json();
-                if (data.success) {
-                    document.getElementById('featureMsg').textContent = '✅ Featured! Pay via ' + data.data.ussdCode;
-                    setTimeout(closeFeatureModal, 2500);
-                } else { document.getElementById('featureMsg').textContent = '❌ ' + (data.message || 'Failed.'); }
+                if (data.success) { document.getElementById('featureMsg').textContent = '✅ Featured! Pay via ' + data.data.ussdCode; setTimeout(closeFeatureModal, 2500); }
+                else { document.getElementById('featureMsg').textContent = '❌ ' + (data.message || 'Failed.'); }
             } catch(e) { document.getElementById('featureMsg').textContent = '❌ Network error.'; }
         }
 
         async function submitReview(productId) {
-            var token = getToken();
-            if (!token) { alert('Please login to write a review.'); return; }
+            var token = getToken(); if (!token) { alert('Please login to write a review.'); return; }
             var rating = document.getElementById('reviewRating-' + productId).value;
             var comment = document.getElementById('reviewComment-' + productId).value;
             var msg = document.getElementById('reviewMsg-' + productId);
             msg.textContent = 'Submitting...';
             try {
-                var res = await fetch('/api/reviews', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ productId: productId, rating: parseInt(rating), comment: comment })
-                });
+                var res = await fetch('/api/reviews', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ productId: productId, rating: parseInt(rating), comment: comment }) });
                 var data = await res.json();
-                if (data.success) {
-                    msg.textContent = '✅ Review submitted!';
-                    document.getElementById('reviewComment-' + productId).value = '';
-                    loadReviews(productId);
-                } else { msg.textContent = data.message || 'Failed to submit review'; }
+                if (data.success) { msg.textContent = '✅ Review submitted!'; document.getElementById('reviewComment-' + productId).value = ''; loadReviews(productId); }
+                else { msg.textContent = data.message || 'Failed to submit review'; }
             } catch(e) { msg.textContent = 'Network error'; }
         }
 
@@ -278,13 +216,9 @@
                         var r = data.data.reviews[i];
                         html += '<div class="review-item"><strong>' + '⭐'.repeat(r.rating) + '</strong> ' + (r.comment || '') + ' <small style="color:#999;">- ' + r.userName + '</small></div>';
                     }
-                    if (data.data.stats) {
-                        html += '<div style="margin-top:5px; color:#666; font-size:0.85rem;">' + data.data.stats.averageRating + ' avg (' + data.data.stats.totalReviews + ' reviews)</div>';
-                    }
+                    if (data.data.stats) { html += '<div style="margin-top:5px; color:#666; font-size:0.85rem;">' + data.data.stats.averageRating + ' avg (' + data.data.stats.totalReviews + ' reviews)</div>'; }
                     container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<p style="color:#999;">No reviews yet. Be the first!</p>';
-                }
+                } else { container.innerHTML = '<p style="color:#999;">No reviews yet. Be the first!</p>'; }
             } catch(e) {}
         }
 
