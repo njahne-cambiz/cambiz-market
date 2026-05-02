@@ -44,244 +44,41 @@
         .product-reviews { color: #f59e0b; font-size: 12px; margin-top: 5px; }
         .product-reviews span { color: #666; }
         .whatsapp-share { color: #25D366; text-decoration: none; font-size: 11px; display: block; margin-top: 5px; font-weight: 500; }
-        .whatsapp-share:hover { text-decoration: underline; }
-        .wishlist-btn { background: white; border: none; font-size: 1.5rem; cursor: pointer; position: absolute; top: 10px; right: 10px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .wishlist-btn { background: white; border: none; font-size: 1.5rem; cursor: pointer; position: absolute; top: 10px; right: 10px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         .wishlist-btn:hover { transform: scale(1.2); }
-        .wishlist-btn.wishlisted { animation: heartPop 0.3s ease; }
-        @keyframes heartPop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
         .no-results { text-align: center; padding: 60px; color: #999; }
-        .no-results .emoji { font-size: 60px; }
         .footer { background: #333; color: white; text-align: center; padding: 30px; margin-top: 50px; font-size: 14px; }
-        @media (max-width: 768px) {
-            .navbar { flex-direction: column; text-align: center; }
-            .search-bar input { width: 100%; }
-            .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-        }
+        @media (max-width: 768px) { .navbar { flex-direction: column; } .search-bar input { width: 100%; } .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <h1>🛒 CamBiz Market</h1>
-        <span id="premiumBadge" class="premium-badge">🏆 PREMIUM</span>
-        <span style="font-size:12px;opacity:0.8;">Cameroon's #1 Marketplace</span>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="🔍 Search products..." onkeyup="if(event.key==='Enter')searchProducts()">
-            <button onclick="searchProducts()">Search</button>
-            <button onclick="clearSearch()" style="background:#666;">✕ Clear</button>
-        </div>
-    </div>
-
-    <div class="premium-banner">
-        🏆 <b>Become a Premium Seller!</b> Get verified badge, lower fees (4.5%), and more! 
-        <a href="/premium">Learn More →</a>
-    </div>
-
-    <div class="categories" id="categoryFilters">
-        <button class="cat-btn active" onclick="filterByCategory('all', this)">📦 All</button>
-    </div>
-
+    <div class="navbar"><h1>🛒 CamBiz Market</h1><span id="premiumBadge" class="premium-badge">🏆 PREMIUM</span><span style="font-size:12px;opacity:0.8;">Cameroon's #1 Marketplace</span><div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 Search..." onkeyup="if(event.key==='Enter')searchProducts()"><button onclick="searchProducts()">Search</button><button onclick="clearSearch()" style="background:#666;">✕</button></div></div>
+    <div class="premium-banner">🏆 <b>Become a Premium Seller!</b> Get verified badge, lower fees (4.5%), and more! <a href="/premium">Learn More →</a></div>
+    <div class="categories" id="categoryFilters"><button class="cat-btn active" onclick="filterByCategory('all', this)">📦 All</button></div>
     <div class="container">
-        <div class="featured-section" id="featuredSection" style="display:none;">
-            <h2>⭐ Featured Products</h2>
-            <div class="products-grid" id="featuredProducts"></div>
-        </div>
-
-        <div class="stats">
-            <div class="stat"><div class="value" id="totalCount">0</div><div class="label">Total Products</div></div>
-            <div class="stat"><div class="value" id="shownCount">0</div><div class="label">Showing</div></div>
-            <div class="stat"><div class="value" id="minPrice">0</div><div class="label">Min Price (XAF)</div></div>
-            <div class="stat"><div class="value" id="maxPrice">0</div><div class="label">Max Price (XAF)</div></div>
-        </div>
-        
+        <div class="featured-section" id="featuredSection" style="display:none;"><h2>⭐ Featured Products</h2><div class="products-grid" id="featuredProducts"></div></div>
+        <div class="stats"><div class="stat"><div class="value" id="totalCount">0</div><div class="label">Total Products</div></div><div class="stat"><div class="value" id="shownCount">0</div><div class="label">Showing</div></div><div class="stat"><div class="value" id="minPrice">0</div><div class="label">Min Price (XAF)</div></div><div class="stat"><div class="value" id="maxPrice">0</div><div class="label">Max Price (XAF)</div></div></div>
         <h2 style="margin-bottom:15px;">📦 All Products</h2>
-        <div class="products-grid" id="products">
-            <div class="no-results"><div class="emoji">⏳</div><p>Loading products...</p></div>
-        </div>
+        <div class="products-grid" id="products"><div class="no-results"><div class="emoji">⏳</div><p>Loading products...</p></div></div>
     </div>
-
-    <div class="footer">
-        <p>© 2026 CamBiz Market | Built with ❤️ by Musa</p>
-        <p style="margin-top:5px;">📧 support@cambiz.cm | 📱 +237 670 000 000</p>
-    </div>
+    <div class="footer"><p>© 2026 CamBiz Market | Built with ❤️ by Musa</p><p style="margin-top:5px;">📧 support@cambiz.cm | 📱 +237 670 000 000</p></div>
 
     <script>
-        let allProducts = [];
-        let currentFilter = 'all';
-
-        const categoryImages = {
-            'Smartphones & Tablets': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop',
-            'Laptops & Computers': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop',
-            'Electronics & Audio': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
-            'Home Appliances': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop',
-            'Fashion & Clothing': 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=300&fit=crop',
-            'Food & Essentials': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop',
-            'Transportation': 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400&h=300&fit=crop',
-            'Accessories': 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=400&h=300&fit=crop',
-            'Sports and Fitness': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=300&fit=crop',
-            'Books and Stationery': 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=300&fit=crop',
-            'Jewelry and Watches': 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=300&fit=crop',
-            'Toys and Games': 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400&h=300&fit=crop',
-            'Pet Supplies': 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400&h=300&fit=crop',
-            'Beauty and Personal Care': 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop',
-            'Baby and Kids': 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=300&fit=crop',
-            'Health and Medical': 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&h=300&fit=crop',
-            'Agriculture and Farming': 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop',
-            'Building and Construction': 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=400&h=300&fit=crop',
-            'Auto and Spare Parts': 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=400&h=300&fit=crop',
-            'Services and Repairs': 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&h=300&fit=crop'
-        };
-
-        const categoryEmojis = {
-            'Smartphones & Tablets': '📱', 'Laptops & Computers': '💻',
-            'Electronics & Audio': '🎧', 'Home Appliances': '🏠',
-            'Fashion & Clothing': '👗', 'Food & Essentials': '🍚',
-            'Transportation': '🏍️', 'Accessories': '⌚',
-            'Sports and Fitness': '⚽', 'Books and Stationery': '📚',
-            'Jewelry and Watches': '💍', 'Toys and Games': '🎮',
-            'Pet Supplies': '🐾', 'Beauty and Personal Care': '💄',
-            'Baby and Kids': '👶', 'Health and Medical': '🏥',
-            'Agriculture and Farming': '🌾', 'Building and Construction': '🏗️',
-            'Auto and Spare Parts': '🔧', 'Services and Repairs': '🛠️'
-        };
-
-        function getProductImage(product) {
-            if (product.imageUrls && product.imageUrls.length > 0) {
-                return '<img src="' + product.imageUrls[0] + '" alt="' + product.name + '" onerror="this.src=\'' + (categoryImages[product.categoryName] || '') + '\'">';
-            }
-            var fallback = categoryImages[product.categoryName];
-            if (fallback) {
-                return '<img src="' + fallback + '" alt="' + product.name + '" onerror="this.parentElement.innerHTML=\'<span class=emoji>' + (categoryEmojis[product.categoryName] || '📦') + '</span>\'">';
-            }
-            return '<span class="emoji">' + (categoryEmojis[product.categoryName] || '📦') + '</span>';
-        }
-
-        async function loadReviewsForProducts(products) {
-            for (let p of products) {
-                try {
-                    const res = await fetch(`/api/reviews/product/${p.id}`);
-                    const data = await res.json();
-                    if (data.success && data.data && data.data.stats) { p.averageRating = data.data.stats.averageRating; p.totalReviews = data.data.stats.totalReviews; }
-                } catch (e) { p.averageRating = 0; p.totalReviews = 0; }
-            }
-            displayProducts(products);
-        }
-
-        async function loadFeatured() {
-            try {
-                const res = await fetch('/api/featured');
-                const data = await res.json();
-                if (data.success && data.data && data.data.length > 0) {
-                    document.getElementById('featuredSection').style.display = 'block';
-                    document.getElementById('featuredProducts').innerHTML = data.data.map(p => `
-                        <div class="product-card featured" onclick="window.location.href='/product?id=${p.id}'">
-                            <div class="featured-badge">⭐ FEATURED</div>
-                            <button class="wishlist-btn" data-product-id="${p.id}" onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)" title="Add to Wishlist">🤍</button>
-                            <div class="product-image">${getProductImage(p)}</div>
-                            <div class="product-info">
-                                <div class="product-category">${p.categoryName || 'General'}</div>
-                                <div class="product-name">${p.name}</div>
-                                <div class="product-price">
-                                    ${p.discountedPrice ? `<span class="original">${p.price.toLocaleString()} XAF</span>` : ''}
-                                    ${(p.discountedPrice || p.price).toLocaleString()} XAF
-                                    ${p.discountedPrice ? `<span class="discount">-${Math.round((1 - p.discountedPrice/p.price) * 100)}%</span>` : ''}
-                                </div>
-                                <div class="product-stock">✅ ${p.stockQuantity} in stock</div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (e) {}
-        }
-
-        async function loadProducts() {
-            try {
-                const [prodRes, catRes] = await Promise.all([fetch('/api/products?page=0&size=200'), fetch('/api/categories')]);
-                const prodData = await prodRes.json();
-                const catData = await catRes.json();
-                if (prodData.success && prodData.data) { allProducts = prodData.data; updateStats(allProducts); loadReviewsForProducts(allProducts); }
-                if (catData.success && catData.data) {
-                    const container = document.getElementById('categoryFilters');
-                    catData.data.forEach(cat => {
-                        const btn = document.createElement('button');
-                        btn.className = 'cat-btn';
-                        btn.textContent = `${categoryEmojis[cat.nameEn] || '📁'} ${cat.nameEn}`;
-                        btn.onclick = () => filterByCategory(cat.id, btn);
-                        container.appendChild(btn);
-                    });
-                }
-            } catch (e) { document.getElementById('products').innerHTML = '<div class="no-results"><div class="emoji">❌</div><p>Failed to load products</p></div>'; }
-        }
-
-        function displayProducts(products) {
-            document.getElementById('shownCount').textContent = products.length;
-            if (products.length === 0) { document.getElementById('products').innerHTML = '<div class="no-results"><div class="emoji">🔍</div><p>No products found</p></div>'; return; }
-            document.getElementById('products').innerHTML = products.map(p => {
-                const stars = '⭐'.repeat(Math.round(p.averageRating || 0));
-                const reviewCount = p.totalReviews || 0;
-                const shareText = encodeURIComponent('🛍️ ' + p.name + ' - ' + ((p.discountedPrice || p.price).toLocaleString()) + ' XAF on CamBiz Market! https://cambiz-market.onrender.com/product?id=' + p.id);
-                return `
-                <div class="product-card" onclick="window.location.href='/product?id=${p.id}'">
-                    <button class="wishlist-btn" data-product-id="${p.id}" onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)" title="Add to Wishlist">🤍</button>
-                    <div class="product-image">${getProductImage(p)}</div>
-                    <div class="product-info">
-                        <div class="product-category">${p.categoryName || 'General'}</div>
-                        <div class="product-name">${p.name}</div>
-                        <div class="product-reviews">${stars} <span>(${reviewCount} reviews)</span></div>
-                        <div class="product-price">
-                            ${p.discountedPrice ? `<span class="original">${p.price.toLocaleString()} XAF</span>` : ''}
-                            ${(p.discountedPrice || p.price).toLocaleString()} XAF
-                            ${p.discountedPrice ? `<span class="discount">-${Math.round((1 - p.discountedPrice/p.price) * 100)}%</span>` : ''}
-                        </div>
-                        <div class="product-stock">✅ ${p.stockQuantity} in stock</div>
-                        <div class="product-condition">🏷️ ${p.condition || 'NEW'}</div>
-                        <a href="https://wa.me/?text=${shareText}" target="_blank" class="whatsapp-share" onclick="event.stopPropagation()">📱 Share on WhatsApp</a>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function updateStats(products) {
-            document.getElementById('totalCount').textContent = allProducts.length;
-            document.getElementById('shownCount').textContent = products.length;
-            const prices = products.map(p => p.discountedPrice || p.price).filter(p => p > 0);
-            if (prices.length > 0) { document.getElementById('minPrice').textContent = Math.min(...prices).toLocaleString(); document.getElementById('maxPrice').textContent = Math.max(...prices).toLocaleString(); }
-        }
-
-        function filterByCategory(categoryId, btn) {
-            currentFilter = categoryId;
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            let filtered = categoryId === 'all' ? allProducts : allProducts.filter(p => p.categoryId == categoryId);
-            updateStats(filtered); displayProducts(filtered);
-        }
-
-        function searchProducts() {
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
-            if (!query) { filterByCategory('all', document.querySelector('.cat-btn')); return; }
-            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query) || (p.description && p.description.toLowerCase().includes(query)) || (p.categoryName && p.categoryName.toLowerCase().includes(query)));
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            updateStats(filtered); displayProducts(filtered);
-        }
-
-        function clearSearch() { document.getElementById('searchInput').value = ''; filterByCategory('all', document.querySelector('.cat-btn')); }
-
-        async function toggleWishlist(productId, heartElement) {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            if (!token) { alert('Please login first.'); return; }
-            const isWishlisted = heartElement.classList.contains('wishlisted');
-            try {
-                const res = await fetch('/api/wishlist/' + (isWishlisted ? 'remove/' : 'add/') + productId, { method: isWishlisted ? 'DELETE' : 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await res.json();
-                if (data.success) { heartElement.classList.toggle('wishlisted'); heartElement.innerHTML = isWishlisted ? '🤍' : '❤️'; }
-            } catch(e) {}
-        }
-
-        (async function() {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            if (token) { try { const res = await fetch('/api/premium/my-status', { headers: { 'Authorization': `Bearer ${token}` } }); const data = await res.json(); if (data.success && data.data && data.data.isPremium) document.getElementById('premiumBadge').style.display = 'inline-block'; } catch(e) {} }
-        })();
-
-        loadFeatured(); loadProducts();
+        let allProducts=[],currentFilter='all';
+        const categoryImages={'Smartphones & Tablets':'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop','Laptops & Computers':'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop','Electronics & Audio':'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop','Home Appliances':'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop','Fashion & Clothing':'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=300&fit=crop','Food & Essentials':'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop','Transportation':'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400&h=300&fit=crop','Accessories':'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=400&h=300&fit=crop','Sports and Fitness':'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=300&fit=crop','Books and Stationery':'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=300&fit=crop','Jewelry and Watches':'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=300&fit=crop','Toys and Games':'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400&h=300&fit=crop','Pet Supplies':'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400&h=300&fit=crop','Beauty and Personal Care':'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop','Baby and Kids':'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=300&fit=crop','Health and Medical':'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&h=300&fit=crop','Agriculture and Farming':'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop','Building and Construction':'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=400&h=300&fit=crop','Auto and Spare Parts':'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=400&h=300&fit=crop','Services and Repairs':'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&h=300&fit=crop'};
+        const categoryEmojis={'Smartphones & Tablets':'📱','Laptops & Computers':'💻','Electronics & Audio':'🎧','Home Appliances':'🏠','Fashion & Clothing':'👗','Food & Essentials':'🍚','Transportation':'🏍️','Accessories':'⌚','Sports and Fitness':'⚽','Books and Stationery':'📚','Jewelry and Watches':'💍','Toys and Games':'🎮','Pet Supplies':'🐾','Beauty and Personal Care':'💄','Baby and Kids':'👶','Health and Medical':'🏥','Agriculture and Farming':'🌾','Building and Construction':'🏗️','Auto and Spare Parts':'🔧','Services and Repairs':'🛠️'};
+        function getProductImage(p){if(p.imageUrls&&p.imageUrls.length>0)return '<img src="'+p.imageUrls[0]+'" alt="'+p.name+'" onerror="this.src=\''+(categoryImages[p.categoryName]||'')+'\'">';var f=categoryImages[p.categoryName];if(f)return '<img src="'+f+'" alt="'+p.name+'" onerror="this.parentElement.innerHTML=\'<span class=emoji>'+(categoryEmojis[p.categoryName]||'📦')+'</span>\'">';return '<span class="emoji">'+(categoryEmojis[p.categoryName]||'📦')+'</span>';}
+        async function loadReviewsForProducts(products){for(let p of products){try{const r=await fetch('/api/reviews/product/'+p.id);const d=await r.json();if(d.success&&d.data&&d.data.stats){p.averageRating=d.data.stats.averageRating;p.totalReviews=d.data.stats.totalReviews;}}catch(e){p.averageRating=0;p.totalReviews=0;}}displayProducts(products);}
+        async function loadFeatured(){try{const r=await fetch('/api/featured');const d=await r.json();if(d.success&&d.data&&d.data.length>0){document.getElementById('featuredSection').style.display='block';document.getElementById('featuredProducts').innerHTML=d.data.map(p=>'<div class="product-card featured" onclick="window.location.href=\'/product?id='+p.id+'\'"><div class="featured-badge">⭐ FEATURED</div><button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist('+p.id+',this)">🤍</button><div class="product-image">'+getProductImage(p)+'</div><div class="product-info"><div class="product-category">'+(p.categoryName||'General')+'</div><div class="product-name">'+p.name+'</div><div class="product-price">'+(p.discountedPrice?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+(p.discountedPrice||p.price).toLocaleString()+' XAF'+(p.discountedPrice?'<span class="discount">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+p.stockQuantity+' in stock</div></div></div>').join('');}}catch(e){}}
+        async function loadProducts(){try{const[pr,cr]=await Promise.all([fetch('/api/products?page=0&size=200'),fetch('/api/categories')]);const pd=await pr.json();const cd=await cr.json();if(pd.success&&pd.data){allProducts=pd.data;updateStats(allProducts);loadReviewsForProducts(allProducts);}if(cd.success&&cd.data){const c=document.getElementById('categoryFilters');cd.data.forEach(cat=>{const b=document.createElement('button');b.className='cat-btn';b.textContent=(categoryEmojis[cat.nameEn]||'📁')+' '+cat.nameEn;b.onclick=()=>filterByCategory(cat.id,b);c.appendChild(b);});}}catch(e){document.getElementById('products').innerHTML='<div class="no-results"><div class="emoji">❌</div><p>Failed to load products</p></div>';}}
+        function displayProducts(products){document.getElementById('shownCount').textContent=products.length;if(products.length===0){document.getElementById('products').innerHTML='<div class="no-results"><div class="emoji">🔍</div><p>No products found</p></div>';return;}document.getElementById('products').innerHTML=products.map(p=>{const stars='⭐'.repeat(Math.round(p.averageRating||0));const rc=p.totalReviews||0;const st=encodeURIComponent('🛍️ '+p.name+' - '+((p.discountedPrice||p.price).toLocaleString())+' XAF on CamBiz Market! https://cambiz-market.onrender.com/product?id='+p.id);return '<div class="product-card" onclick="window.location.href=\'/product?id='+p.id+'\'"><button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist('+p.id+',this)">🤍</button><div class="product-image">'+getProductImage(p)+'</div><div class="product-info"><div class="product-category">'+(p.categoryName||'General')+'</div><div class="product-name">'+p.name+'</div><div class="product-reviews">'+stars+' <span>('+rc+' reviews)</span></div><div class="product-price">'+(p.discountedPrice?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+(p.discountedPrice||p.price).toLocaleString()+' XAF'+(p.discountedPrice?'<span class="discount">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+p.stockQuantity+' in stock</div><div class="product-condition">🏷️ '+(p.condition||'NEW')+'</div><a href="https://wa.me/?text='+st+'" target="_blank" class="whatsapp-share" onclick="event.stopPropagation()">📱 Share on WhatsApp</a></div></div>';}).join('');}
+        function updateStats(products){document.getElementById('totalCount').textContent=allProducts.length;document.getElementById('shownCount').textContent=products.length;const prices=products.map(p=>p.discountedPrice||p.price).filter(p=>p>0);if(prices.length>0){document.getElementById('minPrice').textContent=Math.min(...prices).toLocaleString();document.getElementById('maxPrice').textContent=Math.max(...prices).toLocaleString();}}
+        function filterByCategory(cid,btn){currentFilter=cid;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');let f=cid==='all'?allProducts:allProducts.filter(p=>p.categoryId==cid);updateStats(f);displayProducts(f);}
+        function searchProducts(){const q=document.getElementById('searchInput').value.toLowerCase().trim();if(!q){filterByCategory('all',document.querySelector('.cat-btn'));return;}const f=allProducts.filter(p=>p.name.toLowerCase().includes(q)||(p.description&&p.description.toLowerCase().includes(q))||(p.categoryName&&p.categoryName.toLowerCase().includes(q)));document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));updateStats(f);displayProducts(f);}
+        function clearSearch(){document.getElementById('searchInput').value='';filterByCategory('all',document.querySelector('.cat-btn'));}
+        async function toggleWishlist(pid,he){const token=localStorage.getItem('token')||sessionStorage.getItem('token');if(!token){alert('Please login first.');return;}const iw=he.classList.contains('wishlisted');try{const r=await fetch('/api/wishlist/'+(iw?'remove/':'add/')+pid,{method:iw?'DELETE':'POST',headers:{'Authorization':'Bearer '+token}});const d=await r.json();if(d.success){he.classList.toggle('wishlisted');he.innerHTML=iw?'🤍':'❤️';}}catch(e){}}
+        (async function(){const token=localStorage.getItem('token')||sessionStorage.getItem('token');if(token){try{const r=await fetch('/api/premium/my-status',{headers:{'Authorization':'Bearer '+token}});const d=await r.json();if(d.success&&d.data&&d.data.isPremium)document.getElementById('premiumBadge').style.display='inline-block';}catch(e){}}})();
+        loadFeatured();loadProducts();
     </script>
 </body>
 </html>

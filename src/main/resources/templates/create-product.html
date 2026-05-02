@@ -6,162 +6,86 @@
     <title>Create Product | CamBiz Market</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f5f6fa; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #2d3436, #636e72); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
-        .header nav a { color: white; text-decoration: none; margin-left: 1.5rem; }
-        .container { max-width: 650px; margin: 2rem auto; padding: 0 1.5rem; }
-        .back-btn { color: #0984e3; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; }
-        .card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .card h1 { color: #2d3436; margin-bottom: 1.5rem; }
+        body { background: #f0f2f5; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header nav a { color: #b2bec3; text-decoration: none; margin-left: 2rem; font-size: 0.9rem; font-weight: 500; }
+        .header nav a:hover { color: white; }
+        .container { max-width: 800px; margin: 2.5rem auto; padding: 0 1.5rem; }
+        .back-btn { color: #667eea; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; font-weight: 600; }
+        .card { background: white; border-radius: 20px; padding: 2.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+        .card h1 { color: #1a1a2e; margin-bottom: 0.3rem; font-size: 1.8rem; font-weight: 700; }
+        .card .subtitle { color: #636e72; margin-bottom: 2rem; font-size: 0.95rem; }
+        .section { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #eef0f2; }
+        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .section h2 { font-size: 1.15rem; color: #1a1a2e; margin-bottom: 1.2rem; font-weight: 700; }
         .form-group { margin-bottom: 1.2rem; }
-        .form-group label { display: block; margin-bottom: 0.3rem; color: #2d3436; font-weight: 600; font-size: 0.9rem; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 14px; }
-        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-group label { display: block; margin-bottom: 0.4rem; color: #2d3436; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 13px 16px; border: 2px solid #e8ecf1; border-radius: 12px; font-size: 14px; background: #fafbfc; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #667eea; background: white; }
+        .form-group textarea { min-height: 90px; resize: vertical; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .btn { padding: 14px 24px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; width: 100%; }
-        .btn-primary { background: #0984e3; color: white; }
-        .btn-primary:disabled { background: #b2bec3; cursor: not-allowed; }
-        .message { margin-top: 1rem; padding: 0.75rem; border-radius: 10px; display: none; text-align: center; }
+        .drop-zone { border: 3px dashed #d1d8e0; border-radius: 16px; padding: 2.5rem 2rem; text-align: center; cursor: pointer; background: #fafbfc; }
+        .drop-zone:hover { border-color: #667eea; background: #f0f3ff; }
+        .drop-zone .icon { font-size: 3rem; margin-bottom: 0.5rem; }
+        .drop-zone p { color: #636e72; font-size: 0.9rem; }
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-top: 1.5rem; }
+        .preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; border: 2px solid #e8ecf1; }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-item .remove { position: absolute; top: 6px; right: 6px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 13px; }
+        .btn { padding: 16px 24px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 16px; width: 100%; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102,126,234,0.4); }
+        .btn-primary:disabled { background: #b2bec3; cursor: not-allowed; transform: none; box-shadow: none; }
+        .message { margin-top: 1.2rem; padding: 1rem; border-radius: 12px; display: none; text-align: center; font-weight: 600; }
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
-        @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) { .card { padding: 1.5rem; } .form-row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <header class="header">
-        <a href="/store" class="logo">🛒 CamBiz Market</a>
-        <nav>
-            <a href="/store">📦 Products</a>
-            <a href="/dashboard">👤 Dashboard</a>
-        </nav>
-    </header>
-
+    <header class="header"><a href="/store" class="logo">🛒 CamBiz Market</a><nav><a href="/store">📦 Store</a><a href="/dashboard">👤 Dashboard</a></nav></header>
     <main class="container">
         <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
         <div class="card">
             <h1>📦 Create New Product</h1>
-            
-            <div class="form-group">
-                <label>Product Name *</label>
-                <input type="text" id="name" placeholder="e.g. Samsung Galaxy A54">
+            <p class="subtitle">Fill in product details and upload images in one step</p>
+            <div class="section">
+                <h2>📋 Product Details</h2>
+                <div class="form-group"><label>Product Name *</label><input type="text" id="name" placeholder="e.g. Samsung Galaxy A54"></div>
+                <div class="form-group"><label>Category *</label><select id="categoryId"><option value="">Loading...</option></select></div>
+                <div class="form-group"><label>Description</label><textarea id="description" placeholder="Describe your product..."></textarea></div>
+                <div class="form-row"><div class="form-group"><label>Price (XAF) *</label><input type="number" id="price" placeholder="0"></div><div class="form-group"><label>Discounted Price</label><input type="number" id="discountedPrice" placeholder="Optional"></div></div>
+                <div class="form-row"><div class="form-group"><label>Stock *</label><input type="number" id="quantity" value="1" min="1"></div><div class="form-group"><label>Condition *</label><select id="condition"><option value="NEW">NEW</option><option value="LIKE_NEW">LIKE NEW</option><option value="USED">USED</option><option value="REFURBISHED">REFURBISHED</option></select></div></div>
             </div>
-            
-            <div class="form-group">
-                <label>Category *</label>
-                <select id="categoryId"><option value="">Loading categories...</option></select>
+            <div class="section">
+                <h2>📷 Product Images</h2>
+                <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"><div class="icon">🖼️</div><p>Click or drag images here</p><p style="font-size:0.8rem;color:#b2bec3;">Max 8 images, 10MB each (optional)</p></div>
+                <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
+                <div class="preview-grid" id="previewGrid"></div>
             </div>
-            
-            <div class="form-group">
-                <label>Description</label>
-                <textarea id="description" placeholder="Describe your product..."></textarea>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Price (XAF) *</label>
-                    <input type="number" id="price" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>Discounted Price (XAF)</label>
-                    <input type="number" id="discountedPrice" placeholder="Optional">
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Stock Quantity *</label>
-                    <input type="number" id="quantity" value="1" min="1">
-                </div>
-                <div class="form-group">
-                    <label>Condition *</label>
-                    <select id="condition">
-                        <option value="NEW">NEW</option>
-                        <option value="LIKE_NEW">LIKE NEW</option>
-                        <option value="USED">USED</option>
-                        <option value="REFURBISHED">REFURBISHED</option>
-                    </select>
-                </div>
-            </div>
-            
             <button class="btn btn-primary" onclick="createProduct()">🚀 Create Product</button>
             <div id="message" class="message"></div>
         </div>
     </main>
-
     <script>
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (!token) { window.location.href = '/dashboard'; }
-        
-        async function loadCategories() {
-            try {
-                var res = await fetch('/api/categories');
-                var data = await res.json();
-                var select = document.getElementById('categoryId');
-                if (data.success && data.data) {
-                    select.innerHTML = '<option value="">-- Select category --</option>' +
-                        data.data.map(function(c) { return '<option value="' + c.id + '">' + c.nameEn + '</option>'; }).join('');
-                }
-            } catch(e) {}
+        var token=localStorage.getItem('token')||sessionStorage.getItem('token');var selectedFiles=[];if(!token){window.location.href='/dashboard';}
+        async function loadCategories(){try{var r=await fetch('/api/categories');var d=await r.json();var s=document.getElementById('categoryId');if(d.success&&d.data){s.innerHTML='<option value="">-- Select category --</option>'+d.data.map(function(c){return '<option value="'+c.id+'">'+c.nameEn+'</option>';}).join('');}}catch(e){}}
+        function handleFiles(f){selectedFiles=Array.from(f).slice(0,8);renderPreviews();}
+        function renderPreviews(){document.getElementById('previewGrid').innerHTML=selectedFiles.map(function(f,i){return '<div class="preview-item"><img src="'+URL.createObjectURL(f)+'"><button class="remove" onclick="removeFile('+i+')">✕</button></div>';}).join('');}
+        function removeFile(i){selectedFiles.splice(i,1);renderPreviews();}
+        var dz=document.getElementById('dropZone');dz.addEventListener('dragover',function(e){e.preventDefault();dz.style.borderColor='#667eea';});dz.addEventListener('dragleave',function(){dz.style.borderColor='#d1d8e0';});dz.addEventListener('drop',function(e){e.preventDefault();dz.style.borderColor='#d1d8e0';handleFiles(e.dataTransfer.files);});
+        async function createProduct(){
+            var n=document.getElementById('name').value.trim(),c=document.getElementById('categoryId').value,d=document.getElementById('description').value.trim(),p=document.getElementById('price').value,dp=document.getElementById('discountedPrice').value,q=document.getElementById('quantity').value,co=document.getElementById('condition').value,m=document.getElementById('message'),b=document.querySelector('.btn-primary');
+            if(!n||!c||!p||!q){m.textContent='❌ Please fill in all required fields.';m.className='message error';return;}
+            b.disabled=true;b.textContent='⏳ Creating...';m.className='message';
+            var body={name:n,categoryId:parseInt(c),description:d,price:parseFloat(p),quantity:parseInt(q),condition:co};if(dp)body.discountedPrice=parseFloat(dp);
+            try{var r=await fetch('/api/products',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body)});var data=await r.json();
+                if(data.success){var pid=data.data.id,ic=0;if(selectedFiles.length>0){var fd=new FormData();selectedFiles.forEach(function(f){fd.append('files',f);});var ir=await fetch('/api/products/'+pid+'/images',{method:'POST',headers:{'Authorization':'Bearer '+token},body:fd});var idata=await ir.json();if(idata.success)ic=idata.imageUrls?idata.imageUrls.length:selectedFiles.length;}
+                    m.textContent='✅ Created'+(ic>0?' with '+ic+' images':'')+'! Redirecting...';m.className='message success';setTimeout(function(){window.location.href='/product?id='+pid;},1800);}
+                else{m.textContent='❌ '+(data.message||'Failed');m.className='message error';b.disabled=false;b.textContent='🚀 Create Product';}
+            }catch(e){m.textContent='❌ Network error';m.className='message error';b.disabled=false;b.textContent='🚀 Create Product';}
         }
-        
-        async function createProduct() {
-            var name = document.getElementById('name').value.trim();
-            var categoryId = document.getElementById('categoryId').value;
-            var description = document.getElementById('description').value.trim();
-            var price = document.getElementById('price').value;
-            var discountedPrice = document.getElementById('discountedPrice').value;
-            var quantity = document.getElementById('quantity').value;
-            var condition = document.getElementById('condition').value;
-            var msg = document.getElementById('message');
-            var btn = document.querySelector('.btn-primary');
-            
-            if (!name || !categoryId || !price || !quantity) {
-                msg.textContent = '❌ Please fill in all required fields.';
-                msg.className = 'message error';
-                return;
-            }
-            
-            btn.disabled = true;
-            btn.textContent = '⏳ Creating...';
-            msg.className = 'message';
-            
-            var body = {
-                name: name,
-                categoryId: parseInt(categoryId),
-                description: description,
-                price: parseFloat(price),
-                quantity: parseInt(quantity),
-                condition: condition
-            };
-            if (discountedPrice) body.discountedPrice = parseFloat(discountedPrice);
-            
-            try {
-                var res = await fetch('/api/products', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify(body)
-                });
-                var data = await res.json();
-                
-                if (data.success) {
-                    msg.textContent = '✅ Product created! Redirecting...';
-                    msg.className = 'message success';
-                    setTimeout(function() { window.location.href = '/product?id=' + data.data.id; }, 1500);
-                } else {
-                    msg.textContent = '❌ ' + (data.message || 'Failed to create product.');
-                    msg.className = 'message error';
-                    btn.disabled = false;
-                    btn.textContent = '🚀 Create Product';
-                }
-            } catch(e) {
-                msg.textContent = '❌ Network error.';
-                msg.className = 'message error';
-                btn.disabled = false;
-                btn.textContent = '🚀 Create Product';
-            }
-        }
-        
         loadCategories();
     </script>
 </body>

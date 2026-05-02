@@ -6,60 +6,57 @@
     <title>Dashboard | CamBiz Market</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f5f6fa; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
-        .header nav { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center; }
-        .header nav a { color: #b2bec3; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        body { background: #f0f2f5; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header nav { display: flex; gap: 2rem; align-items: center; }
+        .header nav a { color: #b2bec3; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
         .header nav a:hover { color: white; }
-        .premium-badge { background: linear-gradient(135deg, #f39c12, #e74c3c); color: white; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; display: none; }
-        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
+        .premium-badge { background: linear-gradient(135deg, #f39c12, #e74c3c); color: white; padding: 5px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: none; }
         
-        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 16px; padding: 2rem 2.5rem; margin-bottom: 2rem; }
-        .welcome-banner h1 { font-size: 2rem; margin-bottom: 0.3rem; }
+        .container { max-width: 1050px; margin: 2.5rem auto; padding: 0 1.5rem; }
+        
+        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 2.5rem; margin-bottom: 2.5rem; }
+        .welcome-banner h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.3rem; }
         .welcome-banner p { opacity: 0.9; font-size: 1rem; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); text-align: center; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-2px); }
-        .stat-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
-        .stat-card .value { font-size: 2rem; font-weight: bold; color: #2d3436; }
-        .stat-card .label { color: #636e72; font-size: 0.85rem; margin-top: 0.25rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
+        .stat-card { background: white; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); text-align: center; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card .icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
+        .stat-card .value { font-size: 2rem; font-weight: 700; color: #1a1a2e; }
+        .stat-card .label { color: #636e72; font-size: 0.85rem; margin-top: 0.3rem; font-weight: 500; }
         
-        .section-title { font-size: 1.2rem; color: #2d3436; margin-bottom: 1rem; font-weight: 700; }
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .action-card { background: white; border-radius: 14px; padding: 1.5rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; text-decoration: none; color: #2d3436; transition: all 0.2s; display: block; border: 2px solid transparent; }
-        .action-card:hover { border-color: #667eea; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(102,126,234,0.2); }
-        .action-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+        .section-title { font-size: 1.2rem; color: #1a1a2e; margin-bottom: 1.2rem; font-weight: 700; }
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+        .action-card { background: white; border-radius: 16px; padding: 1.8rem 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.2s; display: block; border: 2px solid transparent; }
+        .action-card:hover { border-color: #667eea; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(102,126,234,0.15); }
+        .action-card .icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
         .action-card .title { font-weight: 600; font-size: 0.9rem; }
         
-        .order-list { background: white; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; }
-        .order-item { padding: 1rem 1.5rem; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; transition: background 0.2s; }
-        .order-item:hover { background: #fafafa; }
+        .order-list { background: white; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); overflow: hidden; }
+        .order-item { padding: 1.2rem 1.8rem; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; transition: background 0.2s; }
+        .order-item:hover { background: #fafbfc; }
         .order-item:last-child { border-bottom: none; }
-        .badge { padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge { padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .badge-pending { background: #fff3cd; color: #856404; }
         .badge-confirmed { background: #d1ecf1; color: #0c5460; }
+        .badge-delivered { background: #d4edda; color: #155724; }
         
-        .login-prompt { background: white; border-radius: 20px; padding: 3.5rem 2rem; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-        .login-prompt h2 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #2d3436; }
-        .login-prompt p { color: #636e72; margin-bottom: 1.5rem; }
-        .btn { padding: 13px 28px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 5px; transition: transform 0.2s; }
-        .btn:hover { transform: translateY(-1px); }
-        .btn-primary { background: #667eea; color: white; }
-        .btn-success { background: #00b894; color: white; }
-        .btn-outline { background: white; color: #667eea; border: 2px solid #667eea; }
-        .login-form { display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 14px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; }
-        .login-form input { display: block; width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; }
+        .login-section { background: white; border-radius: 20px; padding: 4rem 2rem; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
+        .login-section h2 { font-size: 1.8rem; margin-bottom: 0.5rem; color: #1a1a2e; font-weight: 700; }
+        .login-section p { color: #636e72; margin-bottom: 2rem; font-size: 1rem; }
+        .btn { padding: 14px 32px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 15px; margin: 6px; transition: all 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: #667eea; color: white; box-shadow: 0 4px 14px rgba(102,126,234,0.4); }
+        .btn-success { background: #00b894; color: white; box-shadow: 0 4px 14px rgba(0,184,148,0.3); }
+        .login-form { display: none; margin-top: 1.5rem; padding: 2rem; background: #f8f9fa; border-radius: 14px; text-align: left; max-width: 420px; margin-left: auto; margin-right: auto; }
+        .login-form input { display: block; width: 100%; padding: 13px 15px; margin-bottom: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; }
         .login-form input:focus { border-color: #667eea; outline: none; }
         .login-form button { width: 100%; }
+        .empty-state { text-align: center; padding: 2.5rem; color: #b2bec3; font-size: 0.95rem; }
         
-        .empty-state { text-align: center; padding: 2rem; color: #b2bec3; }
-        
-        @media (max-width: 600px) {
-            .welcome-banner { padding: 1.5rem; }
-            .welcome-banner h1 { font-size: 1.5rem; }
-        }
+        @media (max-width: 600px) { .header { padding: 1rem; } .welcome-banner { padding: 1.8rem; } .welcome-banner h1 { font-size: 1.5rem; } .login-section { padding: 2.5rem 1.5rem; } }
     </style>
 </head>
 <body>
@@ -75,7 +72,6 @@
     </header>
 
     <div class="container">
-        <!-- LOGGED IN -->
         <div id="userDashboard" style="display:none;">
             <div class="welcome-banner">
                 <h1>👋 Welcome back!</h1>
@@ -90,11 +86,10 @@
             </div>
         </div>
         
-        <!-- PUBLIC -->
         <div id="publicDashboard">
             <div class="welcome-banner">
                 <h1>🛒 Welcome to CamBiz Market</h1>
-                <p>Cameroon's Premier E-Commerce Platform</p>
+                <p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p>
             </div>
             <div class="stats-grid">
                 <div class="stat-card"><div class="icon">📦</div><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
@@ -102,16 +97,16 @@
                 <div class="stat-card"><div class="icon">🛒</div><div class="value">1</div><div class="label">Orders</div></div>
                 <div class="stat-card"><div class="icon">💰</div><div class="value">650K</div><div class="label">Revenue (XAF)</div></div>
             </div>
-            <div class="login-prompt">
+            <div class="login-section">
                 <h2>🔐 Access Your Dashboard</h2>
-                <p>Manage your orders, products, and more.</p>
+                <p>Manage your orders, products, and track your business.</p>
                 <button class="btn btn-primary" onclick="showLogin()">🔑 Login</button>
                 <a href="/register" class="btn btn-success">📝 Create Account</a>
                 <div class="login-form" id="loginForm">
                     <input type="email" id="loginEmail" placeholder="Email">
                     <input type="password" id="loginPassword" placeholder="Password">
                     <button class="btn btn-primary" onclick="doLogin()">Login</button>
-                    <p id="loginError" style="color:#e74c3c; margin-top:8px; display:none;"></p>
+                    <p id="loginError" style="color:#e74c3c; margin-top:10px; display:none;"></p>
                 </div>
             </div>
         </div>
@@ -121,57 +116,26 @@
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         var userType = '';
         
-        async function init() {
-            try { var res = await fetch('/api/products?page=0&size=200'); var data = await res.json(); if (data.data) document.getElementById('pubProductCount').textContent = data.data.length; } catch(e) {}
-            if (token) { await loadUserDashboard(); checkPremiumStatus(); }
-        }
-        
-        async function checkPremiumStatus() {
-            try { var res = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var data = await res.json(); if (data.success && data.data && data.data.isPremium) { document.getElementById('premiumBadge').style.display = 'inline-block'; document.getElementById('premiumStatus').textContent = '🏆 Premium |'; } } catch(e) {}
-        }
-        
+        async function init() { try { var res = await fetch('/api/products?page=0&size=200'); var data = await res.json(); if (data.data) document.getElementById('pubProductCount').textContent = data.data.length; } catch(e) {} if (token) { await loadUserDashboard(); checkPremiumStatus(); } }
+        async function checkPremiumStatus() { try { var res = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var data = await res.json(); if (data.success && data.data && data.data.isPremium) { document.getElementById('premiumBadge').style.display = 'inline-block'; document.getElementById('premiumStatus').textContent = '🏆 Premium |'; } } catch(e) {} }
         async function loadUserDashboard() {
-            document.getElementById('publicDashboard').style.display = 'none';
-            document.getElementById('userDashboard').style.display = 'block';
-            document.getElementById('logoutLink').style.display = 'inline';
+            document.getElementById('publicDashboard').style.display = 'none'; document.getElementById('userDashboard').style.display = 'block'; document.getElementById('logoutLink').style.display = 'inline';
             try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if (Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if (payload.userType === 'SELLER') userType = 'SELLER'; else userType = 'BUYER'; } catch(e) { userType = 'BUYER'; }
             document.getElementById('userTypeDisplay').textContent = userType === 'SELLER' ? '🏪 Seller Dashboard' : '🛒 Buyer Dashboard';
             if (userType === 'SELLER') loadSellerDashboard(); else loadBuyerDashboard();
         }
-        
         async function loadBuyerDashboard() {
             document.getElementById('userStats').innerHTML = '<div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist</div></div><div class="stat-card"><div class="icon">📦</div><div class="value" id="myOrderCount">-</div><div class="label">My Orders</div></div>';
-            document.getElementById('userActions').innerHTML = '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>';
+            document.getElementById('userActions').innerHTML = '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a>';
             try { var wRes = await fetch('/api/wishlist/count', { headers: { 'Authorization': 'Bearer ' + token } }); var wData = await wRes.json(); if (wData.success) document.getElementById('wishlistCount').textContent = wData.count; } catch(e) { document.getElementById('wishlistCount').textContent = '0'; }
             try { var oRes = await fetch('/api/orders/my-orders', { headers: { 'Authorization': 'Bearer ' + token } }); var oData = await oRes.json(); if (oData.success && oData.data) document.getElementById('myOrderCount').textContent = oData.data.length; } catch(e) { document.getElementById('myOrderCount').textContent = '0'; }
         }
-        
         async function loadSellerDashboard() {
-            document.getElementById('userStats').innerHTML = '<div class="stat-card"><div class="icon">📦</div><div class="value" id="sellerProductCount">-</div><div class="label">My Products</div></div><div class="stat-card"><div class="icon">🛒</div><div class="value" id="sellerOrderCount">-</div><div class="label">Orders</div></div><div class="stat-card"><div class="icon">💰</div><div class="value" id="sellerRevenue">-</div><div class="label">Revenue (XAF)</div></div>';
+            document.getElementById('userStats').innerHTML = '';
             document.getElementById('userActions').innerHTML = '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>';
-            try { var pRes = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token } }); var pData = await pRes.json(); if (pData.success && pData.data) document.getElementById('sellerProductCount').textContent = pData.data.length; } catch(e) { document.getElementById('sellerProductCount').textContent = '0'; }
-            try {
-                var oRes = await fetch('/api/orders/seller-orders', { headers: { 'Authorization': 'Bearer ' + token } }); var oData = await oRes.json();
-                if (oData.success && oData.data) {
-                    document.getElementById('sellerOrderCount').textContent = oData.data.length;
-                    var revenue = 0; for (var i = 0; i < oData.data.length; i++) { revenue += oData.data[i].sellerPayout || 0; }
-                    document.getElementById('sellerRevenue').textContent = revenue.toLocaleString();
-                    document.getElementById('sellerOrders').style.display = 'block';
-                    var html = '';
-                    for (var j = 0; j < Math.min(oData.data.length, 5); j++) {
-                        var order = oData.data[j];
-                        html += '<div class="order-item"><div><strong>#' + order.sellerOrderId + '</strong><br><small>' + (order.items ? order.items.map(function(i){return i.productName;}).join(', ') : '') + '</small></div><div><span class="badge badge-pending">' + order.status + '</span></div><div><strong>' + (order.sellerPayout || 0).toLocaleString() + ' XAF</strong></div></div>';
-                    }
-                    document.getElementById('sellerOrderList').innerHTML = html || '<div class="empty-state">No orders yet</div>';
-                }
-            } catch(e) { document.getElementById('sellerOrderCount').textContent = '0'; }
         }
-        
         function showLogin() { document.getElementById('loginForm').style.display = 'block'; }
-        async function doLogin() {
-            var email = document.getElementById('loginEmail').value; var password = document.getElementById('loginPassword').value; var errorEl = document.getElementById('loginError');
-            try { var res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var data = await res.json(); if (data.success && data.data && data.data.token) { localStorage.setItem('token', data.data.token); location.reload(); } else { errorEl.textContent = data.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
-        }
+        async function doLogin() { var email = document.getElementById('loginEmail').value; var password = document.getElementById('loginPassword').value; var errorEl = document.getElementById('loginError'); try { var res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var data = await res.json(); if (data.success && data.data && data.data.token) { localStorage.setItem('token', data.data.token); location.reload(); } else { errorEl.textContent = data.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; } }
         function logout() { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; }
         init();
     </script>
