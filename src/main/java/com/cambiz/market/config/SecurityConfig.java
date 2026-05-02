@@ -95,6 +95,7 @@ public class SecurityConfig {
                 .requestMatchers("/wishlist").permitAll()
                 .requestMatchers("/orders").permitAll()
                 .requestMatchers("/upload-images").permitAll()
+                .requestMatchers("/create-product").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 

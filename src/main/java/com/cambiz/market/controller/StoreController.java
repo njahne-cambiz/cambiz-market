@@ -52,4 +52,9 @@ public class StoreController {
     public String uploadImages() {
         return "upload-images";
     }
+    
+    @GetMapping("/create-product")
+    public String createProduct() {
+        return "create-product";
+    }
 }
