@@ -27,12 +27,15 @@
         .featured-section h2 { margin-bottom: 15px; color: #ff6b6b; }
         .featured-badge { background: #ff6b6b; color: white; padding: 3px 10px; border-radius: 10px; display: inline-block; margin-bottom: 10px; font-size: 12px; font-weight: bold; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .product-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: transform 0.3s; cursor: pointer; position: relative; }
+        .product-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: transform 0.3s; cursor: pointer; position: relative; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
         .product-card.featured { border: 2px solid #ff6b6b; }
-        .product-emoji { font-size: 40px; margin-bottom: 10px; }
+        .product-image { height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; }
+        .product-image .emoji { font-size: 60px; }
+        .product-info { padding: 15px 20px 20px; }
         .product-category { font-size: 11px; color: #667eea; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
-        .product-name { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .product-name { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 8px; }
         .product-price { font-size: 22px; font-weight: bold; color: #667eea; }
         .product-price .original { font-size: 14px; color: #999; text-decoration: line-through; margin-right: 8px; }
         .product-price .discount { font-size: 12px; background: #ff6b6b; color: white; padding: 3px 8px; border-radius: 10px; margin-left: 8px; }
@@ -42,8 +45,8 @@
         .product-reviews span { color: #666; }
         .whatsapp-share { color: #25D366; text-decoration: none; font-size: 11px; display: block; margin-top: 5px; font-weight: 500; }
         .whatsapp-share:hover { text-decoration: underline; }
-        .wishlist-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; position: absolute; top: 12px; right: 12px; transition: transform 0.2s; padding: 0; line-height: 1; }
-        .wishlist-btn:hover { transform: scale(1.3); }
+        .wishlist-btn { background: white; border: none; font-size: 1.5rem; cursor: pointer; position: absolute; top: 10px; right: 10px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .wishlist-btn:hover { transform: scale(1.2); }
         .wishlist-btn.wishlisted { animation: heartPop 0.3s ease; }
         @keyframes heartPop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
         .no-results { text-align: center; padding: 60px; color: #999; }
@@ -105,6 +108,29 @@
         let allProducts = [];
         let currentFilter = 'all';
 
+        const categoryImages = {
+            'Smartphones & Tablets': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop',
+            'Laptops & Computers': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop',
+            'Electronics & Audio': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
+            'Home Appliances': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop',
+            'Fashion & Clothing': 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=300&fit=crop',
+            'Food & Essentials': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop',
+            'Transportation': 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400&h=300&fit=crop',
+            'Accessories': 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=400&h=300&fit=crop',
+            'Sports and Fitness': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=300&fit=crop',
+            'Books and Stationery': 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=300&fit=crop',
+            'Jewelry and Watches': 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=300&fit=crop',
+            'Toys and Games': 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400&h=300&fit=crop',
+            'Pet Supplies': 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400&h=300&fit=crop',
+            'Beauty and Personal Care': 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop',
+            'Baby and Kids': 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=300&fit=crop',
+            'Health and Medical': 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&h=300&fit=crop',
+            'Agriculture and Farming': 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop',
+            'Building and Construction': 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=400&h=300&fit=crop',
+            'Auto and Spare Parts': 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=400&h=300&fit=crop',
+            'Services and Repairs': 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&h=300&fit=crop'
+        };
+
         const categoryEmojis = {
             'Smartphones & Tablets': '📱', 'Laptops & Computers': '💻',
             'Electronics & Audio': '🎧', 'Home Appliances': '🏠',
@@ -118,15 +144,23 @@
             'Auto and Spare Parts': '🔧', 'Services and Repairs': '🛠️'
         };
 
+        function getProductImage(product) {
+            if (product.imageUrls && product.imageUrls.length > 0) {
+                return '<img src="' + product.imageUrls[0] + '" alt="' + product.name + '" onerror="this.src=\'' + (categoryImages[product.categoryName] || '') + '\'">';
+            }
+            var fallback = categoryImages[product.categoryName];
+            if (fallback) {
+                return '<img src="' + fallback + '" alt="' + product.name + '" onerror="this.parentElement.innerHTML=\'<span class=emoji>' + (categoryEmojis[product.categoryName] || '📦') + '</span>\'">';
+            }
+            return '<span class="emoji">' + (categoryEmojis[product.categoryName] || '📦') + '</span>';
+        }
+
         async function loadReviewsForProducts(products) {
             for (let p of products) {
                 try {
                     const res = await fetch(`/api/reviews/product/${p.id}`);
                     const data = await res.json();
-                    if (data.success && data.data && data.data.stats) {
-                        p.averageRating = data.data.stats.averageRating;
-                        p.totalReviews = data.data.stats.totalReviews;
-                    }
+                    if (data.success && data.data && data.data.stats) { p.averageRating = data.data.stats.averageRating; p.totalReviews = data.data.stats.totalReviews; }
                 } catch (e) { p.averageRating = 0; p.totalReviews = 0; }
             }
             displayProducts(products);
@@ -142,15 +176,17 @@
                         <div class="product-card featured" onclick="window.location.href='/product?id=${p.id}'">
                             <div class="featured-badge">⭐ FEATURED</div>
                             <button class="wishlist-btn" data-product-id="${p.id}" onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)" title="Add to Wishlist">🤍</button>
-                            <div class="product-emoji">${categoryEmojis[p.categoryName] || '📦'}</div>
-                            <div class="product-category">${p.categoryName || 'General'}</div>
-                            <div class="product-name">${p.name}</div>
-                            <div class="product-price">
-                                ${p.discountedPrice ? `<span class="original">${p.price.toLocaleString()} XAF</span>` : ''}
-                                ${(p.discountedPrice || p.price).toLocaleString()} XAF
-                                ${p.discountedPrice ? `<span class="discount">-${Math.round((1 - p.discountedPrice/p.price) * 100)}%</span>` : ''}
+                            <div class="product-image">${getProductImage(p)}</div>
+                            <div class="product-info">
+                                <div class="product-category">${p.categoryName || 'General'}</div>
+                                <div class="product-name">${p.name}</div>
+                                <div class="product-price">
+                                    ${p.discountedPrice ? `<span class="original">${p.price.toLocaleString()} XAF</span>` : ''}
+                                    ${(p.discountedPrice || p.price).toLocaleString()} XAF
+                                    ${p.discountedPrice ? `<span class="discount">-${Math.round((1 - p.discountedPrice/p.price) * 100)}%</span>` : ''}
+                                </div>
+                                <div class="product-stock">✅ ${p.stockQuantity} in stock</div>
                             </div>
-                            <div class="product-stock">✅ ${p.stockQuantity} in stock</div>
                         </div>
                     `).join('');
                 }
@@ -159,19 +195,10 @@
 
         async function loadProducts() {
             try {
-                const [prodRes, catRes] = await Promise.all([
-                    fetch('/api/products?page=0&size=200'),
-                    fetch('/api/categories')
-                ]);
+                const [prodRes, catRes] = await Promise.all([fetch('/api/products?page=0&size=200'), fetch('/api/categories')]);
                 const prodData = await prodRes.json();
                 const catData = await catRes.json();
-                
-                if (prodData.success && prodData.data) {
-                    allProducts = prodData.data;
-                    updateStats(allProducts);
-                    loadReviewsForProducts(allProducts);
-                }
-                
+                if (prodData.success && prodData.data) { allProducts = prodData.data; updateStats(allProducts); loadReviewsForProducts(allProducts); }
                 if (catData.success && catData.data) {
                     const container = document.getElementById('categoryFilters');
                     catData.data.forEach(cat => {
@@ -182,17 +209,12 @@
                         container.appendChild(btn);
                     });
                 }
-            } catch (e) {
-                document.getElementById('products').innerHTML = '<div class="no-results"><div class="emoji">❌</div><p>Failed to load products</p></div>';
-            }
+            } catch (e) { document.getElementById('products').innerHTML = '<div class="no-results"><div class="emoji">❌</div><p>Failed to load products</p></div>'; }
         }
 
         function displayProducts(products) {
             document.getElementById('shownCount').textContent = products.length;
-            if (products.length === 0) {
-                document.getElementById('products').innerHTML = '<div class="no-results"><div class="emoji">🔍</div><p>No products found</p></div>';
-                return;
-            }
+            if (products.length === 0) { document.getElementById('products').innerHTML = '<div class="no-results"><div class="emoji">🔍</div><p>No products found</p></div>'; return; }
             document.getElementById('products').innerHTML = products.map(p => {
                 const stars = '⭐'.repeat(Math.round(p.averageRating || 0));
                 const reviewCount = p.totalReviews || 0;
@@ -200,18 +222,20 @@
                 return `
                 <div class="product-card" onclick="window.location.href='/product?id=${p.id}'">
                     <button class="wishlist-btn" data-product-id="${p.id}" onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)" title="Add to Wishlist">🤍</button>
-                    <div class="product-emoji">${categoryEmojis[p.categoryName] || '📦'}</div>
-                    <div class="product-category">${p.categoryName || 'General'}</div>
-                    <div class="product-name">${p.name}</div>
-                    <div class="product-reviews">${stars} <span>(${reviewCount} reviews)</span></div>
-                    <div class="product-price">
-                        ${p.discountedPrice ? `<span class="original">${p.price.toLocaleString()} XAF</span>` : ''}
-                        ${(p.discountedPrice || p.price).toLocaleString()} XAF
-                        ${p.discountedPrice ? `<span class="discount">-${Math.round((1 - p.discountedPrice/p.price) * 100)}%</span>` : ''}
+                    <div class="product-image">${getProductImage(p)}</div>
+                    <div class="product-info">
+                        <div class="product-category">${p.categoryName || 'General'}</div>
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-reviews">${stars} <span>(${reviewCount} reviews)</span></div>
+                        <div class="product-price">
+                            ${p.discountedPrice ? `<span class="original">${p.price.toLocaleString()} XAF</span>` : ''}
+                            ${(p.discountedPrice || p.price).toLocaleString()} XAF
+                            ${p.discountedPrice ? `<span class="discount">-${Math.round((1 - p.discountedPrice/p.price) * 100)}%</span>` : ''}
+                        </div>
+                        <div class="product-stock">✅ ${p.stockQuantity} in stock</div>
+                        <div class="product-condition">🏷️ ${p.condition || 'NEW'}</div>
+                        <a href="https://wa.me/?text=${shareText}" target="_blank" class="whatsapp-share" onclick="event.stopPropagation()">📱 Share on WhatsApp</a>
                     </div>
-                    <div class="product-stock">✅ ${p.stockQuantity} in stock</div>
-                    <div class="product-condition">🏷️ ${p.condition || 'NEW'}</div>
-                    <a href="https://wa.me/?text=${shareText}" target="_blank" class="whatsapp-share" onclick="event.stopPropagation()">📱 Share on WhatsApp</a>
                 </div>
             `}).join('');
         }
@@ -220,10 +244,7 @@
             document.getElementById('totalCount').textContent = allProducts.length;
             document.getElementById('shownCount').textContent = products.length;
             const prices = products.map(p => p.discountedPrice || p.price).filter(p => p > 0);
-            if (prices.length > 0) {
-                document.getElementById('minPrice').textContent = Math.min(...prices).toLocaleString();
-                document.getElementById('maxPrice').textContent = Math.max(...prices).toLocaleString();
-            }
+            if (prices.length > 0) { document.getElementById('minPrice').textContent = Math.min(...prices).toLocaleString(); document.getElementById('maxPrice').textContent = Math.max(...prices).toLocaleString(); }
         }
 
         function filterByCategory(categoryId, btn) {
@@ -231,59 +252,36 @@
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
             let filtered = categoryId === 'all' ? allProducts : allProducts.filter(p => p.categoryId == categoryId);
-            updateStats(filtered);
-            displayProducts(filtered);
+            updateStats(filtered); displayProducts(filtered);
         }
 
         function searchProducts() {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             if (!query) { filterByCategory('all', document.querySelector('.cat-btn')); return; }
-            const filtered = allProducts.filter(p => 
-                p.name.toLowerCase().includes(query) || 
-                (p.description && p.description.toLowerCase().includes(query)) ||
-                (p.categoryName && p.categoryName.toLowerCase().includes(query))
-            );
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query) || (p.description && p.description.toLowerCase().includes(query)) || (p.categoryName && p.categoryName.toLowerCase().includes(query)));
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            updateStats(filtered);
-            displayProducts(filtered);
+            updateStats(filtered); displayProducts(filtered);
         }
 
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            filterByCategory('all', document.querySelector('.cat-btn'));
-        }
+        function clearSearch() { document.getElementById('searchInput').value = ''; filterByCategory('all', document.querySelector('.cat-btn')); }
 
         async function toggleWishlist(productId, heartElement) {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            if (!token) { alert('Please login first to use wishlist.'); return; }
+            if (!token) { alert('Please login first.'); return; }
             const isWishlisted = heartElement.classList.contains('wishlisted');
-            const url = isWishlisted ? `/api/wishlist/remove/${productId}` : `/api/wishlist/add/${productId}`;
-            const method = isWishlisted ? 'DELETE' : 'POST';
             try {
-                const response = await fetch(url, { method: method, headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                if (data.success) {
-                    if (isWishlisted) { heartElement.classList.remove('wishlisted'); heartElement.innerHTML = '🤍'; }
-                    else { heartElement.classList.add('wishlisted'); heartElement.innerHTML = '❤️'; }
-                }
-            } catch (error) {}
+                const res = await fetch('/api/wishlist/' + (isWishlisted ? 'remove/' : 'add/') + productId, { method: isWishlisted ? 'DELETE' : 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                if (data.success) { heartElement.classList.toggle('wishlisted'); heartElement.innerHTML = isWishlisted ? '🤍' : '❤️'; }
+            } catch(e) {}
         }
 
         (async function() {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            if (token) {
-                try {
-                    const res = await fetch('/api/premium/my-status', { headers: { 'Authorization': `Bearer ${token}` } });
-                    const data = await res.json();
-                    if (data.success && data.data && data.data.isPremium) {
-                        document.getElementById('premiumBadge').style.display = 'inline-block';
-                    }
-                } catch(e) {}
-            }
+            if (token) { try { const res = await fetch('/api/premium/my-status', { headers: { 'Authorization': `Bearer ${token}` } }); const data = await res.json(); if (data.success && data.data && data.data.isPremium) document.getElementById('premiumBadge').style.display = 'inline-block'; } catch(e) {} }
         })();
 
-        loadFeatured();
-        loadProducts();
+        loadFeatured(); loadProducts();
     </script>
 </body>
 </html>
