@@ -37,7 +37,7 @@
         .login-card p { color: #565959; margin-bottom: 1.5rem; }
         .btn { padding: 12px 34px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 6px; min-width: 200px; transition: all 0.2s; }
         .btn:hover { transform: translateY(-1px); }
-        .btn-primary { background: #ffd814; color: #0f1111; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn-primary { background: #ffd814; color: #0f1111; }
         .btn-primary:hover { background: #f7ca00; }
         .btn-success { background: white; color: #0f1111; border: 1px solid #d5d9d9; }
         .btn-success:hover { background: #f7fafa; }
@@ -78,13 +78,14 @@
         .btn-sm { padding: 6px 16px; font-size: 0.8rem; min-width: auto; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
         .btn-confirm { background: #ffd814; color: #0f1111; }
         .btn-ship { background: #131921; color: white; }
+        .btn-reject { background: #d00; color: white; }
         
         .logout-btn { text-align: center; margin: 1.5rem 0; }
         .logout-btn a { color: #565959; font-weight: 600; text-decoration: none; padding: 10px 24px; border-radius: 4px; font-size: 0.9rem; }
         .logout-btn a:hover { background: #f7f7f7; color: #d00; }
         .footer { text-align: center; padding: 1.8rem; color: #565959; font-size: 0.85rem; }
         .empty-state { text-align: center; padding: 2rem; color: #565959; }
-        @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr);}.hero h1{font-size:1.8rem;}.quick-actions{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr);}.hero h1{font-size:1.8rem;}.quick-actions{grid-template-columns:repeat(2,1fr);}.order-row{grid-template-columns:1fr 1fr;gap:5px;font-size:0.75rem;}}
         @media(max-width:500px){.stats-grid{grid-template-columns:1fr 1fr;}.quick-actions{grid-template-columns:1fr 1fr;}}
     </style>
 </head>
@@ -92,7 +93,7 @@
     <header class="header"><a href="/store" class="logo">cam<span>Biz</span> Market</a></header>
     <div class="container">
         <div id="publicView">
-            <div class="hero"><div class="icon">🛒</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p></div>
+            <div class="hero"><div class="icon">🛒</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform</p></div>
             <div class="about-grid">
                 <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect across Cameroon.</p></div>
                 <div class="about-card"><div class="icon">💳</div><h3>Mobile Money</h3><p>MTN & Orange Money.</p></div>
@@ -101,12 +102,7 @@
                 <div class="about-card"><div class="icon">🤝</div><h3>Njangi Groups</h3><p>Buy together, save.</p></div>
                 <div class="about-card"><div class="icon">🎁</div><h3>Refer & Earn</h3><p>Invite friends, earn.</p></div>
             </div>
-            <div class="stats-grid">
-                <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
-                <div class="stat-card"><div class="value">2+</div><div class="label">Users</div></div>
-                <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
-                <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
-            </div>
+            <div class="stats-grid"><div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div><div class="stat-card"><div class="value">2+</div><div class="label">Users</div></div><div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div><div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div></div>
             <div class="login-card"><h2>Sign In</h2><p>Access your CamBiz Market account</p><button class="btn btn-primary" onclick="showLogin()">Sign In</button><a href="/register" class="btn btn-success">Create Account</a><div class="login-form" id="loginForm"><input type="email" id="loginEmail" placeholder="Email"><input type="password" id="loginPassword" placeholder="Password"><button class="btn btn-primary" onclick="doLogin()">Sign In</button><p id="loginError" style="color:#d00;margin-top:12px;display:none;"></p></div></div>
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
@@ -117,7 +113,7 @@
             <div id="buyerCartPanel" style="display:none;"></div>
             <div class="section-title">Quick Actions</div>
             <div class="quick-actions" id="userActions"></div>
-            <div id="sellerOrderPanel" style="display:none;"></div>
+            <div id="sellerPanel" style="display:none;"></div>
             <div class="logout-btn"><a href="#" onclick="logout()">Sign Out</a></div>
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
@@ -146,32 +142,32 @@
         }
         async function loadBuyerCart(){
             try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();
-                if(d.success&&d.data&&d.data.items&&d.data.items.length>0){
-                    var panel=document.getElementById('buyerCartPanel');panel.style.display='block';
-                    var html='<div class="cart-mini"><div class="section-title">🛒 Your Cart</div>';
-                    for(var i=0;i<d.data.items.length;i++){var item=d.data.items[i];html+='<div class="cart-item-row"><span>'+item.productName+' x'+item.quantity+'</span><span>'+item.effectivePrice.toLocaleString()+' XAF</span></div>';}
-                    html+='<div class="cart-total">Total: '+d.data.total.toLocaleString()+' XAF</div>';
-                    html+='<a href="/cart" class="btn-cart-action">⚡ Buy Now</a></div>';
-                    panel.innerHTML=html;
-                }
-            }catch(e){}
+                if(d.success&&d.data&&d.data.items&&d.data.items.length>0){var panel=document.getElementById('buyerCartPanel');panel.style.display='block';var html='<div class="cart-mini"><div class="section-title">🛒 Your Cart</div>';for(var i=0;i<d.data.items.length;i++){var item=d.data.items[i];html+='<div class="cart-item-row"><span>'+item.productName+' x'+item.quantity+'</span><span>'+item.effectivePrice.toLocaleString()+' XAF</span></div>';}html+='<div class="cart-total">Total: '+d.data.total.toLocaleString()+' XAF</div>';html+='<a href="/cart" class="btn-cart-action">⚡ Buy Now</a></div>';panel.innerHTML=html;}}catch(e){}
         }
         async function loadSellerView(){
             document.getElementById('userActions').innerHTML='<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">View all</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade</div></a>';
+            document.getElementById('sellerPanel').style.display='block';
             loadSellerOrders();
+            loadSellerOffers();
         }
         async function loadSellerOrders(){
-            try{var r=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();var panel=document.getElementById('sellerOrderPanel');panel.style.display='block';
+            try{var r=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();
                 var pc=0;try{var pr=await fetch('/api/products/my-products',{headers:{'Authorization':'Bearer '+token}});var pd=await pr.json();if(pd.success&&pd.data)pc=pd.data.length;}catch(e){}
                 var oc=d.success&&d.data?d.data.length:0;var rev=0;if(d.success&&d.data){for(var i=0;i<d.data.length;i++){rev+=d.data[i].sellerPayout||0;}}
                 document.getElementById('userStats').innerHTML='<div class="stat-card"><div class="value">'+pc+'</div><div class="label">My Products</div></div><div class="stat-card"><div class="value">'+oc+'</div><div class="label">Orders</div></div><div class="stat-card"><div class="value">'+rev.toLocaleString()+'</div><div class="label">Revenue (XAF)</div></div>';
-                if(d.success&&d.data&&d.data.length>0){var html='<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="order-row header-row"><span>Order #</span><span>Product</span><span>Qty</span><span>Status</span><span>Action</span></div>';
-                    for(var j=0;j<d.data.length;j++){var o=d.data[j];var items=o.items?o.items.map(function(i){return i.productName;}).join(', '):'Product';var qty=o.items?o.items.reduce(function(s,i){return s+i.quantity;},0):0;
-                        html+='<div class="order-row"><span><strong>#'+o.sellerOrderId.toString().slice(-6)+'</strong></span><span>'+items+'</span><span>'+qty+'</span><span class="status status-'+o.status+'">'+o.status+'</span><span>'+(o.status==='PENDING'?'<button class="btn-sm btn-confirm" onclick="updateOrderStatus('+o.sellerOrderId+',\'CONFIRMED\')">Confirm</button>':o.status==='CONFIRMED'?'<button class="btn-sm btn-ship" onclick="updateOrderStatus('+o.sellerOrderId+',\'SHIPPED\')">Ship</button>':o.status==='SHIPPED'?'<button class="btn-sm btn-confirm" onclick="updateOrderStatus('+o.sellerOrderId+',\'DELIVERED\')">Deliver</button>':'<span style="color:#10b981;">✅ Done</span>')+'</span></div>';}
-                    html+='</div>';panel.innerHTML=html;}else{panel.innerHTML='<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="empty-state">No orders yet.</div></div>';}
-            }catch(e){}
+                var panel=document.getElementById('sellerPanel');
+                var html='<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="order-row header-row"><span>Order #</span><span>Product</span><span>Qty</span><span>Status</span><span>Action</span></div>';
+                if(d.success&&d.data&&d.data.length>0){for(var j=0;j<d.data.length;j++){var o=d.data[j];var items=o.items?o.items.map(function(i){return i.productName;}).join(', '):'Product';var qty=o.items?o.items.reduce(function(s,i){return s+i.quantity;},0):0;html+='<div class="order-row"><span><strong>#'+o.sellerOrderId.toString().slice(-6)+'</strong></span><span>'+items+'</span><span>'+qty+'</span><span class="status status-'+o.status+'">'+o.status+'</span><span>'+(o.status==='PENDING'?'<button class="btn-sm btn-confirm" onclick="updateOrderStatus('+o.sellerOrderId+',\'CONFIRMED\')">Confirm</button>':o.status==='CONFIRMED'?'<button class="btn-sm btn-ship" onclick="updateOrderStatus('+o.sellerOrderId+',\'SHIPPED\')">Ship</button>':o.status==='SHIPPED'?'<button class="btn-sm btn-confirm" onclick="updateOrderStatus('+o.sellerOrderId+',\'DELIVERED\')">Deliver</button>':'<span style="color:#10b981;">✅ Done</span>')+'</span></div>';}}else{html+='<div class="empty-state">No orders yet.</div>';}html+='</div>';panel.innerHTML=html;}catch(e){}
         }
-        async function updateOrderStatus(oid,status){try{var r=await fetch('/api/orders/'+oid+'/update-status?status='+status,{method:'PUT',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('✅ Order '+status+'!');loadSellerOrders();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
+        async function loadSellerOffers(){
+            try{var r=await fetch('/api/makola/seller/offers',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();
+                if(d.success&&d.data&&d.data.length>0){var panel=document.getElementById('sellerPanel');var html=panel.innerHTML;html+='<div class="section-title" style="margin-top:20px;">💰 Customer Offers</div><div class="order-table"><div class="order-row header-row"><span>Product</span><span>Buyer</span><span>Offer</span><span>Status</span><span>Action</span></div>';
+                for(var i=0;i<d.data.length;i++){var o=d.data[i];html+='<div class="order-row"><span>'+o.productName+'</span><span>'+o.buyerName+'</span><span>'+o.offerAmount.toLocaleString()+' XAF</span><span class="status status-PENDING">'+o.status+'</span><span><button class="btn-sm btn-confirm" onclick="acceptOffer('+o.negotiationId+')">Accept</button> <button class="btn-sm btn-reject" onclick="rejectOffer('+o.negotiationId+')">Reject</button></span></div>';}
+                html+='</div>';panel.innerHTML=html;}}catch(e){}
+        }
+        async function updateOrderStatus(oid,status){try{var r=await fetch('/api/orders/'+oid+'/update-status?status='+status,{method:'PUT',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('✅ Order '+status+'!');loadSellerView();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
+        async function acceptOffer(nid){try{var r=await fetch('/api/makola/accept/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('✅ Offer accepted! Deal at '+d.data.finalPrice+' XAF');loadSellerView();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
+        async function rejectOffer(nid){var reason=prompt('Reason for rejection (optional):');try{var url='/api/makola/reject/'+nid;if(reason)url+='?reason='+encodeURIComponent(reason);var r=await fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('Offer rejected');loadSellerView();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
         function showLogin(){document.getElementById('loginForm').style.display='block';}
         async function doLogin(){var email=document.getElementById('loginEmail').value;var password=document.getElementById('loginPassword').value;var errorEl=document.getElementById('loginError');try{var r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})});var d=await r.json();if(d.success&&d.data&&d.data.token){localStorage.setItem('token',d.data.token);location.reload();}else{errorEl.textContent=d.message||'Login failed';errorEl.style.display='block';}}catch(e){errorEl.textContent='Network error';errorEl.style.display='block';}}
         function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');location.href='/dashboard';}
