@@ -7,113 +7,49 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f0f2f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: center; align-items: center; }
         .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
-        .header nav { display: flex; gap: 2rem; align-items: center; }
-        .header nav a { color: #b2bec3; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
-        .header nav a:hover { color: white; }
-        .premium-badge { background: linear-gradient(135deg, #f39c12, #e74c3c); color: white; padding: 5px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: none; }
-        
         .container { max-width: 600px; margin: 4rem auto; padding: 0 1.5rem; }
-        
         .login-card { background: white; border-radius: 24px; padding: 3.5rem 2.5rem; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
         .login-card .icon { font-size: 4rem; margin-bottom: 1rem; }
         .login-card h1 { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
         .login-card p { color: #636e72; margin-bottom: 2rem; font-size: 1rem; line-height: 1.5; }
-        
-        .btn { padding: 16px 36px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 16px; margin: 8px; transition: all 0.2s; min-width: 200px; }
+        .btn { padding: 16px 36px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 16px; margin: 8px; min-width: 200px; transition: all 0.2s; }
         .btn:hover { transform: translateY(-2px); }
         .btn-primary { background: #667eea; color: white; box-shadow: 0 4px 16px rgba(102,126,234,0.4); }
-        .btn-primary:hover { box-shadow: 0 8px 24px rgba(102,126,234,0.5); }
         .btn-success { background: #00b894; color: white; box-shadow: 0 4px 16px rgba(0,184,148,0.3); }
-        .btn-success:hover { box-shadow: 0 8px 24px rgba(0,184,148,0.4); }
-        
         .login-form { display: none; margin-top: 2rem; padding: 2rem; background: #f8f9fa; border-radius: 16px; text-align: left; }
         .login-form input { display: block; width: 100%; padding: 14px 16px; margin-bottom: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 15px; }
         .login-form input:focus { border-color: #667eea; outline: none; }
         .login-form button { width: 100%; margin: 0; }
-        
-        .user-dashboard { display: none; }
-        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 2.5rem; margin-bottom: 2rem; }
-        .welcome-banner h1 { font-size: 1.8rem; font-weight: 700; }
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .action-card { background: white; border-radius: 16px; padding: 1.8rem 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.2s; display: block; border: 2px solid transparent; }
-        .action-card:hover { border-color: #667eea; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(102,126,234,0.15); }
-        .action-card .icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
-        .action-card .title { font-weight: 600; font-size: 0.9rem; }
-        
         @media (max-width: 600px) { .login-card { padding: 2.5rem 1.5rem; } .container { margin: 2rem auto; } }
     </style>
 </head>
 <body>
-    <header class="header">
-        <a href="/store" class="logo">🛒 CamBiz Market</a>
-        <nav>
-            <span id="premiumBadge" class="premium-badge">🏆 PREMIUM</span>
-            <a href="/store">📦 Store</a>
-            <a href="/wishlist">❤️ Wishlist</a>
-            <a href="/orders">📋 Orders</a>
-            <a href="#" id="logoutLink" style="display:none; color:#e74c3c;" onclick="logout()">🚪 Logout</a>
-        </nav>
-    </header>
-
+    <header class="header"><a href="/store" class="logo">🛒 CamBiz Market</a></header>
     <div class="container">
-        <!-- PUBLIC VIEW -->
-        <div id="publicView">
-            <div class="login-card">
-                <div class="icon">🛒</div>
-                <h1>Welcome to CamBiz Market</h1>
-                <p>Cameroon's Premier E-Commerce Platform<br>Buy & Sell with Confidence</p>
-                <button class="btn btn-primary" onclick="showLogin()">🔑 Login</button>
-                <a href="/register" class="btn btn-success">📝 Create Account</a>
-                <div class="login-form" id="loginForm">
-                    <input type="email" id="loginEmail" placeholder="Email">
-                    <input type="password" id="loginPassword" placeholder="Password">
-                    <button class="btn btn-primary" onclick="doLogin()">Login</button>
-                    <p id="loginError" style="color:#e74c3c; margin-top:12px; display:none;"></p>
-                </div>
+        <div class="login-card">
+            <div class="icon">🛒</div>
+            <h1>Welcome to CamBiz Market</h1>
+            <p>Cameroon's Premier E-Commerce Platform<br>Buy & Sell with Confidence</p>
+            <button class="btn btn-primary" onclick="showLogin()">🔑 Login</button>
+            <a href="/register" class="btn btn-success">📝 Create Account</a>
+            <div class="login-form" id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button class="btn btn-primary" onclick="doLogin()">Login</button>
+                <p id="loginError" style="color:#e74c3c; margin-top:12px; display:none;"></p>
             </div>
-        </div>
-        
-        <!-- LOGGED IN VIEW -->
-        <div id="userView" class="user-dashboard">
-            <div class="welcome-banner">
-                <h1>👋 Welcome back!</h1>
-                <p><span id="premiumStatus"></span> <span id="userTypeDisplay"></span></p>
-            </div>
-            <div class="quick-actions" id="userActions"></div>
         </div>
     </div>
-
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        
-        if (token) { loadUserDashboard(); checkPremiumStatus(); }
-        
-        async function checkPremiumStatus() {
-            try { var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success && d.data && d.data.isPremium) { document.getElementById('premiumBadge').style.display = 'inline-block'; document.getElementById('premiumStatus').textContent = '🏆 Premium |'; } } catch(e) {}
-        }
-        
-        async function loadUserDashboard() {
-            document.getElementById('publicView').style.display = 'none';
-            document.getElementById('userView').style.display = 'block';
-            document.getElementById('logoutLink').style.display = 'inline';
-            var userType = 'BUYER';
-            try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if (Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if (payload.userType === 'SELLER') userType = 'SELLER'; } catch(e) {}
-            document.getElementById('userTypeDisplay').textContent = userType === 'SELLER' ? '🏪 Seller Dashboard' : '🛒 Buyer Dashboard';
-            if (userType === 'SELLER') {
-                document.getElementById('userActions').innerHTML = '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>';
-            } else {
-                document.getElementById('userActions').innerHTML = '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a>';
-            }
-        }
-        
+        if (token) { window.location.href = '/store'; }
         function showLogin() { document.getElementById('loginForm').style.display = 'block'; }
         async function doLogin() {
             var email = document.getElementById('loginEmail').value; var password = document.getElementById('loginPassword').value; var errorEl = document.getElementById('loginError');
-            try { var r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var d = await r.json(); if (d.success && d.data && d.data.token) { localStorage.setItem('token', d.data.token); location.reload(); } else { errorEl.textContent = d.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
+            try { var r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var d = await r.json(); if (d.success && d.data && d.data.token) { localStorage.setItem('token', d.data.token); window.location.href = '/store'; } else { errorEl.textContent = d.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
         }
-        function logout() { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; }
     </script>
 </body>
 </html>

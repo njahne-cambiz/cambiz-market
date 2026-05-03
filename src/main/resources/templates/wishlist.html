@@ -11,7 +11,6 @@
         .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
         .header nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
         .header nav a { color: white; text-decoration: none; font-size: 0.95rem; }
-        .header nav a:hover { opacity: 0.8; }
         .wishlist-badge { background: #e17055; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; display: none; }
         .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
         .container h1 { color: #2d3436; margin-bottom: 0.5rem; font-size: 2rem; }
@@ -45,7 +44,6 @@
         .login-box input { display: block; width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #dfe6e9; border-radius: 8px; font-size: 14px; }
         .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 5px; }
         .btn-primary { background: #0984e3; color: white; }
-        .btn-outline { background: white; color: #0984e3; border: 2px solid #0984e3; }
         .btn-register { background: #00b894; color: white; }
     </style>
 </head>
@@ -58,10 +56,8 @@
             <a href="/dashboard">👤 Dashboard</a>
         </nav>
     </header>
-
     <main class="container">
         <h1>❤️ My Wishlist</h1>
-        
         <div id="loginSection" style="display:none;">
             <div class="login-box">
                 <h2>🔐 Login Required</h2>
@@ -72,123 +68,31 @@
                 <p id="loginError" style="color:#d63031; margin-top:8px; display:none;"></p>
                 <p style="margin-top:10px; font-size:0.8rem; color:#636e72;">Test: buyer@cambiz.cm / Buyer@123</p>
                 <a href="/register" class="btn btn-register" style="margin-top:10px;">📝 Create Account</a>
-                <a href="/store" class="btn btn-outline" style="margin-top:10px;">🛒 Browse Store</a>
             </div>
         </div>
-        
         <div id="loading"><p style="text-align:center; padding:3rem;">Loading your wishlist...</p></div>
         <div id="wishlist-grid" class="wishlist-grid"></div>
-        
         <div id="empty-state" class="empty-state">
             <div class="icon">💔</div>
             <h2>Your wishlist is empty</h2>
             <p>Save items you love and come back to them anytime!</p>
-            <a href="/store" class="btn btn-primary">🛍️ Browse Products</a>
         </div>
     </main>
-
     <script>
         let token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        
-        if (!token) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('loginSection').style.display = 'block';
-        } else {
-            document.getElementById('loginSection').style.display = 'none';
-            loadWishlist();
-        }
-        
+        if (!token) { document.getElementById('loading').style.display = 'none'; document.getElementById('loginSection').style.display = 'block'; }
+        else { document.getElementById('loginSection').style.display = 'none'; loadWishlist(); }
         async function doLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const errorEl = document.getElementById('loginError');
-            
-            try {
-                const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
-                const data = await res.json();
-                
-                if (data.success && data.data && data.data.token) {
-                    token = data.data.token;
-                    localStorage.setItem('token', token);
-                    errorEl.style.display = 'none';
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('loading').style.display = 'block';
-                    loadWishlist();
-                } else {
-                    errorEl.textContent = data.message || 'Login failed';
-                    errorEl.style.display = 'block';
-                }
-            } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
+            var email = document.getElementById('loginEmail').value; var password = document.getElementById('loginPassword').value; var errorEl = document.getElementById('loginError');
+            try { var res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var data = await res.json(); if (data.success && data.data && data.data.token) { token = data.data.token; localStorage.setItem('token', token); errorEl.style.display = 'none'; document.getElementById('loginSection').style.display = 'none'; document.getElementById('loading').style.display = 'block'; loadWishlist(); } else { errorEl.textContent = data.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
         }
-        
         async function loadWishlist() {
-            try {
-                const response = await fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                document.getElementById('loading').style.display = 'none';
-                
-                if (data.success && data.data && data.data.length > 0) {
-                    document.getElementById('wishlist-grid').innerHTML = data.data.map(item => `
-                        <div class="product-card" id="wishlist-item-${item.productId}">
-                            <div class="product-image">
-                                ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.productName}" onerror="this.parentElement.innerHTML='<span class=no-image>📷</span>'">` : '<span class="no-image">📷</span>'}
-                                <button class="remove-btn" onclick="removeItem(${item.productId})" title="Remove from wishlist">💔</button>
-                            </div>
-                            <div class="product-info">
-                                <h3 title="${item.productName}">${item.productName}</h3>
-                                <p class="seller">${item.sellerBusinessName}</p>
-                                <div class="price">
-                                    <span class="current">${item.discountedPrice.toLocaleString()} XAF</span>
-                                    ${item.discountedPrice < item.price ? `<span class="original">${item.price.toLocaleString()} XAF</span>` : ''}
-                                </div>
-                                <p class="added-date">💾 Saved ${new Date(item.addedDate).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}</p>
-                                <span class="stock-badge ${item.inStock ? 'in-stock' : 'out-stock'}">${item.inStock ? '✅ In Stock' : '❌ Out of Stock'}</span>
-                                <a href="/product?id=${item.productId}" class="btn-view">🔍 View Details</a>
-                            </div>
-                        </div>
-                    `).join('');
-                    updateBadge(data.count);
-                    document.getElementById('empty-state').style.display = 'none';
-                } else {
-                    showEmpty();
-                }
-            } catch (error) {
-                document.getElementById('loading').innerHTML = '<p style="color:#d63031; text-align:center;">⚠️ Error loading wishlist. Please refresh.</p>';
-            }
+            try { var response = await fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${token}` } }); var data = await response.json(); document.getElementById('loading').style.display = 'none'; if (data.success && data.data && data.data.length > 0) { document.getElementById('wishlist-grid').innerHTML = data.data.map(item => '<div class="product-card" id="wishlist-item-' + item.productId + '"><div class="product-image">' + (item.imageUrl ? '<img src="' + item.imageUrl + '" alt="' + item.productName + '" onerror="this.parentElement.innerHTML=\'<span class=no-image>📷</span>\'">' : '<span class="no-image">📷</span>') + '<button class="remove-btn" onclick="removeItem(' + item.productId + ')" title="Remove from wishlist">💔</button></div><div class="product-info"><h3 title="' + item.productName + '">' + item.productName + '</h3><p class="seller">' + item.sellerBusinessName + '</p><div class="price"><span class="current">' + item.discountedPrice.toLocaleString() + ' XAF</span>' + (item.discountedPrice < item.price ? '<span class="original">' + item.price.toLocaleString() + ' XAF</span>' : '') + '</div><p class="added-date">💾 Saved ' + new Date(item.addedDate).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) + '</p><span class="stock-badge ' + (item.inStock ? 'in-stock' : 'out-stock') + '">' + (item.inStock ? '✅ In Stock' : '❌ Out of Stock') + '</span><a href="/product?id=' + item.productId + '" class="btn-view">🔍 View Details</a></div></div>').join(''); updateBadge(data.count); document.getElementById('empty-state').style.display = 'none'; } else { showEmpty(); } } catch (error) { document.getElementById('loading').innerHTML = '<p style="color:#d63031; text-align:center;">⚠️ Error loading wishlist. Please refresh.</p>'; }
         }
-        
-        async function removeItem(productId) {
-            try {
-                const response = await fetch(`/api/wishlist/remove/${productId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                if (data.success) {
-                    const card = document.getElementById(`wishlist-item-${productId}`);
-                    if (card) {
-                        card.style.transition = 'opacity 0.3s, transform 0.3s';
-                        card.style.opacity = '0'; card.style.transform = 'scale(0.9)';
-                        setTimeout(() => { card.remove(); checkEmpty(); }, 300);
-                    }
-                }
-            } catch (error) {}
-        }
-        
-        async function checkEmpty() {
-            const remaining = document.querySelectorAll('.product-card');
-            if (remaining.length === 0) { showEmpty(); updateBadge(0); }
-            else {
-                const response = await fetch('/api/wishlist/count', { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                updateBadge(data.count);
-            }
-        }
-        
+        async function removeItem(productId) { try { var response = await fetch('/api/wishlist/remove/' + productId, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); var data = await response.json(); if (data.success) { var card = document.getElementById('wishlist-item-' + productId); if (card) { card.style.transition = 'opacity 0.3s, transform 0.3s'; card.style.opacity = '0'; card.style.transform = 'scale(0.9)'; setTimeout(() => { card.remove(); checkEmpty(); }, 300); } } } catch (error) {} }
+        async function checkEmpty() { var remaining = document.querySelectorAll('.product-card'); if (remaining.length === 0) { showEmpty(); updateBadge(0); } else { var response = await fetch('/api/wishlist/count', { headers: { 'Authorization': `Bearer ${token}` } }); var data = await response.json(); updateBadge(data.count); } }
         function showEmpty() { document.getElementById('wishlist-grid').style.display = 'none'; document.getElementById('empty-state').style.display = 'block'; }
-        
-        function updateBadge(count) {
-            const badge = document.getElementById('wishlist-count-badge');
-            badge.textContent = count;
-            badge.style.display = count > 0 ? 'inline' : 'none';
-        }
+        function updateBadge(count) { var badge = document.getElementById('wishlist-count-badge'); badge.textContent = count; badge.style.display = count > 0 ? 'inline' : 'none'; }
     </script>
 </body>
 </html>
