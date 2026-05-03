@@ -10,24 +10,23 @@
         .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: center; align-items: center; }
         .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
         
-        .container { max-width: 900px; margin: 3rem auto; padding: 0 1.5rem; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
         
-        .hero { text-align: center; margin-bottom: 3rem; }
+        .hero { text-align: center; margin-bottom: 2.5rem; }
         .hero .icon { font-size: 4rem; margin-bottom: 1rem; }
         .hero h1 { font-size: 2.2rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
-        .hero p { color: #636e72; font-size: 1.1rem; line-height: 1.6; }
+        .hero p { color: #636e72; font-size: 1.1rem; }
         
-        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-        .about-card { background: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.2s; }
-        .about-card:hover { transform: translateY(-3px); }
-        .about-card .icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .about-card h3 { color: #1a1a2e; margin-bottom: 0.5rem; font-size: 1.1rem; }
-        .about-card p { color: #636e72; font-size: 0.9rem; line-height: 1.5; }
+        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
+        .about-card { background: white; border-radius: 16px; padding: 1.8rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .about-card .icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
+        .about-card h3 { color: #1a1a2e; margin-bottom: 0.3rem; font-size: 1rem; }
+        .about-card p { color: #636e72; font-size: 0.85rem; line-height: 1.4; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 3rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
         .stat-card { background: white; border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
         .stat-card .value { font-size: 1.8rem; font-weight: 700; color: #667eea; }
-        .stat-card .label { color: #636e72; font-size: 0.85rem; margin-top: 0.3rem; }
+        .stat-card .label { color: #636e72; font-size: 0.8rem; margin-top: 0.3rem; }
         
         .login-card { background: white; border-radius: 24px; padding: 3rem 2.5rem; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
         .login-card h2 { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
@@ -41,39 +40,39 @@
         .login-form input:focus { border-color: #667eea; outline: none; }
         .login-form button { width: 100%; margin: 0; }
         
-        .user-dashboard { display: none; }
-        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 2.5rem; margin-bottom: 2rem; }
-        .welcome-banner h1 { font-size: 1.8rem; font-weight: 700; }
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .action-card { background: white; border-radius: 16px; padding: 1.5rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.2s; display: block; border: 2px solid transparent; }
+        .user-view { display: none; }
+        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 2rem 2.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .welcome-banner h1 { font-size: 1.6rem; font-weight: 700; }
+        .welcome-banner .badge { background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        
+        .section-title { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 1rem; }
+        .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .action-card { background: white; border-radius: 16px; padding: 1.8rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; border: 2px solid transparent; }
         .action-card:hover { border-color: #667eea; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(102,126,234,0.15); }
-        .action-card .icon { font-size: 2rem; margin-bottom: 0.4rem; }
-        .action-card .title { font-weight: 600; font-size: 0.85rem; }
+        .action-card .icon { font-size: 2.2rem; }
+        .action-card .title { font-weight: 600; font-size: 0.9rem; }
+        .action-card .sub { font-size: 0.75rem; color: #b2bec3; }
         
-        .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
+        .footer { text-align: center; padding: 1.5rem; color: #b2bec3; font-size: 0.85rem; }
         
-        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.6rem; } }
-        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } .login-card { padding: 2rem 1.5rem; } }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.6rem; } .quick-actions { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } .quick-actions { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
     <header class="header"><a href="/store" class="logo">🛒 CamBiz Market</a></header>
     
     <div class="container">
-        <!-- PUBLIC DASHBOARD -->
+        <!-- PUBLIC VIEW -->
         <div id="publicView">
-            <div class="hero">
-                <div class="icon">🛒</div>
-                <h1>Welcome to CamBiz Market</h1>
-                <p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p>
-            </div>
+            <div class="hero"><div class="icon">🛒</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p></div>
             <div class="about-grid">
-                <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect with buyers and sellers across Cameroon.</p></div>
-                <div class="about-card"><div class="icon">💳</div><h3>Mobile Money Ready</h3><p>Pay with MTN Mobile Money and Orange Money.</p></div>
-                <div class="about-card"><div class="icon">🚀</div><h3>Boost Your Business</h3><p>Premium badges, featured listings, and more.</p></div>
-                <div class="about-card"><div class="icon">🤖</div><h3>AI-Powered Negotiation</h3><p>Makola AI negotiates the best price for you.</p></div>
-                <div class="about-card"><div class="icon">🤝</div><h3>Njangi Group Buying</h3><p>Buy together, save together with group deals.</p></div>
-                <div class="about-card"><div class="icon">⭐</div><h3>Trusted Reviews</h3><p>Real reviews from real buyers.</p></div>
+                <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect across Cameroon.</p></div>
+                <div class="about-card"><div class="icon">💳</div><h3>Mobile Money</h3><p>MTN & Orange Money ready.</p></div>
+                <div class="about-card"><div class="icon">🚀</div><h3>Boost Business</h3><p>Premium tools for sellers.</p></div>
+                <div class="about-card"><div class="icon">🤖</div><h3>AI Negotiation</h3><p>Makola AI gets best price.</p></div>
+                <div class="about-card"><div class="icon">🤝</div><h3>Njangi Groups</h3><p>Buy together, save together.</p></div>
+                <div class="about-card"><div class="icon">⭐</div><h3>Trusted Reviews</h3><p>Real buyer reviews.</p></div>
             </div>
             <div class="stats-grid">
                 <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
@@ -82,13 +81,11 @@
                 <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
             </div>
             <div class="login-card">
-                <h2>🔐 Get Started Today</h2>
-                <p>Join Cameroon's fastest growing marketplace</p>
+                <h2>🔐 Get Started Today</h2><p>Join Cameroon's fastest growing marketplace</p>
                 <button class="btn btn-primary" onclick="showLogin()">🔑 Login</button>
                 <a href="/register" class="btn btn-success">📝 Create Free Account</a>
                 <div class="login-form" id="loginForm">
-                    <input type="email" id="loginEmail" placeholder="Email">
-                    <input type="password" id="loginPassword" placeholder="Password">
+                    <input type="email" id="loginEmail" placeholder="Email"><input type="password" id="loginPassword" placeholder="Password">
                     <button class="btn btn-primary" onclick="doLogin()">Login</button>
                     <p id="loginError" style="color:#e74c3c; margin-top:12px; display:none;"></p>
                 </div>
@@ -96,26 +93,26 @@
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
         
-        <!-- LOGGED IN DASHBOARD -->
-        <div id="userView" class="user-dashboard">
+        <!-- USER VIEW (Seller or Buyer) -->
+        <div id="userView" class="user-view">
             <div class="welcome-banner">
-                <h1>👋 Welcome back!</h1>
-                <p><span id="premiumStatus"></span> <span id="userTypeDisplay"></span></p>
+                <div><h1>👋 Welcome back!</h1><p style="opacity:0.9;"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div>
+                <span class="badge" id="roleBadge"></span>
             </div>
+            <div class="section-title">🚀 Quick Actions</div>
             <div class="quick-actions" id="userActions"></div>
-            <div style="text-align:center; margin-top:1rem;"><a href="#" onclick="logout()" style="color:#e74c3c; font-weight:600;">🚪 Logout</a></div>
+            <div style="text-align:center; margin:1rem 0;"><a href="#" onclick="logout()" style="color:#e74c3c; font-weight:600;">🚪 Logout</a></div>
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
     </div>
 
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        
         if (token) { loadUserDashboard(); checkPremiumStatus(); } else { init(); }
         
         async function init() { try { var r = await fetch('/api/products?page=0&size=200'); var d = await r.json(); if (d.data) document.getElementById('pubProductCount').textContent = d.data.length; } catch(e) {} }
         
-        async function checkPremiumStatus() { try { var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success && d.data && d.data.isPremium) { document.getElementById('premiumStatus').textContent = '🏆 Premium |'; } } catch(e) {} }
+        async function checkPremiumStatus() { try { var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success && d.data && d.data.isPremium) { document.getElementById('premiumStatus').textContent = '🏆 Premium | '; } } catch(e) {} }
         
         async function loadUserDashboard() {
             document.getElementById('publicView').style.display = 'none';
@@ -123,20 +120,22 @@
             var userType = 'BUYER';
             try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if (Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if (payload.userType === 'SELLER') userType = 'SELLER'; } catch(e) {}
             document.getElementById('userTypeDisplay').textContent = userType === 'SELLER' ? '🏪 Seller Dashboard' : '🛒 Buyer Dashboard';
+            document.getElementById('roleBadge').textContent = userType === 'SELLER' ? 'Seller' : 'Buyer';
             if (userType === 'SELLER') {
                 document.getElementById('userActions').innerHTML = 
-                    '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div></a>' +
-                    '<a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div></a>' +
-                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a>' +
-                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div></a>' +
-                    '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a>' +
-                    '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>';
+                    '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List an item</div></a>' +
+                    '<a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a>' +
+                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">Manage sales</div></a>' +
+                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse all</div></a>' +
+                    '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div><div class="sub">Saved items</div></a>' +
+                    '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade now</div></a>';
             } else {
                 document.getElementById('userActions').innerHTML = 
-                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div></a>' +
-                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a>' +
-                    '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a>' +
-                    '<a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi Deals</div></a>';
+                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse products</div></a>' +
+                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">Track purchases</div></a>' +
+                    '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div><div class="sub">Saved items</div></a>' +
+                    '<a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi Deals</div><div class="sub">Group buying</div></a>' +
+                    '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Become seller</div></a>';
             }
         }
         
