@@ -110,7 +110,7 @@
         <div id="userView" class="user-view">
             <div class="welcome-banner"><div><h1>👋 Welcome back!</h1><p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div><span class="badge" id="roleBadge"></span></div>
             <div class="stats-grid" id="userStats"></div>
-            <div id="buyerCartPanel" style="display:none;"></div>
+            <div id="buyerPanel" style="display:none;"></div>
             <div class="section-title">Quick Actions</div>
             <div class="quick-actions" id="userActions"></div>
             <div id="sellerPanel" style="display:none;"></div>
@@ -132,7 +132,10 @@
         }
         async function loadBuyerView(){
             document.getElementById('userActions').innerHTML='<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">Shop now</div></a><a href="/cart" class="action-card"><div class="icon">🛒</div><div class="title">View Cart</div><div class="sub">Checkout</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">Track</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div><div class="sub">Saved</div></a><a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi</div><div class="sub">Groups</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer</div><div class="sub">Earn</div></a>';
-            loadBuyerStats();loadBuyerCart();
+            document.getElementById('buyerPanel').style.display='block';
+            loadBuyerStats();
+            loadBuyerCart();
+            loadBuyerOffers();
         }
         async function loadBuyerStats(){
             document.getElementById('userStats').innerHTML='<div class="stat-card"><div class="icon">🛒</div><div class="value" id="cartCount">-</div><div class="label">Cart Items</div></div><div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist</div></div><div class="stat-card"><div class="icon">📦</div><div class="value" id="orderCount">-</div><div class="label">Orders</div></div><div class="stat-card"><div class="icon">💰</div><div class="value" id="cartTotal">-</div><div class="label">Cart Total</div></div>';
@@ -142,7 +145,20 @@
         }
         async function loadBuyerCart(){
             try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();
-                if(d.success&&d.data&&d.data.items&&d.data.items.length>0){var panel=document.getElementById('buyerCartPanel');panel.style.display='block';var html='<div class="cart-mini"><div class="section-title">🛒 Your Cart</div>';for(var i=0;i<d.data.items.length;i++){var item=d.data.items[i];html+='<div class="cart-item-row"><span>'+item.productName+' x'+item.quantity+'</span><span>'+item.effectivePrice.toLocaleString()+' XAF</span></div>';}html+='<div class="cart-total">Total: '+d.data.total.toLocaleString()+' XAF</div>';html+='<a href="/cart" class="btn-cart-action">⚡ Buy Now</a></div>';panel.innerHTML=html;}}catch(e){}
+                var panel=document.getElementById('buyerPanel');
+                if(d.success&&d.data&&d.data.items&&d.data.items.length>0){var html='<div class="cart-mini"><div class="section-title">🛒 Your Cart</div>';for(var i=0;i<d.data.items.length;i++){var item=d.data.items[i];html+='<div class="cart-item-row"><span>'+item.productName+' x'+item.quantity+'</span><span>'+item.effectivePrice.toLocaleString()+' XAF</span></div>';}html+='<div class="cart-total">Total: '+d.data.total.toLocaleString()+' XAF</div>';html+='<a href="/cart" class="btn-cart-action">⚡ Buy Now</a></div>';panel.innerHTML=html;}else{panel.innerHTML='';}
+            }catch(e){}
+        }
+        async function loadBuyerOffers(){
+            try{var r=await fetch('/api/makola/my-offers',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();
+                if(d.success&&d.data&&d.data.length>0){
+                    var panel=document.getElementById('buyerPanel');
+                    var html=panel.innerHTML;
+                    html+='<div class="cart-mini" style="margin-top:15px;"><div class="section-title">💬 My Offers</div>';
+                    for(var i=0;i<d.data.length;i++){var o=d.data[i];var sc=o.status==='ACCEPTED'?'#10b981':o.status==='REJECTED'?'#d00':'#d68910';html+='<div class="cart-item-row"><span>'+o.productName+'</span><span style="color:'+sc+';font-weight:600;">'+o.status+'</span><span>'+o.buyerOffer.toLocaleString()+' XAF</span></div>';}
+                    html+='</div>';panel.innerHTML=html;
+                }
+            }catch(e){}
         }
         async function loadSellerView(){
             document.getElementById('userActions').innerHTML='<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">View all</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade</div></a>';
@@ -163,11 +179,8 @@
             try{var r=await fetch('/api/makola/seller/offers',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();
                 var panel=document.getElementById('sellerPanel');
                 var html='<div class="section-title" style="margin-top:20px;">💰 Customer Offers</div><div class="order-table"><div class="order-row header-row"><span>Product</span><span>Offer</span><span>Status</span><span>Action</span></div>';
-                if(d.success&&d.data&&d.data.length>0){
-                    for(var i=0;i<d.data.length;i++){var o=d.data[i];html+='<div class="order-row"><span>'+o.productName+'</span><span>'+o.buyerOffer.toLocaleString()+' XAF</span><span class="status status-PENDING">'+o.status+'</span><span><button class="btn-sm btn-confirm" onclick="acceptOffer('+o.negotiationId+')">Accept</button> <button class="btn-sm btn-reject" onclick="rejectOffer('+o.negotiationId+')">Reject</button></span></div>';}
-                }else{html+='<div class="empty-state">No offers yet. Buyers can negotiate prices on your products.</div>';}
-                html+='</div>';
-                panel.innerHTML+=html;
+                if(d.success&&d.data&&d.data.length>0){for(var i=0;i<d.data.length;i++){var o=d.data[i];html+='<div class="order-row"><span>'+o.productName+'</span><span>'+o.buyerOffer.toLocaleString()+' XAF</span><span class="status status-PENDING">'+o.status+'</span><span><button class="btn-sm btn-confirm" onclick="acceptOffer('+o.negotiationId+')">Accept</button> <button class="btn-sm btn-reject" onclick="rejectOffer('+o.negotiationId+')">Reject</button></span></div>';}}else{html+='<div class="empty-state">No offers yet.</div>';}
+                html+='</div>';panel.innerHTML+=html;
             }catch(e){}
         }
         async function updateOrderStatus(oid,status){try{var r=await fetch('/api/orders/'+oid+'/update-status?status='+status,{method:'PUT',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('✅ Order '+status+'!');loadSellerView();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
