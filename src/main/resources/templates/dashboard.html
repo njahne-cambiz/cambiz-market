@@ -3,17 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | CamBiz Market</title>
+    <title>CamBiz Market - Cameroon's Premier E-Commerce Platform</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f0f2f5; min-height: 100vh; }
         .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: center; align-items: center; }
         .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
-        .container { max-width: 600px; margin: 4rem auto; padding: 0 1.5rem; }
-        .login-card { background: white; border-radius: 24px; padding: 3.5rem 2.5rem; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
-        .login-card .icon { font-size: 4rem; margin-bottom: 1rem; }
-        .login-card h1 { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
-        .login-card p { color: #636e72; margin-bottom: 2rem; font-size: 1rem; line-height: 1.5; }
+        
+        .container { max-width: 900px; margin: 3rem auto; padding: 0 1.5rem; }
+        
+        .hero { text-align: center; margin-bottom: 3rem; }
+        .hero .icon { font-size: 4rem; margin-bottom: 1rem; }
+        .hero h1 { font-size: 2.2rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
+        .hero p { color: #636e72; font-size: 1.1rem; line-height: 1.6; }
+        
+        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        .about-card { background: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.2s; }
+        .about-card:hover { transform: translateY(-3px); }
+        .about-card .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .about-card h3 { color: #1a1a2e; margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .about-card p { color: #636e72; font-size: 0.9rem; line-height: 1.5; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 3rem; }
+        .stat-card { background: white; border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .stat-card .value { font-size: 1.8rem; font-weight: 700; color: #667eea; }
+        .stat-card .label { color: #636e72; font-size: 0.85rem; margin-top: 0.3rem; }
+        
+        .login-card { background: white; border-radius: 24px; padding: 3rem 2.5rem; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
+        .login-card h2 { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
+        .login-card p { color: #636e72; margin-bottom: 1.5rem; }
         .btn { padding: 16px 36px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 16px; margin: 8px; min-width: 200px; transition: all 0.2s; }
         .btn:hover { transform: translateY(-2px); }
         .btn-primary { background: #667eea; color: white; box-shadow: 0 4px 16px rgba(102,126,234,0.4); }
@@ -22,18 +40,72 @@
         .login-form input { display: block; width: 100%; padding: 14px 16px; margin-bottom: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 15px; }
         .login-form input:focus { border-color: #667eea; outline: none; }
         .login-form button { width: 100%; margin: 0; }
-        @media (max-width: 600px) { .login-card { padding: 2.5rem 1.5rem; } .container { margin: 2rem auto; } }
+        
+        .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
+        
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.6rem; } }
+        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } .login-card { padding: 2rem 1.5rem; } }
     </style>
 </head>
 <body>
     <header class="header"><a href="/store" class="logo">🛒 CamBiz Market</a></header>
+    
     <div class="container">
-        <div class="login-card">
+        <!-- Hero -->
+        <div class="hero">
             <div class="icon">🛒</div>
             <h1>Welcome to CamBiz Market</h1>
-            <p>Cameroon's Premier E-Commerce Platform<br>Buy & Sell with Confidence</p>
+            <p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p>
+        </div>
+        
+        <!-- About Section -->
+        <div class="about-grid">
+            <div class="about-card">
+                <div class="icon">🛍️</div>
+                <h3>Buy & Sell Locally</h3>
+                <p>Connect with buyers and sellers across Cameroon. From smartphones to farm produce, find everything you need.</p>
+            </div>
+            <div class="about-card">
+                <div class="icon">💳</div>
+                <h3>Mobile Money Ready</h3>
+                <p>Pay easily with MTN Mobile Money and Orange Money. Secure transactions with buyer protection.</p>
+            </div>
+            <div class="about-card">
+                <div class="icon">🚀</div>
+                <h3>Boost Your Business</h3>
+                <p>Premium seller badges, featured listings, and powerful tools to grow your sales and reach more customers.</p>
+            </div>
+            <div class="about-card">
+                <div class="icon">🤖</div>
+                <h3>AI-Powered Negotiation</h3>
+                <p>Our Makola AI helps you get the best price. Make offers and let AI negotiate for you in real-time.</p>
+            </div>
+            <div class="about-card">
+                <div class="icon">📱</div>
+                <h3>Share on WhatsApp</h3>
+                <p>One-click sharing to WhatsApp. Spread the word about your products and grow your customer base instantly.</p>
+            </div>
+            <div class="about-card">
+                <div class="icon">⭐</div>
+                <h3>Trusted Reviews</h3>
+                <p>Real reviews from real buyers. Make informed decisions with our verified review system.</p>
+            </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products Listed</div></div>
+            <div class="stat-card"><div class="value">2+</div><div class="label">Registered Users</div></div>
+            <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
+            <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
+        </div>
+        
+        <!-- Login -->
+        <div class="login-card">
+            <h2>🔐 Get Started Today</h2>
+            <p>Join Cameroon's fastest growing marketplace</p>
             <button class="btn btn-primary" onclick="showLogin()">🔑 Login</button>
-            <a href="/register" class="btn btn-success">📝 Create Account</a>
+            <a href="/register" class="btn btn-success">📝 Create Free Account</a>
             <div class="login-form" id="loginForm">
                 <input type="email" id="loginEmail" placeholder="Email">
                 <input type="password" id="loginPassword" placeholder="Password">
@@ -41,15 +113,22 @@
                 <p id="loginError" style="color:#e74c3c; margin-top:12px; display:none;"></p>
             </div>
         </div>
+        
+        <div class="footer">
+            <p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p>
+        </div>
     </div>
+
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (token) { window.location.href = '/store'; }
+        async function init() { try { var r = await fetch('/api/products?page=0&size=200'); var d = await r.json(); if (d.data) document.getElementById('pubProductCount').textContent = d.data.length; } catch(e) {} }
         function showLogin() { document.getElementById('loginForm').style.display = 'block'; }
         async function doLogin() {
             var email = document.getElementById('loginEmail').value; var password = document.getElementById('loginPassword').value; var errorEl = document.getElementById('loginError');
             try { var r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var d = await r.json(); if (d.success && d.data && d.data.token) { localStorage.setItem('token', d.data.token); window.location.href = '/store'; } else { errorEl.textContent = d.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
         }
+        init();
     </script>
 </body>
 </html>
