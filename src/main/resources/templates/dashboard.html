@@ -12,66 +12,85 @@
         .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; letter-spacing: -0.5px; }
         .header .logo span { color: #febd69; }
         
-        .container { max-width: 950px; margin: 2rem auto; padding: 0 1.5rem; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
         
         .hero { text-align: center; margin-bottom: 2.5rem; }
         .hero .icon { font-size: 4.5rem; margin-bottom: 1rem; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .hero h1 { font-size: 2.4rem; font-weight: 800; color: #0f1111; margin-bottom: 0.5rem; letter-spacing: -1px; }
+        .hero h1 { font-size: 2.4rem; font-weight: 800; color: #0f1111; }
         .hero p { color: #565959; font-size: 1.15rem; }
         
         .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
         .about-card { background: white; border-radius: 12px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); transition: all 0.3s; }
         .about-card:hover { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
         .about-card .icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
-        .about-card h3 { color: #0f1111; margin-bottom: 0.4rem; font-size: 1rem; font-weight: 700; }
-        .about-card p { color: #565959; font-size: 0.85rem; line-height: 1.4; }
+        .about-card h3 { color: #0f1111; font-size: 1rem; font-weight: 700; }
+        .about-card p { color: #565959; font-size: 0.85rem; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
-        .stat-card { background: white; border-radius: 12px; padding: 1.6rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 12px; padding: 1.4rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); transition: transform 0.2s; }
         .stat-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .stat-card .value { font-size: 2rem; font-weight: 800; color: #131921; }
-        .stat-card .label { color: #565959; font-size: 0.8rem; margin-top: 0.3rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 1.8rem; font-weight: 800; color: #131921; }
+        .stat-card .label { color: #565959; font-size: 0.75rem; margin-top: 0.3rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .login-card { background: white; border-radius: 12px; padding: 2.5rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); position: relative; overflow: hidden; max-width: 420px; margin: 0 auto; }
-        .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #febd69, #ffd814); }
-        .login-card h2 { font-size: 1.5rem; font-weight: 700; color: #0f1111; margin-bottom: 0.5rem; }
+        .login-card { background: white; border-radius: 12px; padding: 2.5rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); max-width: 420px; margin: 0 auto; }
+        .login-card::before { content: ''; display: block; height: 4px; background: linear-gradient(90deg, #febd69, #ffd814); margin: -2.5rem -2.5rem 1.5rem -2.5rem; }
+        .login-card h2 { font-size: 1.5rem; font-weight: 700; color: #0f1111; }
         .login-card p { color: #565959; margin-bottom: 1.5rem; }
         .btn { padding: 12px 34px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 6px; min-width: 200px; transition: all 0.2s; }
         .btn:hover { transform: translateY(-1px); }
         .btn-primary { background: #ffd814; color: #0f1111; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .btn-primary:hover { background: #f7ca00; }
-        .btn-success { background: white; color: #0f1111; border: 1px solid #d5d9d9; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+        .btn-success { background: white; color: #0f1111; border: 1px solid #d5d9d9; }
         .btn-success:hover { background: #f7fafa; }
+        .btn-sm { padding: 6px 16px; font-size: 0.8rem; min-width: auto; border-radius: 6px; }
+        .btn-confirm { background: #ffd814; color: #0f1111; }
+        .btn-confirm:hover { background: #f7ca00; }
+        .btn-ship { background: #131921; color: white; }
+        .btn-ship:hover { background: #232f3e; }
+        
         .login-form { display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8fafc; border-radius: 12px; text-align: left; border: 1px solid #e8ecf1; }
         .login-form input { display: block; width: 100%; padding: 10px 14px; margin-bottom: 12px; border: 1px solid #a6a6a6; border-radius: 4px; font-size: 14px; }
-        .login-form input:focus { border-color: #febd69; outline: none; box-shadow: 0 0 3px #febd69; }
+        .login-form input:focus { border-color: #febd69; outline: none; }
         .login-form button { width: 100%; margin: 0; }
         
         .user-view { display: none; }
-        .welcome-banner { background: linear-gradient(135deg, #131921, #232f3e); color: white; border-radius: 12px; padding: 2rem 2.5rem; margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+        .welcome-banner { background: linear-gradient(135deg, #131921, #232f3e); color: white; border-radius: 12px; padding: 2rem 2.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .welcome-banner h1 { font-size: 1.7rem; font-weight: 700; }
-        .welcome-banner .subtitle { opacity: 0.9; font-size: 0.95rem; margin-top: 0.3rem; }
+        .welcome-banner .subtitle { opacity: 0.9; font-size: 0.9rem; margin-top: 0.3rem; }
         .welcome-banner .badge { background: #febd69; color: #0f1111; padding: 6px 18px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; }
         
-        .section-title { font-size: 1.15rem; font-weight: 700; color: #0f1111; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: #0f1111; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; }
         .section-title::after { content: ''; flex: 1; height: 1px; background: #d5d9d9; }
         
-        .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 2.5rem; }
-        .action-card { background: white; border-radius: 12px; padding: 2rem 1.2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #0f1111; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; border-bottom: 3px solid transparent; }
+        .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .action-card { background: white; border-radius: 12px; padding: 1.5rem 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #0f1111; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; border-bottom: 3px solid transparent; }
         .action-card:hover { border-bottom-color: #febd69; transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
-        .action-card .icon { font-size: 2.4rem; transition: transform 0.2s; }
+        .action-card .icon { font-size: 2.2rem; }
         .action-card:hover .icon { transform: scale(1.1); }
-        .action-card .title { font-weight: 700; font-size: 0.95rem; color: #0f1111; }
-        .action-card .sub { font-size: 0.78rem; color: #565959; }
+        .action-card .title { font-weight: 700; font-size: 0.9rem; }
+        .action-card .sub { font-size: 0.75rem; color: #565959; }
+        
+        .order-table { background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); overflow: hidden; }
+        .order-row { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr; gap: 10px; padding: 14px 20px; border-bottom: 1px solid #e8ecf1; align-items: center; font-size: 0.85rem; }
+        .order-row.header-row { background: #f8fafc; font-weight: 700; color: #565959; font-size: 0.8rem; text-transform: uppercase; }
+        .order-row:last-child { border-bottom: none; }
+        .order-row:hover { background: #f8fafc; }
+        .status { font-weight: 600; }
+        .status-PENDING { color: #d68910; }
+        .status-CONFIRMED { color: #2563eb; }
+        .status-SHIPPED { color: #6b46c1; }
+        .status-DELIVERED { color: #10b981; }
         
         .logout-btn { text-align: center; margin: 1.5rem 0; }
-        .logout-btn a { color: #565959; font-weight: 600; text-decoration: none; padding: 10px 24px; border-radius: 4px; transition: all 0.2s; font-size: 0.9rem; }
+        .logout-btn a { color: #565959; font-weight: 600; text-decoration: none; padding: 10px 24px; border-radius: 4px; font-size: 0.9rem; }
         .logout-btn a:hover { background: #f7f7f7; color: #d00; }
         
         .footer { text-align: center; padding: 1.8rem; color: #565959; font-size: 0.85rem; }
         
-        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.8rem; } .quick-actions { grid-template-columns: repeat(2, 1fr); } .welcome-banner { padding: 1.5rem; } }
+        .empty-state { text-align: center; padding: 2rem; color: #565959; }
+        
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.8rem; } .quick-actions { grid-template-columns: repeat(2, 1fr); } .order-row { grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.75rem; } }
         @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } .quick-actions { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
@@ -112,15 +131,13 @@
         <!-- USER VIEW -->
         <div id="userView" class="user-view">
             <div class="welcome-banner">
-                <div>
-                    <h1>👋 Welcome back!</h1>
-                    <p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p>
-                </div>
+                <div><h1>👋 Welcome back!</h1><p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div>
                 <span class="badge" id="roleBadge"></span>
             </div>
             <div class="stats-grid" id="userStats"></div>
             <div class="section-title">Quick Actions</div>
             <div class="quick-actions" id="userActions"></div>
+            <div id="sellerOrderPanel" style="display:none;"></div>
             <div class="logout-btn"><a href="#" onclick="logout()">Sign Out</a></div>
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
@@ -132,7 +149,7 @@
         
         async function init() { try { var r = await fetch('/api/products?page=0&size=200'); var d = await r.json(); if (d.data) document.getElementById('pubProductCount').textContent = d.data.length; } catch(e) {} }
         
-        async function checkPremiumStatus() { try { var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success && d.data && d.data.isPremium) { document.getElementById('premiumStatus').textContent = '🏆 Premium | '; } } catch(e) {} }
+        async function checkPremiumStatus() { try { var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success && d.data && d.data.isPremium) document.getElementById('premiumStatus').textContent = '🏆 Premium | '; } catch(e) {} }
         
         async function loadUserDashboard() {
             document.getElementById('publicView').style.display = 'none';
@@ -143,15 +160,14 @@
             document.getElementById('roleBadge').textContent = userType === 'SELLER' ? 'Seller' : 'Buyer';
             
             if (userType === 'SELLER') {
-                document.getElementById('userStats').innerHTML = '';
                 document.getElementById('userActions').innerHTML = 
                     '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List an item</div></a>' +
                     '<a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a>' +
-                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">Manage sales</div></a>' +
+                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">View all</div></a>' +
                     '<a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite friends</div></a>' +
                     '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse all</div></a>' +
-                    '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div><div class="sub">Saved items</div></a>' +
                     '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade now</div></a>';
+                loadSellerOrders();
             } else {
                 document.getElementById('userActions').innerHTML = 
                     '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">Shop now</div></a>' +
@@ -164,11 +180,63 @@
             }
         }
         
+        async function loadSellerOrders() {
+            try {
+                var r = await fetch('/api/orders/seller-orders', { headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                var panel = document.getElementById('sellerOrderPanel');
+                panel.style.display = 'block';
+                
+                var productCount = 0;
+                try { var pr = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token } }); var pd = await pr.json(); if (pd.success && pd.data) productCount = pd.data.length; } catch(e) {}
+                var orderCount = d.success && d.data ? d.data.length : 0;
+                var revenue = 0;
+                if (d.success && d.data) { for (var i = 0; i < d.data.length; i++) { revenue += d.data[i].sellerPayout || 0; } }
+                
+                document.getElementById('userStats').innerHTML = 
+                    '<div class="stat-card"><div class="value">' + productCount + '</div><div class="label">My Products</div></div>' +
+                    '<div class="stat-card"><div class="value">' + orderCount + '</div><div class="label">Orders Received</div></div>' +
+                    '<div class="stat-card"><div class="value">' + revenue.toLocaleString() + '</div><div class="label">Revenue (XAF)</div></div>';
+                
+                if (d.success && d.data && d.data.length > 0) {
+                    var html = '<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="order-row header-row"><span>Order #</span><span>Product</span><span>Qty</span><span>Status</span><span>Action</span></div>';
+                    for (var j = 0; j < d.data.length; j++) {
+                        var o = d.data[j];
+                        var items = o.items ? o.items.map(function(i) { return i.productName; }).join(', ') : 'Product';
+                        var qty = o.items ? o.items.reduce(function(s, i) { return s + i.quantity; }, 0) : 0;
+                        html += '<div class="order-row">' +
+                            '<span><strong>#' + o.sellerOrderId.toString().slice(-6) + '</strong></span>' +
+                            '<span>' + items + '</span>' +
+                            '<span>' + qty + '</span>' +
+                            '<span class="status status-' + o.status + '">' + o.status + '</span>' +
+                            '<span>' + (o.status === 'PENDING' ? '<button class="btn btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'CONFIRMED\')">Confirm</button>' : 
+                                      o.status === 'CONFIRMED' ? '<button class="btn btn-sm btn-ship" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'SHIPPED\')">Ship</button>' :
+                                      o.status === 'SHIPPED' ? '<button class="btn btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'DELIVERED\')">Deliver</button>' :
+                                      '<span style="color:#10b981;">✅ Done</span>') + '</span>' +
+                            '</div>';
+                    }
+                    html += '</div>';
+                    panel.innerHTML = html;
+                } else {
+                    panel.innerHTML = '<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="empty-state">No orders yet. Your products are waiting for buyers!</div></div>';
+                }
+            } catch(e) { document.getElementById('sellerOrderPanel').innerHTML = ''; }
+        }
+        
+        async function updateOrderStatus(orderId, status) {
+            try {
+                var r = await fetch('/api/orders/' + orderId + '/update-status?status=' + status, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                if (d.success) { alert('✅ Order ' + status + '!'); loadSellerOrders(); }
+                else { alert('❌ ' + (d.message || 'Failed')); }
+            } catch(e) { alert('Network error'); }
+        }
+        
         async function loadBuyerStats() {
-            var html = '<div class="stat-card"><div class="icon">🛒</div><div class="value" id="cartCount">-</div><div class="label">Cart Items</div></div>';
-            html += '<div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist</div></div>';
-            html += '<div class="stat-card"><div class="icon">📦</div><div class="value" id="orderCount">-</div><div class="label">Orders</div></div>';
-            document.getElementById('userStats').innerHTML = html;
+            document.getElementById('userStats').innerHTML = 
+                '<div class="stat-card"><div class="icon">🛒</div><div class="value" id="cartCount">-</div><div class="label">Cart Items</div></div>' +
+                '<div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist</div></div>' +
+                '<div class="stat-card"><div class="icon">📦</div><div class="value" id="orderCount">-</div><div class="label">Orders</div></div>';
             try { var cr = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } }); var cd = await cr.json(); if (cd.success && cd.data && cd.data.items) document.getElementById('cartCount').textContent = cd.data.items.length; } catch(e) { document.getElementById('cartCount').textContent = '0'; }
             try { var wr = await fetch('/api/wishlist/count', { headers: { 'Authorization': 'Bearer ' + token } }); var wd = await wr.json(); if (wd.success) document.getElementById('wishlistCount').textContent = wd.count; } catch(e) { document.getElementById('wishlistCount').textContent = '0'; }
             try { var o = await fetch('/api/orders/my-orders', { headers: { 'Authorization': 'Bearer ' + token } }); var od = await o.json(); if (od.success && od.data) document.getElementById('orderCount').textContent = od.data.length; } catch(e) { document.getElementById('orderCount').textContent = '0'; }
