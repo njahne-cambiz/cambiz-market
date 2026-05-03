@@ -87,6 +87,9 @@ public class SecurityConfig {
 
                 // Uploaded images - public read access
                 .requestMatchers("/uploads/**").permitAll()
+                
+                // Njangi active deals - public
+                .requestMatchers(HttpMethod.GET, "/api/njangi/active").permitAll()
 
                 // STATIC & PAGES
                 .requestMatchers("/", "/dashboard/**", "/store/**", "/shop/**", "/product", "/home", "/index", "/about", "/contact").permitAll()
