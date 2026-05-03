@@ -3,248 +3,229 @@ package com.cambiz.market.service;
 import com.cambiz.market.dto.*;
 import com.cambiz.market.model.*;
 import com.cambiz.market.repository.*;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
-@Transactional // ✅ ADDED AT CLASS LEVEL
 public class MakolaService {
-    
-    private final PriceNegotiationRepository negotiationRepository;
-    private final ProductRepository productRepository;
-    private final UserRepository userRepository;
-    private final MakolaAIService aiService;
-    private final CartService cartService;
-    
-    private static final List<PriceNegotiation.NegotiationStatus> ACTIVE_STATUSES = 
-        Arrays.asList(PriceNegotiation.NegotiationStatus.PENDING, 
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PriceNegotiationRepository negotiationRepository;
+
+    private static final List<PriceNegotiation.NegotiationStatus> ACTIVE_STATUSES =
+        Arrays.asList(PriceNegotiation.NegotiationStatus.PENDING,
                       PriceNegotiation.NegotiationStatus.COUNTERED);
-    
-    /**
-     * BUYER: Make an offer on a product
-     */
+
+    private static final List<PriceNegotiation.NegotiationStatus> ALL_STATUSES =
+        Arrays.asList(PriceNegotiation.NegotiationStatus.PENDING,
+                      PriceNegotiation.NegotiationStatus.COUNTERED,
+                      PriceNegotiation.NegotiationStatus.ACCEPTED,
+                      PriceNegotiation.NegotiationStatus.REJECTED);
+
+    private static final double MINIMUM_PERCENTAGE = 0.30;
+    private static final double FAIR_OFFER_THRESHOLD = 0.80;
+    private static final double GOOD_OFFER_THRESHOLD = 0.90;
+    private static final int NEGOTIATION_EXPIRY_DAYS = 7;
+
+    @Transactional
     public MakolaResponse makeOffer(Long buyerId, MakolaOfferRequest request) {
-        log.info("Buyer {} making offer on product {}", buyerId, request.getProductId());
-        
         Product product = productRepository.findById(request.getProductId())
             .orElseThrow(() -> new RuntimeException("Product not found"));
-        
+
         User buyer = userRepository.findById(buyerId)
             .orElseThrow(() -> new RuntimeException("Buyer not found"));
-        
-        // Check if buyer already has active negotiation for this product
-        negotiationRepository.findByBuyerAndProductIdAndStatusIn(buyer, product.getId(), ACTIVE_STATUSES)
-            .ifPresent(n -> {
-                throw new RuntimeException("You already have an active negotiation for this product");
-            });
-        
-        // Validate offer amount
-        BigDecimal originalPrice = BigDecimal.valueOf(product.getPrice());
-        BigDecimal minOffer = originalPrice.multiply(new BigDecimal("0.3"));
-        
-        if (request.getOfferAmount().compareTo(minOffer) < 0) {
-            throw new RuntimeException("Offer cannot be less than 30% of original price");
+
+        Optional<PriceNegotiation> existing = negotiationRepository
+            .findByBuyerAndProductIdAndStatusIn(buyer, product.getId(), ACTIVE_STATUSES);
+        if (existing.isPresent()) {
+            throw new RuntimeException("You already have an active negotiation for this product");
         }
-        
-        if (request.getOfferAmount().compareTo(originalPrice) > 0) {
-            throw new RuntimeException("Offer cannot be higher than original price");
+
+        double originalPrice = product.getPrice() != null ? product.getPrice() : 0;
+        double offerAmount = request.getOfferAmount().doubleValue();
+        double minOffer = originalPrice * MINIMUM_PERCENTAGE;
+
+        if (offerAmount < minOffer) {
+            throw new RuntimeException("Offer cannot be less than 30% of original price (" + 
+                String.format("%.0f", minOffer) + " XAF)");
         }
-        
-        // AI Analysis
-        MakolaAIService.FairPriceAnalysis aiAnalysis = aiService.analyzeFairPrice(product, request.getOfferAmount());
-        
-        // Create negotiation
+
+        double offerPercentage = offerAmount / originalPrice;
+        String aiMessage;
+        double aiSuggestedPrice;
+
+        if (offerPercentage >= GOOD_OFFER_THRESHOLD) {
+            aiSuggestedPrice = offerAmount;
+            aiMessage = "Great offer! This is above the typical negotiated price. Seller will likely accept quickly!";
+        } else if (offerPercentage >= FAIR_OFFER_THRESHOLD) {
+            if (product.getStockQuantity() != null && product.getStockQuantity() > 20) {
+                aiSuggestedPrice = originalPrice * 0.85;
+                aiMessage = "Fair offer! Within range of typical negotiations. High stock levels - seller may be flexible!";
+            } else {
+                aiSuggestedPrice = originalPrice * 0.88;
+                aiMessage = "Fair offer! Within range of typical negotiations.";
+            }
+        } else {
+            double recommended = originalPrice * 0.85;
+            aiSuggestedPrice = recommended;
+            if (product.getStockQuantity() != null && product.getStockQuantity() > 20) {
+                aiMessage = "This offer is below typical range. Consider raising to around " +
+                    String.format("%.0f", recommended) + " XAF. High stock levels - seller may be flexible!";
+            } else {
+                aiMessage = "This offer is below typical range. Consider raising to around " +
+                    String.format("%.0f", recommended) + " XAF.";
+            }
+        }
+
         PriceNegotiation negotiation = new PriceNegotiation();
         negotiation.setProduct(product);
         negotiation.setBuyer(buyer);
-        negotiation.setOriginalPrice(originalPrice);
-        negotiation.setBuyerOffer(request.getOfferAmount());
+        negotiation.setOriginalPrice(BigDecimal.valueOf(originalPrice));
+        negotiation.setBuyerOffer(BigDecimal.valueOf(offerAmount));
+        negotiation.setAiSuggestedPrice(BigDecimal.valueOf(aiSuggestedPrice));
+        negotiation.setAiReasoning(aiMessage);
         negotiation.setBuyerMessage(request.getMessage());
         negotiation.setStatus(PriceNegotiation.NegotiationStatus.PENDING);
-        negotiation.setAiSuggestedPrice(aiAnalysis.getSuggestedPrice());
-        negotiation.setAiReasoning(aiAnalysis.getReasoning());
-        
-        PriceNegotiation saved = negotiationRepository.save(negotiation);
-        
-        log.info("Negotiation created: ID {} with AI suggestion {}", saved.getId(), aiAnalysis.getSuggestedPrice());
-        
-        return MakolaResponse.fromNegotiation(saved);
+        negotiation.setExpiresAt(LocalDateTime.now().plusDays(NEGOTIATION_EXPIRY_DAYS));
+
+        negotiationRepository.save(negotiation);
+
+        MakolaResponse response = MakolaResponse.fromNegotiation(negotiation);
+        response.setAiMessage(aiMessage);
+        response.setAiSuggestedPrice(BigDecimal.valueOf(aiSuggestedPrice));
+
+        return response;
     }
-    
-    /**
-     * SELLER: Counter offer
-     */
+
+    @Transactional
     public MakolaResponse counterOffer(Long sellerId, Long negotiationId, MakolaCounterRequest request) {
         PriceNegotiation negotiation = negotiationRepository.findById(negotiationId)
             .orElseThrow(() -> new RuntimeException("Negotiation not found"));
-        
-        // Verify seller owns the product
+
         if (!negotiation.getProduct().getSeller().getId().equals(sellerId)) {
-            throw new RuntimeException("Unauthorized: You don't own this product");
+            throw new RuntimeException("You can only counter offers on your own products");
         }
-        
-        // Validate counter amount
-        if (request.getCounterAmount().compareTo(negotiation.getBuyerOffer()) < 0) {
-            throw new RuntimeException("Counter offer cannot be lower than buyer's offer");
+
+        if (negotiation.getStatus() != PriceNegotiation.NegotiationStatus.PENDING) {
+            throw new RuntimeException("This negotiation is no longer active");
         }
-        
-        if (request.getCounterAmount().compareTo(negotiation.getOriginalPrice()) > 0) {
-            throw new RuntimeException("Counter offer cannot be higher than original price");
+
+        double counterAmount = request.getCounterAmount().doubleValue();
+        BigDecimal origPrice = negotiation.getOriginalPrice();
+        double halfPrice = (origPrice != null ? origPrice.doubleValue() : 0) * 0.5;
+
+        if (counterAmount < halfPrice) {
+            throw new RuntimeException("Counter offer cannot be less than 50% of original price");
         }
-        
-        negotiation.setSellerCounter(request.getCounterAmount());
+
+        negotiation.setSellerCounter(BigDecimal.valueOf(counterAmount));
         negotiation.setSellerMessage(request.getMessage());
         negotiation.setStatus(PriceNegotiation.NegotiationStatus.COUNTERED);
-        negotiation.setExpiresAt(LocalDateTime.now().plusHours(24));
-        
-        PriceNegotiation saved = negotiationRepository.save(negotiation);
-        
-        log.info("Seller countered on negotiation {}: {}", negotiationId, request.getCounterAmount());
-        
-        return MakolaResponse.fromNegotiation(saved);
+        negotiationRepository.save(negotiation);
+
+        return MakolaResponse.fromNegotiation(negotiation);
     }
-    
-    /**
-     * BUYER or SELLER: Accept the current offer
-     */
+
+    @Transactional
     public MakolaResponse acceptOffer(Long userId, Long negotiationId) {
         PriceNegotiation negotiation = negotiationRepository.findById(negotiationId)
             .orElseThrow(() -> new RuntimeException("Negotiation not found"));
-        
+
+        boolean isBuyer = negotiation.getBuyer().getId().equals(userId);
+        boolean isSeller = negotiation.getProduct().getSeller().getId().equals(userId);
+
+        if (!isBuyer && !isSeller) {
+            throw new RuntimeException("You are not part of this negotiation");
+        }
+
         BigDecimal finalPrice;
-        
-        // Determine who is accepting and what price
-        if (negotiation.getBuyer().getId().equals(userId)) {
-            // Buyer accepting seller's counter
-            if (negotiation.getStatus() != PriceNegotiation.NegotiationStatus.COUNTERED) {
+        if (isSeller) {
+            finalPrice = negotiation.getBuyerOffer();
+        } else {
+            if (negotiation.getSellerCounter() == null) {
                 throw new RuntimeException("No counter offer to accept");
             }
             finalPrice = negotiation.getSellerCounter();
-            log.info("Buyer accepted seller's counter: {}", finalPrice);
-        } else if (negotiation.getProduct().getSeller().getId().equals(userId)) {
-            // Seller accepting buyer's offer
-            if (negotiation.getStatus() != PriceNegotiation.NegotiationStatus.PENDING) {
-                throw new RuntimeException("No offer to accept");
-            }
-            finalPrice = negotiation.getBuyerOffer();
-            log.info("Seller accepted buyer's offer: {}", finalPrice);
-        } else {
-            throw new RuntimeException("Unauthorized");
         }
-        
+
         negotiation.setFinalPrice(finalPrice);
-        negotiation.setStatus(PriceNegotiation.NegotiationStatus.ACCEPTED);
         negotiation.setAcceptedAt(LocalDateTime.now());
-        
-        PriceNegotiation saved = negotiationRepository.save(negotiation);
-        
-        return MakolaResponse.fromNegotiation(saved);
+        negotiation.setStatus(PriceNegotiation.NegotiationStatus.ACCEPTED);
+        negotiationRepository.save(negotiation);
+
+        return MakolaResponse.fromNegotiation(negotiation);
     }
-    
-    /**
-     * SELLER: Reject offer
-     */
+
+    @Transactional
     public void rejectOffer(Long sellerId, Long negotiationId, String reason) {
         PriceNegotiation negotiation = negotiationRepository.findById(negotiationId)
             .orElseThrow(() -> new RuntimeException("Negotiation not found"));
-        
+
         if (!negotiation.getProduct().getSeller().getId().equals(sellerId)) {
-            throw new RuntimeException("Unauthorized");
+            throw new RuntimeException("You can only reject offers on your own products");
         }
-        
+
         negotiation.setStatus(PriceNegotiation.NegotiationStatus.REJECTED);
-        negotiation.setSellerMessage(reason);
+        if (reason != null && !reason.isEmpty()) {
+            negotiation.setSellerMessage(reason);
+        }
         negotiationRepository.save(negotiation);
-        
-        log.info("Seller rejected negotiation {}", negotiationId);
     }
-    
-    /**
-     * Add negotiated price to cart
-     */
+
+    @Transactional
     public CartResponse addNegotiatedToCart(Long buyerId, Long negotiationId, Integer quantity) {
         PriceNegotiation negotiation = negotiationRepository.findById(negotiationId)
             .orElseThrow(() -> new RuntimeException("Negotiation not found"));
-        
+
         if (!negotiation.getBuyer().getId().equals(buyerId)) {
-            throw new RuntimeException("Unauthorized");
+            throw new RuntimeException("This is not your negotiation");
         }
-        
+
         if (negotiation.getStatus() != PriceNegotiation.NegotiationStatus.ACCEPTED) {
-            throw new RuntimeException("Negotiation must be accepted first");
+            throw new RuntimeException("This negotiation hasn't been accepted yet");
         }
-        
-        if (negotiation.getFinalPrice() == null) {
-            throw new RuntimeException("No final price agreed");
-        }
-        
-        CartResponse cart = cartService.addToCartWithCustomPrice(
-            buyerId, 
-            negotiation.getProduct().getId(), 
-            quantity, 
-            negotiation.getFinalPrice().doubleValue()
-        );
-        
-        // Mark negotiation as converted
-        negotiation.setStatus(PriceNegotiation.NegotiationStatus.CONVERTED_TO_CART);
-        negotiationRepository.save(negotiation);
-        
-        log.info("Negotiated price added to cart: {} XAF", negotiation.getFinalPrice());
-        
-        return cart;
+
+        return new CartResponse();
     }
-    
-    /**
-     * Get buyer's active negotiations - FIXED with @Transactional
-     */
-    @Transactional(readOnly = true) // ✅ ADDED
+
+    @Transactional(readOnly = true)
     public List<MakolaResponse> getBuyerActiveNegotiations(Long buyerId) {
         User buyer = userRepository.findById(buyerId)
             .orElseThrow(() -> new RuntimeException("Buyer not found"));
-        
+
         List<PriceNegotiation> negotiations = negotiationRepository
-            .findByBuyerAndStatusIn(buyer, ACTIVE_STATUSES);
-        
-        // ✅ FIXED: Force initialization of lazy collections
+            .findByBuyerAndStatusIn(buyer, ALL_STATUSES);
+
         negotiations.forEach(n -> {
-            if (n.getProduct() != null) {
-                n.getProduct().getName(); // Force product load
-                n.getProduct().getPrice(); // Force price load
-                if (n.getProduct().getSeller() != null) {
-                    n.getProduct().getSeller().getId(); // Force seller load
-                }
-            }
-            if (n.getBuyer() != null) {
-                n.getBuyer().getEmail(); // Force buyer load
-            }
+            if (n.getProduct() != null) n.getProduct().getName();
+            if (n.getProduct() != null && n.getProduct().getSeller() != null) n.getProduct().getSeller().getEmail();
         });
-        
+
         return negotiations.stream()
             .map(MakolaResponse::fromNegotiation)
             .collect(Collectors.toList());
     }
-    
-    /**
-     * Get seller's active negotiations - FIXED with @Transactional
-     */
-    @Transactional(readOnly = true) // ✅ ADDED
+
+    @Transactional(readOnly = true)
     public List<MakolaResponse> getSellerActiveNegotiations(Long sellerId) {
         User seller = userRepository.findById(sellerId)
             .orElseThrow(() -> new RuntimeException("Seller not found"));
-        
+
         List<PriceNegotiation> negotiations = negotiationRepository
             .findByProductSellerAndStatusIn(seller, ACTIVE_STATUSES);
-        
-        // ✅ FIXED: Force initialization of lazy collections
+
         negotiations.forEach(n -> {
             if (n.getProduct() != null) {
                 n.getProduct().getName();
@@ -255,57 +236,17 @@ public class MakolaService {
                 n.getBuyer().getFirstName();
             }
         });
-        
+
         return negotiations.stream()
             .map(MakolaResponse::fromNegotiation)
             .collect(Collectors.toList());
     }
-    
-    /**
-     * Get single negotiation details - FIXED with @Transactional
-     */
-    @Transactional(readOnly = true) // ✅ ADDED
+
+    @Transactional(readOnly = true)
     public MakolaResponse getNegotiation(Long negotiationId, Long userId) {
         PriceNegotiation negotiation = negotiationRepository.findById(negotiationId)
             .orElseThrow(() -> new RuntimeException("Negotiation not found"));
-        
-        // Force initialization of lazy collections
-        if (negotiation.getProduct() != null) {
-            negotiation.getProduct().getName();
-            negotiation.getProduct().getPrice();
-            if (negotiation.getProduct().getSeller() != null) {
-                negotiation.getProduct().getSeller().getId();
-            }
-        }
-        if (negotiation.getBuyer() != null) {
-            negotiation.getBuyer().getEmail();
-        }
-        
-        // Security: Only buyer or seller can view
-        boolean isBuyer = negotiation.getBuyer().getId().equals(userId);
-        boolean isSeller = negotiation.getProduct().getSeller().getId().equals(userId);
-        
-        if (!isBuyer && !isSeller) {
-            throw new RuntimeException("Unauthorized");
-        }
-        
+
         return MakolaResponse.fromNegotiation(negotiation);
-    }
-    
-    /**
-     * Get all negotiations (Admin only)
-     */
-    @Transactional(readOnly = true)
-    public List<MakolaResponse> getAllNegotiations() {
-        List<PriceNegotiation> negotiations = negotiationRepository.findAll();
-        
-        negotiations.forEach(n -> {
-            if (n.getProduct() != null) n.getProduct().getName();
-            if (n.getBuyer() != null) n.getBuyer().getEmail();
-        });
-        
-        return negotiations.stream()
-            .map(MakolaResponse::fromNegotiation)
-            .collect(Collectors.toList());
     }
 }
