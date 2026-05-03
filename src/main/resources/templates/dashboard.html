@@ -14,49 +14,35 @@
         .header nav a:hover { color: white; }
         .premium-badge { background: linear-gradient(135deg, #f39c12, #e74c3c); color: white; padding: 5px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: none; }
         
-        .container { max-width: 1050px; margin: 2.5rem auto; padding: 0 1.5rem; }
+        .container { max-width: 600px; margin: 4rem auto; padding: 0 1.5rem; }
         
-        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 2.5rem; margin-bottom: 2.5rem; }
-        .welcome-banner h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.3rem; }
-        .welcome-banner p { opacity: 0.9; font-size: 1rem; }
+        .login-card { background: white; border-radius: 24px; padding: 3.5rem 2.5rem; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
+        .login-card .icon { font-size: 4rem; margin-bottom: 1rem; }
+        .login-card h1 { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
+        .login-card p { color: #636e72; margin-bottom: 2rem; font-size: 1rem; line-height: 1.5; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
-        .stat-card { background: white; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); text-align: center; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-3px); }
-        .stat-card .icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
-        .stat-card .value { font-size: 2rem; font-weight: 700; color: #1a1a2e; }
-        .stat-card .label { color: #636e72; font-size: 0.85rem; margin-top: 0.3rem; font-weight: 500; }
+        .btn { padding: 16px 36px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 16px; margin: 8px; transition: all 0.2s; min-width: 200px; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: #667eea; color: white; box-shadow: 0 4px 16px rgba(102,126,234,0.4); }
+        .btn-primary:hover { box-shadow: 0 8px 24px rgba(102,126,234,0.5); }
+        .btn-success { background: #00b894; color: white; box-shadow: 0 4px 16px rgba(0,184,148,0.3); }
+        .btn-success:hover { box-shadow: 0 8px 24px rgba(0,184,148,0.4); }
         
-        .section-title { font-size: 1.2rem; color: #1a1a2e; margin-bottom: 1.2rem; font-weight: 700; }
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+        .login-form { display: none; margin-top: 2rem; padding: 2rem; background: #f8f9fa; border-radius: 16px; text-align: left; }
+        .login-form input { display: block; width: 100%; padding: 14px 16px; margin-bottom: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 15px; }
+        .login-form input:focus { border-color: #667eea; outline: none; }
+        .login-form button { width: 100%; margin: 0; }
+        
+        .user-dashboard { display: none; }
+        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 2.5rem; margin-bottom: 2rem; }
+        .welcome-banner h1 { font-size: 1.8rem; font-weight: 700; }
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         .action-card { background: white; border-radius: 16px; padding: 1.8rem 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.2s; display: block; border: 2px solid transparent; }
         .action-card:hover { border-color: #667eea; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(102,126,234,0.15); }
         .action-card .icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
         .action-card .title { font-weight: 600; font-size: 0.9rem; }
         
-        .order-list { background: white; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); overflow: hidden; }
-        .order-item { padding: 1.2rem 1.8rem; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; transition: background 0.2s; }
-        .order-item:hover { background: #fafbfc; }
-        .order-item:last-child { border-bottom: none; }
-        .badge { padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .badge-pending { background: #fff3cd; color: #856404; }
-        .badge-confirmed { background: #d1ecf1; color: #0c5460; }
-        .badge-delivered { background: #d4edda; color: #155724; }
-        
-        .login-section { background: white; border-radius: 20px; padding: 4rem 2rem; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
-        .login-section h2 { font-size: 1.8rem; margin-bottom: 0.5rem; color: #1a1a2e; font-weight: 700; }
-        .login-section p { color: #636e72; margin-bottom: 2rem; font-size: 1rem; }
-        .btn { padding: 14px 32px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 15px; margin: 6px; transition: all 0.2s; }
-        .btn:hover { transform: translateY(-2px); }
-        .btn-primary { background: #667eea; color: white; box-shadow: 0 4px 14px rgba(102,126,234,0.4); }
-        .btn-success { background: #00b894; color: white; box-shadow: 0 4px 14px rgba(0,184,148,0.3); }
-        .login-form { display: none; margin-top: 1.5rem; padding: 2rem; background: #f8f9fa; border-radius: 14px; text-align: left; max-width: 420px; margin-left: auto; margin-right: auto; }
-        .login-form input { display: block; width: 100%; padding: 13px 15px; margin-bottom: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; }
-        .login-form input:focus { border-color: #667eea; outline: none; }
-        .login-form button { width: 100%; }
-        .empty-state { text-align: center; padding: 2.5rem; color: #b2bec3; font-size: 0.95rem; }
-        
-        @media (max-width: 600px) { .header { padding: 1rem; } .welcome-banner { padding: 1.8rem; } .welcome-banner h1 { font-size: 1.5rem; } .login-section { padding: 2.5rem 1.5rem; } }
+        @media (max-width: 600px) { .login-card { padding: 2.5rem 1.5rem; } .container { margin: 2rem auto; } }
     </style>
 </head>
 <body>
@@ -72,72 +58,62 @@
     </header>
 
     <div class="container">
-        <div id="userDashboard" style="display:none;">
-            <div class="welcome-banner">
-                <h1>👋 Welcome back!</h1>
-                <p><span id="premiumStatus"></span> <span id="userTypeDisplay"></span></p>
-            </div>
-            <div class="stats-grid" id="userStats"></div>
-            <div class="section-title">🚀 Quick Actions</div>
-            <div class="quick-actions" id="userActions"></div>
-            <div id="sellerOrders" style="display:none;">
-                <div class="section-title">📦 Recent Orders</div>
-                <div class="order-list" id="sellerOrderList"></div>
-            </div>
-        </div>
-        
-        <div id="publicDashboard">
-            <div class="welcome-banner">
-                <h1>🛒 Welcome to CamBiz Market</h1>
-                <p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card"><div class="icon">📦</div><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
-                <div class="stat-card"><div class="icon">👥</div><div class="value">2</div><div class="label">Users</div></div>
-                <div class="stat-card"><div class="icon">🛒</div><div class="value">1</div><div class="label">Orders</div></div>
-                <div class="stat-card"><div class="icon">💰</div><div class="value">650K</div><div class="label">Revenue (XAF)</div></div>
-            </div>
-            <div class="login-section">
-                <h2>🔐 Access Your Dashboard</h2>
-                <p>Manage your orders, products, and track your business.</p>
+        <!-- PUBLIC VIEW -->
+        <div id="publicView">
+            <div class="login-card">
+                <div class="icon">🛒</div>
+                <h1>Welcome to CamBiz Market</h1>
+                <p>Cameroon's Premier E-Commerce Platform<br>Buy & Sell with Confidence</p>
                 <button class="btn btn-primary" onclick="showLogin()">🔑 Login</button>
                 <a href="/register" class="btn btn-success">📝 Create Account</a>
                 <div class="login-form" id="loginForm">
                     <input type="email" id="loginEmail" placeholder="Email">
                     <input type="password" id="loginPassword" placeholder="Password">
                     <button class="btn btn-primary" onclick="doLogin()">Login</button>
-                    <p id="loginError" style="color:#e74c3c; margin-top:10px; display:none;"></p>
+                    <p id="loginError" style="color:#e74c3c; margin-top:12px; display:none;"></p>
                 </div>
             </div>
+        </div>
+        
+        <!-- LOGGED IN VIEW -->
+        <div id="userView" class="user-dashboard">
+            <div class="welcome-banner">
+                <h1>👋 Welcome back!</h1>
+                <p><span id="premiumStatus"></span> <span id="userTypeDisplay"></span></p>
+            </div>
+            <div class="quick-actions" id="userActions"></div>
         </div>
     </div>
 
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        var userType = '';
         
-        async function init() { try { var res = await fetch('/api/products?page=0&size=200'); var data = await res.json(); if (data.data) document.getElementById('pubProductCount').textContent = data.data.length; } catch(e) {} if (token) { await loadUserDashboard(); checkPremiumStatus(); } }
-        async function checkPremiumStatus() { try { var res = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var data = await res.json(); if (data.success && data.data && data.data.isPremium) { document.getElementById('premiumBadge').style.display = 'inline-block'; document.getElementById('premiumStatus').textContent = '🏆 Premium |'; } } catch(e) {} }
+        if (token) { loadUserDashboard(); checkPremiumStatus(); }
+        
+        async function checkPremiumStatus() {
+            try { var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success && d.data && d.data.isPremium) { document.getElementById('premiumBadge').style.display = 'inline-block'; document.getElementById('premiumStatus').textContent = '🏆 Premium |'; } } catch(e) {}
+        }
+        
         async function loadUserDashboard() {
-            document.getElementById('publicDashboard').style.display = 'none'; document.getElementById('userDashboard').style.display = 'block'; document.getElementById('logoutLink').style.display = 'inline';
-            try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if (Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if (payload.userType === 'SELLER') userType = 'SELLER'; else userType = 'BUYER'; } catch(e) { userType = 'BUYER'; }
+            document.getElementById('publicView').style.display = 'none';
+            document.getElementById('userView').style.display = 'block';
+            document.getElementById('logoutLink').style.display = 'inline';
+            var userType = 'BUYER';
+            try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if (Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if (payload.userType === 'SELLER') userType = 'SELLER'; } catch(e) {}
             document.getElementById('userTypeDisplay').textContent = userType === 'SELLER' ? '🏪 Seller Dashboard' : '🛒 Buyer Dashboard';
-            if (userType === 'SELLER') loadSellerDashboard(); else loadBuyerDashboard();
+            if (userType === 'SELLER') {
+                document.getElementById('userActions').innerHTML = '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>';
+            } else {
+                document.getElementById('userActions').innerHTML = '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a>';
+            }
         }
-        async function loadBuyerDashboard() {
-            document.getElementById('userStats').innerHTML = '<div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist</div></div><div class="stat-card"><div class="icon">📦</div><div class="value" id="myOrderCount">-</div><div class="label">My Orders</div></div>';
-            document.getElementById('userActions').innerHTML = '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a>';
-            try { var wRes = await fetch('/api/wishlist/count', { headers: { 'Authorization': 'Bearer ' + token } }); var wData = await wRes.json(); if (wData.success) document.getElementById('wishlistCount').textContent = wData.count; } catch(e) { document.getElementById('wishlistCount').textContent = '0'; }
-            try { var oRes = await fetch('/api/orders/my-orders', { headers: { 'Authorization': 'Bearer ' + token } }); var oData = await oRes.json(); if (oData.success && oData.data) document.getElementById('myOrderCount').textContent = oData.data.length; } catch(e) { document.getElementById('myOrderCount').textContent = '0'; }
-        }
-        async function loadSellerDashboard() {
-            document.getElementById('userStats').innerHTML = '';
-            document.getElementById('userActions').innerHTML = '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>';
-        }
+        
         function showLogin() { document.getElementById('loginForm').style.display = 'block'; }
-        async function doLogin() { var email = document.getElementById('loginEmail').value; var password = document.getElementById('loginPassword').value; var errorEl = document.getElementById('loginError'); try { var res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var data = await res.json(); if (data.success && data.data && data.data.token) { localStorage.setItem('token', data.data.token); location.reload(); } else { errorEl.textContent = data.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; } }
+        async function doLogin() {
+            var email = document.getElementById('loginEmail').value; var password = document.getElementById('loginPassword').value; var errorEl = document.getElementById('loginError');
+            try { var r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var d = await r.json(); if (d.success && d.data && d.data.token) { localStorage.setItem('token', d.data.token); location.reload(); } else { errorEl.textContent = d.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
+        }
         function logout() { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; }
-        init();
     </script>
 </body>
 </html>
