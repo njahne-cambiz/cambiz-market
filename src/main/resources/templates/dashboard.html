@@ -7,13 +7,11 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f0f2f5; min-height: 100vh; }
-        
         .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: center; align-items: center; position: sticky; top: 0; z-index: 100; }
         .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; letter-spacing: -0.5px; }
         
         .container { max-width: 950px; margin: 2.5rem auto; padding: 0 1.5rem; }
         
-        /* PUBLIC HERO */
         .hero { text-align: center; margin-bottom: 2.5rem; }
         .hero .icon { font-size: 4.5rem; margin-bottom: 1rem; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
@@ -40,15 +38,12 @@
         .btn { padding: 15px 34px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 15px; margin: 8px; min-width: 210px; transition: all 0.25s; }
         .btn:hover { transform: translateY(-3px); }
         .btn-primary { background: linear-gradient(135deg, #667eea, #5a67d8); color: white; box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
-        .btn-primary:hover { box-shadow: 0 10px 28px rgba(102,126,234,0.55); }
         .btn-success { background: linear-gradient(135deg, #00b894, #00a381); color: white; box-shadow: 0 6px 20px rgba(0,184,148,0.35); }
-        .btn-success:hover { box-shadow: 0 10px 28px rgba(0,184,148,0.5); }
         .login-form { display: none; margin-top: 2rem; padding: 2rem; background: #f8fafc; border-radius: 16px; text-align: left; border: 1px solid #e8ecf1; }
-        .login-form input { display: block; width: 100%; padding: 14px 16px; margin-bottom: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 15px; transition: border-color 0.2s; }
+        .login-form input { display: block; width: 100%; padding: 14px 16px; margin-bottom: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 15px; }
         .login-form input:focus { border-color: #667eea; outline: none; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
         .login-form button { width: 100%; margin: 0; }
         
-        /* USER DASHBOARD */
         .user-view { display: none; }
         .welcome-banner { background: linear-gradient(135deg, #1a1a2e, #2d3436); color: white; border-radius: 20px; padding: 2.2rem 2.8rem; margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
         .welcome-banner h1 { font-size: 1.7rem; font-weight: 700; }
@@ -75,14 +70,13 @@
         .footer { text-align: center; padding: 1.8rem; color: #b2bec3; font-size: 0.85rem; }
         
         @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.8rem; } .quick-actions { grid-template-columns: repeat(2, 1fr); } .welcome-banner { padding: 1.5rem; } }
-        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } .quick-actions { grid-template-columns: 1fr 1fr; } .action-card { padding: 1.5rem 0.8rem; } }
+        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } .quick-actions { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
     <header class="header"><a href="/store" class="logo">🛒 CamBiz Market</a></header>
     
     <div class="container">
-        <!-- PUBLIC VIEW -->
         <div id="publicView">
             <div class="hero"><div class="icon">🛒</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p></div>
             <div class="about-grid">
@@ -91,7 +85,7 @@
                 <div class="about-card"><div class="icon">🚀</div><h3>Boost Your Business</h3><p>Premium tools to grow your sales.</p></div>
                 <div class="about-card"><div class="icon">🤖</div><h3>AI-Powered Negotiation</h3><p>Makola AI gets you the best price.</p></div>
                 <div class="about-card"><div class="icon">🤝</div><h3>Njangi Group Buying</h3><p>Buy together, save together.</p></div>
-                <div class="about-card"><div class="icon">⭐</div><h3>Trusted Reviews</h3><p>Real reviews from real buyers.</p></div>
+                <div class="about-card"><div class="icon">🎁</div><h3>Refer & Earn</h3><p>Invite friends and earn rewards.</p></div>
             </div>
             <div class="stats-grid">
                 <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
@@ -112,13 +106,9 @@
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
         
-        <!-- USER VIEW (Seller or Buyer) -->
         <div id="userView" class="user-view">
             <div class="welcome-banner">
-                <div>
-                    <h1>👋 Welcome back!</h1>
-                    <p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p>
-                </div>
+                <div><h1>👋 Welcome back!</h1><p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div>
                 <span class="badge" id="roleBadge"></span>
             </div>
             <div class="section-title">🚀 Quick Actions</div>
@@ -148,6 +138,7 @@
                     '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List an item</div></a>' +
                     '<a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a>' +
                     '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">Manage sales</div></a>' +
+                    '<a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite friends</div></a>' +
                     '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse all</div></a>' +
                     '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div><div class="sub">Saved items</div></a>' +
                     '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade now</div></a>';
@@ -156,7 +147,8 @@
                     '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse products</div></a>' +
                     '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">Track purchases</div></a>' +
                     '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div><div class="sub">Saved items</div></a>' +
-                    '<a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi Deals</div><div class="sub">Group buying</div></a>';
+                    '<a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi Deals</div><div class="sub">Group buying</div></a>' +
+                    '<a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite friends</div></a>';
             }
         }
         

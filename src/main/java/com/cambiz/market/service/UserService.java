@@ -86,6 +86,33 @@ public class UserService {
         user.setRoles(new HashSet<>(Collections.singletonList(userRole)));
         user.setStatus(User.UserStatus.ACTIVE);
 
+        // Generate referral code
+        String name = (user.getFirstName() != null ? user.getFirstName() : "USER").toUpperCase();
+        String code = name.replaceAll("[^A-Z0-9]", "");
+        if (code.length() > 4) code = code.substring(0, 4);
+        // Will set after save to get ID
+        user.setReferralCode(code);
+
+        // Process referral code if provided
+        if (request.getReferralCode() != null && !request.getReferralCode().isEmpty()) {
+            user.setReferredByCode(request.getReferralCode());
+        }
+
+        user = userRepository.save(user);
+        
+        // Update referral code with actual ID
+        user.setReferralCode(code + user.getId());
+        
+        // Process referral bonus
+        if (request.getReferralCode() != null && !request.getReferralCode().isEmpty()) {
+            User referrer = userRepository.findByReferralCode(request.getReferralCode()).orElse(null);
+            if (referrer != null) {
+                user.setWalletBalance(user.getWalletBalance() + 500.0); // 500 XAF signup bonus
+                referrer.setWalletBalance(referrer.getWalletBalance() != null ? referrer.getWalletBalance() + 1000.0 : 1000.0); // 1000 XAF referral bonus
+                userRepository.save(referrer);
+            }
+        }
+        
         return userRepository.save(user);
     }
 
@@ -158,11 +185,9 @@ public class UserService {
     public User updateProfile(Long userId, String firstName, String lastName, String phone) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
         if (firstName != null) user.setFirstName(firstName);
         if (lastName != null) user.setLastName(lastName);
         if (phone != null) user.setPhone(phone);
-        
         return userRepository.save(user);
     }
 

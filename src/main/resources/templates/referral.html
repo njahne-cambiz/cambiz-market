@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #667eea, #764ba2); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        
+        .register-card { background: white; border-radius: 20px; padding: 2.5rem; max-width: 520px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        .register-card .logo { text-align: center; font-size: 2rem; margin-bottom: 0.5rem; }
+        .register-card h1 { text-align: center; color: #2d3436; margin-bottom: 0.3rem; font-size: 1.5rem; }
+        .register-card p { text-align: center; color: #636e72; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.3rem; color: #2d3436; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 14px; transition: border-color 0.2s; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        
+        .referral-box { background: #f0f0ff; border: 2px dashed #667eea; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; text-align: center; }
+        .referral-box p { color: #667eea; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; }
+        .referral-box input { border-color: #667eea !important; background: white; }
+        
+        .btn-register { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+        .btn-register:hover { transform: translateY(-2px); }
+        .btn-register:disabled { background: #b2bec3; cursor: not-allowed; transform: none; }
+        
+        .message { text-align: center; margin-top: 1rem; padding: 0.75rem; border-radius: 10px; display: none; }
+        .message.success { background: #d4edda; color: #155724; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; display: block; }
+        
+        .login-link { text-align: center; margin-top: 1.5rem; color: #636e72; font-size: 0.9rem; }
+        .login-link a { color: #667eea; font-weight: bold; text-decoration: none; }
+        .login-link a:hover { text-decoration: underline; }
+        
+        .back-link { display: block; text-align: center; margin-bottom: 1rem; color: white; text-decoration: none; font-size: 0.9rem; }
+        
+        @media (max-width: 500px) {
+            .register-card { padding: 1.5rem; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div style="width:100%; max-width:520px;">
+        <a href="/store" class="back-link">← Back to Store</a>
+        
+        <div class="register-card">
+            <div class="logo">🛒</div>
+            <h1>Create Your Account</h1>
+            <p>Join Cameroon's #1 Marketplace</p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" placeholder="John">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="lastName" placeholder="Doe">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="you@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone" placeholder="+237 6XX XXX XXX">
+            </div>
+            
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Min. 6 characters">
+            </div>
+            
+            <div class="form-group">
+                <label>I want to</label>
+                <select id="userType">
+                    <option value="BUYER">🛒 Buy Products</option>
+                    <option value="SELLER">🏪 Sell Products</option>
+                </select>
+            </div>
+            
+            <div class="referral-box">
+                <p>🎁 Got a referral code?</p>
+                <input type="text" id="referralCode" placeholder="Enter friend's code (optional)">
+            </div>
+            
+            <button class="btn-register" onclick="register()">🚀 Create Account</button>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="login-link">
+                Already have an account? <a href="/dashboard">Log in</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function register() {
+            var firstName = document.getElementById('firstName').value.trim();
+            var lastName = document.getElementById('lastName').value.trim();
+            var email = document.getElementById('email').value.trim();
+            var phone = document.getElementById('phone').value.trim();
+            var password = document.getElementById('password').value;
+            var userType = document.getElementById('userType').value;
+            var referralCode = document.getElementById('referralCode').value.trim();
+            
+            var msgEl = document.getElementById('message');
+            var btn = document.querySelector('.btn-register');
+            
+            if (!firstName || !lastName || !email || !password) {
+                msgEl.textContent = '❌ Please fill in all required fields.';
+                msgEl.className = 'message error';
+                return;
+            }
+            if (password.length < 6) {
+                msgEl.textContent = '❌ Password must be at least 6 characters.';
+                msgEl.className = 'message error';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Creating account...';
+            msgEl.className = 'message';
+            
+            var body = { firstName: firstName, lastName: lastName, email: email, phone: phone, password: password, userType: userType };
+            if (referralCode) body.referralCode = referralCode;
+            
+            try {
+                var res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                var data = await res.json();
+                
+                if (data.success) {
+                    var msg = '🎉 Account created!';
+                    if (referralCode) msg += ' Referral bonus applied!';
+                    msg += ' Redirecting...';
+                    msgEl.textContent = msg;
+                    msgEl.className = 'message success';
+                    btn.textContent = '✅ Done!';
+                    setTimeout(function() { window.location.href = '/dashboard'; }, 1500);
+                } else {
+                    msgEl.textContent = '❌ ' + (data.message || 'Registration failed.');
+                    msgEl.className = 'message error';
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Create Account';
+                }
+            } catch(e) {
+                msgEl.textContent = '❌ Network error. Please try again.';
+                msgEl.className = 'message error';
+                btn.disabled = false;
+                btn.textContent = '🚀 Create Account';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -14,57 +14,38 @@ public class StoreController {
     }
 
     @GetMapping("/shop")
-    public String shop() {
-        return "redirect:/store";
-    }
+    public String shop() { return "redirect:/store"; }
 
     @GetMapping("/wishlist")
-    public String wishlist() {
-        return "wishlist";
-    }
+    public String wishlist() { return "wishlist"; }
 
     @GetMapping("/order-tracking")
-    public String orderTracking() {
-        return "order-tracking";
-    }
+    public String orderTracking() { return "order-tracking"; }
 
     @GetMapping("/track")
-    public String track() {
-        return "order-tracking";
-    }
+    public String track() { return "order-tracking"; }
 
     @GetMapping("/orders")
-    public String myOrders() {
-        return "my-orders";
-    }
+    public String myOrders() { return "my-orders"; }
 
     @GetMapping("/premium")
-    public String premium() {
-        return "premium";
-    }
+    public String premium() { return "premium"; }
 
     @GetMapping("/register")
-    public String register() {
-        return "register";
-    }
+    public String register() { return "register"; }
 
     @GetMapping("/upload-images")
-    public String uploadImages() {
-        return "upload-images";
-    }
+    public String uploadImages() { return "upload-images"; }
 
     @GetMapping("/create-product")
-    public String createProduct() {
-        return "create-product";
-    }
+    public String createProduct() { return "create-product"; }
 
     @GetMapping("/njangi")
-    public String njangi() {
-        return "njangi";
-    }
+    public String njangi() { return "njangi"; }
 
     @GetMapping("/create-njangi")
-    public String createNjangi() {
-        return "create-njangi";
-    }
+    public String createNjangi() { return "create-njangi"; }
+
+    @GetMapping("/referral")
+    public String referral() { return "referral"; }
 }

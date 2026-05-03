@@ -3,18 +3,19 @@ package com.cambiz.market.repository;
 import com.cambiz.market.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import java.util.Optional;
 
-@Repository  // ✅ ADD THIS ANNOTATION
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     
     Optional<User> findByEmail(String email);
     
     Optional<User> findByPhone(String phone);
     
-    Boolean existsByEmail(String email);
+    Optional<User> findByReferralCode(String referralCode);
     
-    Boolean existsByPhone(String phone);
+    boolean existsByEmail(String email);
     
-    Optional<User> findByEmailOrPhone(String email, String phone);
+    boolean existsByPhone(String phone);
 }

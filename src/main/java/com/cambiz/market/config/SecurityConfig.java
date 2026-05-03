@@ -98,6 +98,7 @@ public class SecurityConfig {
                 .requestMatchers("/create-product").permitAll()
                 .requestMatchers("/njangi").permitAll()
                 .requestMatchers("/create-njangi").permitAll()
+                .requestMatchers("/referral").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 
@@ -119,6 +120,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
                 .requestMatchers("/api/njangi/**").authenticated()
+                .requestMatchers("/api/referral/**").authenticated()
 
                 // Wishlist API
                 .requestMatchers("/api/wishlist/**").authenticated()
