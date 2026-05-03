@@ -147,8 +147,8 @@
         async function loadSellerView(){
             document.getElementById('userActions').innerHTML='<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">View all</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade</div></a>';
             document.getElementById('sellerPanel').style.display='block';
-            loadSellerOrders();
-            loadSellerOffers();
+            await loadSellerOrders();
+            await loadSellerOffers();
         }
         async function loadSellerOrders(){
             try{var r=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();
@@ -161,10 +161,14 @@
         }
         async function loadSellerOffers(){
             try{var r=await fetch('/api/makola/seller/offers',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();
-                var panel=document.getElementById('sellerPanel');var html=panel.innerHTML;
-                html+='<div class="section-title" style="margin-top:20px;">💰 Customer Offers</div><div class="order-table"><div class="order-row header-row"><span>Product</span><span>Buyer</span><span>Offer</span><span>Status</span><span>Action</span></div>';
-                if(d.success&&d.data&&d.data.length>0){for(var i=0;i<d.data.length;i++){var o=d.data[i];html+='<div class="order-row"><span>'+o.productName+'</span><span>'+o.buyerName+'</span><span>'+o.offerAmount.toLocaleString()+' XAF</span><span class="status status-PENDING">'+o.status+'</span><span><button class="btn-sm btn-confirm" onclick="acceptOffer('+o.negotiationId+')">Accept</button> <button class="btn-sm btn-reject" onclick="rejectOffer('+o.negotiationId+')">Reject</button></span></div>';}}else{html+='<div class="empty-state">No offers yet. Buyers can negotiate prices on your products.</div>';}
-                html+='</div>';panel.innerHTML=html;}catch(e){console.log('Offers error:',e);}
+                var panel=document.getElementById('sellerPanel');
+                var html='<div class="section-title" style="margin-top:20px;">💰 Customer Offers</div><div class="order-table"><div class="order-row header-row"><span>Product</span><span>Offer</span><span>Status</span><span>Action</span></div>';
+                if(d.success&&d.data&&d.data.length>0){
+                    for(var i=0;i<d.data.length;i++){var o=d.data[i];html+='<div class="order-row"><span>'+o.productName+'</span><span>'+o.buyerOffer.toLocaleString()+' XAF</span><span class="status status-PENDING">'+o.status+'</span><span><button class="btn-sm btn-confirm" onclick="acceptOffer('+o.negotiationId+')">Accept</button> <button class="btn-sm btn-reject" onclick="rejectOffer('+o.negotiationId+')">Reject</button></span></div>';}
+                }else{html+='<div class="empty-state">No offers yet. Buyers can negotiate prices on your products.</div>';}
+                html+='</div>';
+                panel.innerHTML+=html;
+            }catch(e){}
         }
         async function updateOrderStatus(oid,status){try{var r=await fetch('/api/orders/'+oid+'/update-status?status='+status,{method:'PUT',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('✅ Order '+status+'!');loadSellerView();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
         async function acceptOffer(nid){try{var r=await fetch('/api/makola/accept/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('✅ Offer accepted! Deal at '+d.data.finalPrice+' XAF');loadSellerView();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
