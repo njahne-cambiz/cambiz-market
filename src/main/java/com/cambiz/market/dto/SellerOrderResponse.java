@@ -1,7 +1,7 @@
 package com.cambiz.market.dto;
 
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -9,6 +9,7 @@ import java.util.List;
 @Builder
 public class SellerOrderResponse {
     private Long sellerOrderId;
+    private Long orderId;
     private Long sellerId;
     private String sellerName;
     private BigDecimal subtotal;

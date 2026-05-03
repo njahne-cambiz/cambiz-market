@@ -42,11 +42,11 @@ public class OrderService {
             throw new RuntimeException("Cart is empty");
         }
         
-        // 2. Get buyer - ✅ FIXED: Used for logging and validation
+        // 2. Get buyer
         User buyer = userRepository.findById(buyerId)
             .orElseThrow(() -> new RuntimeException("Buyer not found"));
         
-        log.info("Buyer {} ({}) checking out", buyer.getId(), buyer.getEmail()); // ✅ Use buyer variable
+        log.info("Buyer {} ({}) checking out", buyer.getId(), buyer.getEmail());
         
         // 3. Group items by seller
         Map<Long, List<CartItem>> itemsBySeller = cart.getItems().stream()
@@ -103,9 +103,12 @@ public class OrderService {
                 sellerName = seller.getFirstName();
             }
             
+            Long orderId = System.currentTimeMillis();
+            
             // Create seller order response
             sellerOrderResponses.add(SellerOrderResponse.builder()
                 .sellerOrderId(System.currentTimeMillis() + sellerId)
+                .orderId(orderId)
                 .sellerId(sellerId)
                 .sellerName(sellerName)
                 .subtotal(sellerSubtotal)
@@ -146,7 +149,7 @@ public class OrderService {
      * Get buyer's orders
      */
     public List<OrderResponse> getBuyerOrders(Long buyerId) {
-        log.debug("Fetching orders for buyer: {}", buyerId); // ✅ Use buyerId parameter
+        log.debug("Fetching orders for buyer: {}", buyerId);
         return new ArrayList<>(orderStorage.values());
     }
     
@@ -154,7 +157,7 @@ public class OrderService {
      * Get single order
      */
     public OrderResponse getOrder(Long orderId, Long userId) {
-        log.debug("User {} fetching order: {}", userId, orderId); // ✅ Use userId parameter
+        log.debug("User {} fetching order: {}", userId, orderId);
         OrderResponse order = orderStorage.get(orderId);
         if (order == null) {
             throw new RuntimeException("Order not found with ID: " + orderId);
@@ -174,10 +177,8 @@ public class OrderService {
             return;
         }
         
-        // Update payment status
         orderPaymentStatus.put(orderId, status);
         
-        // Update order status based on payment
         if ("PAID".equalsIgnoreCase(status) || "SUCCESS".equalsIgnoreCase(status)) {
             OrderResponse updatedOrder = OrderResponse.builder()
                 .orderId(order.getOrderId())
@@ -227,10 +228,27 @@ public class OrderService {
     }
     
     /**
+     * Find the main order ID from a seller order ID
+     */
+    public Long findMainOrderIdBySellerOrderId(Long sellerOrderId) {
+        for (Map.Entry<Long, OrderResponse> entry : orderStorage.entrySet()) {
+            OrderResponse order = entry.getValue();
+            if (order.getSellerOrders() != null) {
+                for (SellerOrderResponse so : order.getSellerOrders()) {
+                    if (so.getSellerOrderId().equals(sellerOrderId)) {
+                        return entry.getKey();
+                    }
+                }
+            }
+        }
+        return sellerOrderId;
+    }
+    
+    /**
      * Get all orders (for admin)
      */
     public List<OrderResponse> getAllOrders() {
-        log.debug("Fetching all orders, count: {}", orderStorage.size()); // ✅ Use orderStorage
+        log.debug("Fetching all orders, count: {}", orderStorage.size());
         return new ArrayList<>(orderStorage.values());
     }
     
@@ -238,7 +256,7 @@ public class OrderService {
      * Get seller's orders
      */
     public List<SellerOrderResponse> getSellerOrders(Long sellerId) {
-        log.debug("Fetching orders for seller: {}", sellerId); // ✅ Use sellerId parameter
+        log.debug("Fetching orders for seller: {}", sellerId);
         List<SellerOrderResponse> sellerOrders = new ArrayList<>();
         
         for (OrderResponse order : orderStorage.values()) {
