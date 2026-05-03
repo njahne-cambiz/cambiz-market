@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CamBiz Market - Cameroon's Premier E-Commerce Platform</title>
+    <title>Dashboard | CamBiz Market</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f0f2f5; min-height: 100vh; }
@@ -41,6 +41,15 @@
         .login-form input:focus { border-color: #667eea; outline: none; }
         .login-form button { width: 100%; margin: 0; }
         
+        .user-dashboard { display: none; }
+        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 2.5rem; margin-bottom: 2rem; }
+        .welcome-banner h1 { font-size: 1.8rem; font-weight: 700; }
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .action-card { background: white; border-radius: 16px; padding: 1.8rem 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.2s; display: block; border: 2px solid transparent; }
+        .action-card:hover { border-color: #667eea; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(102,126,234,0.15); }
+        .action-card .icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
+        .action-card .title { font-weight: 600; font-size: 0.9rem; }
+        
         .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
         
         @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.6rem; } }
@@ -51,83 +60,81 @@
     <header class="header"><a href="/store" class="logo">🛒 CamBiz Market</a></header>
     
     <div class="container">
-        <!-- Hero -->
-        <div class="hero">
-            <div class="icon">🛒</div>
-            <h1>Welcome to CamBiz Market</h1>
-            <p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p>
+        <!-- PUBLIC DASHBOARD -->
+        <div id="publicView">
+            <div class="hero">
+                <div class="icon">🛒</div>
+                <h1>Welcome to CamBiz Market</h1>
+                <p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p>
+            </div>
+            <div class="about-grid">
+                <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect with buyers and sellers across Cameroon. From smartphones to farm produce, find everything you need.</p></div>
+                <div class="about-card"><div class="icon">💳</div><h3>Mobile Money Ready</h3><p>Pay easily with MTN Mobile Money and Orange Money. Secure transactions with buyer protection.</p></div>
+                <div class="about-card"><div class="icon">🚀</div><h3>Boost Your Business</h3><p>Premium seller badges, featured listings, and powerful tools to grow your sales and reach more customers.</p></div>
+                <div class="about-card"><div class="icon">🤖</div><h3>AI-Powered Negotiation</h3><p>Our Makola AI helps you get the best price. Make offers and let AI negotiate for you in real-time.</p></div>
+                <div class="about-card"><div class="icon">🤝</div><h3>Njangi Group Buying</h3><p>Buy together, save together! Join group buying circles and get bulk discounts with friends.</p></div>
+                <div class="about-card"><div class="icon">⭐</div><h3>Trusted Reviews</h3><p>Real reviews from real buyers. Make informed decisions with our verified review system.</p></div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products Listed</div></div>
+                <div class="stat-card"><div class="value">2+</div><div class="label">Registered Users</div></div>
+                <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
+                <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
+            </div>
+            <div class="login-card">
+                <h2>🔐 Get Started Today</h2>
+                <p>Join Cameroon's fastest growing marketplace</p>
+                <button class="btn btn-primary" onclick="showLogin()">🔑 Login</button>
+                <a href="/register" class="btn btn-success">📝 Create Free Account</a>
+                <div class="login-form" id="loginForm">
+                    <input type="email" id="loginEmail" placeholder="Email">
+                    <input type="password" id="loginPassword" placeholder="Password">
+                    <button class="btn btn-primary" onclick="doLogin()">Login</button>
+                    <p id="loginError" style="color:#e74c3c; margin-top:12px; display:none;"></p>
+                </div>
+            </div>
+            <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
         
-        <!-- About Section -->
-        <div class="about-grid">
-            <div class="about-card">
-                <div class="icon">🛍️</div>
-                <h3>Buy & Sell Locally</h3>
-                <p>Connect with buyers and sellers across Cameroon. From smartphones to farm produce, find everything you need.</p>
+        <!-- LOGGED IN DASHBOARD -->
+        <div id="userView" class="user-dashboard">
+            <div class="welcome-banner">
+                <h1>👋 Welcome back!</h1>
+                <p><span id="premiumStatus"></span> <span id="userTypeDisplay"></span></p>
             </div>
-            <div class="about-card">
-                <div class="icon">💳</div>
-                <h3>Mobile Money Ready</h3>
-                <p>Pay easily with MTN Mobile Money and Orange Money. Secure transactions with buyer protection.</p>
-            </div>
-            <div class="about-card">
-                <div class="icon">🚀</div>
-                <h3>Boost Your Business</h3>
-                <p>Premium seller badges, featured listings, and powerful tools to grow your sales and reach more customers.</p>
-            </div>
-            <div class="about-card">
-                <div class="icon">🤖</div>
-                <h3>AI-Powered Negotiation</h3>
-                <p>Our Makola AI helps you get the best price. Make offers and let AI negotiate for you in real-time.</p>
-            </div>
-            <div class="about-card">
-                <div class="icon">📱</div>
-                <h3>Share on WhatsApp</h3>
-                <p>One-click sharing to WhatsApp. Spread the word about your products and grow your customer base instantly.</p>
-            </div>
-            <div class="about-card">
-                <div class="icon">⭐</div>
-                <h3>Trusted Reviews</h3>
-                <p>Real reviews from real buyers. Make informed decisions with our verified review system.</p>
-            </div>
-        </div>
-        
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products Listed</div></div>
-            <div class="stat-card"><div class="value">2+</div><div class="label">Registered Users</div></div>
-            <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
-            <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
-        </div>
-        
-        <!-- Login -->
-        <div class="login-card">
-            <h2>🔐 Get Started Today</h2>
-            <p>Join Cameroon's fastest growing marketplace</p>
-            <button class="btn btn-primary" onclick="showLogin()">🔑 Login</button>
-            <a href="/register" class="btn btn-success">📝 Create Free Account</a>
-            <div class="login-form" id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email">
-                <input type="password" id="loginPassword" placeholder="Password">
-                <button class="btn btn-primary" onclick="doLogin()">Login</button>
-                <p id="loginError" style="color:#e74c3c; margin-top:12px; display:none;"></p>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p>
+            <div class="quick-actions" id="userActions"></div>
+            <div style="text-align:center; margin-top:1rem;"><a href="#" onclick="logout()" style="color:#e74c3c; font-weight:600;">🚪 Logout</a></div>
         </div>
     </div>
 
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (token) { window.location.href = '/store'; }
+        
+        if (token) { loadUserDashboard(); checkPremiumStatus(); } else { init(); }
+        
         async function init() { try { var r = await fetch('/api/products?page=0&size=200'); var d = await r.json(); if (d.data) document.getElementById('pubProductCount').textContent = d.data.length; } catch(e) {} }
+        
+        async function checkPremiumStatus() { try { var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success && d.data && d.data.isPremium) { document.getElementById('premiumStatus').textContent = '🏆 Premium |'; } } catch(e) {} }
+        
+        async function loadUserDashboard() {
+            document.getElementById('publicView').style.display = 'none';
+            document.getElementById('userView').style.display = 'block';
+            var userType = 'BUYER';
+            try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if (Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if (payload.userType === 'SELLER') userType = 'SELLER'; } catch(e) {}
+            document.getElementById('userTypeDisplay').textContent = userType === 'SELLER' ? '🏪 Seller Dashboard' : '🛒 Buyer Dashboard';
+            if (userType === 'SELLER') {
+                document.getElementById('userActions').innerHTML = '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>';
+            } else {
+                document.getElementById('userActions').innerHTML = '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a><a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi Deals</div></a>';
+            }
+        }
+        
         function showLogin() { document.getElementById('loginForm').style.display = 'block'; }
         async function doLogin() {
             var email = document.getElementById('loginEmail').value; var password = document.getElementById('loginPassword').value; var errorEl = document.getElementById('loginError');
-            try { var r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var d = await r.json(); if (d.success && d.data && d.data.token) { localStorage.setItem('token', d.data.token); window.location.href = '/store'; } else { errorEl.textContent = d.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
+            try { var r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var d = await r.json(); if (d.success && d.data && d.data.token) { localStorage.setItem('token', d.data.token); location.reload(); } else { errorEl.textContent = d.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
         }
+        function logout() { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; }
         init();
     </script>
 </body>

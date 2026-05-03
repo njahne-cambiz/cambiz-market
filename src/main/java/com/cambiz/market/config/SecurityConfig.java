@@ -78,7 +78,7 @@ public class SecurityConfig {
                 // Admin expiry endpoints - PUBLIC (for testing)
                 .requestMatchers(HttpMethod.POST, "/api/admin/expire-featured").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/admin/expire-premium").permitAll()
-                
+
                 // Database migration - temporary public access
                 .requestMatchers("/api/admin/db/**").permitAll()
 
@@ -96,6 +96,8 @@ public class SecurityConfig {
                 .requestMatchers("/orders").permitAll()
                 .requestMatchers("/upload-images").permitAll()
                 .requestMatchers("/create-product").permitAll()
+                .requestMatchers("/njangi").permitAll()
+                .requestMatchers("/create-njangi").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 
@@ -116,21 +118,22 @@ public class SecurityConfig {
                 .requestMatchers("/api/store-tracking/**").authenticated()
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
-                
+                .requestMatchers("/api/njangi/**").authenticated()
+
                 // Wishlist API
                 .requestMatchers("/api/wishlist/**").authenticated()
-                
+
                 // Premium upgrade requires authentication
                 .requestMatchers(HttpMethod.POST, "/api/premium/**").authenticated()
-                
+
                 // Featured POST requires authentication
                 .requestMatchers(HttpMethod.POST, "/api/featured/**").authenticated()
-                
+
                 // Products - Write
                 .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
-                
+
                 // Categories - Write
                 .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/categories/**").authenticated()

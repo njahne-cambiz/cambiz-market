@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Njangi Deal | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f2f5; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header nav a { color: #b2bec3; text-decoration: none; margin-left: 2rem; font-size: 0.9rem; }
+        .header nav a:hover { color: white; }
+        .container { max-width: 700px; margin: 2rem auto; padding: 0 1.5rem; }
+        .back-btn { color: #667eea; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; font-weight: 600; }
+        .card { background: white; border-radius: 20px; padding: 2.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+        .card h1 { color: #1a1a2e; margin-bottom: 1.5rem; font-size: 1.6rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; color: #2d3436; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 13px 16px; border: 2px solid #e8ecf1; border-radius: 12px; font-size: 14px; background: #fafbfc; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; background: white; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .info-box { background: #fff8e1; border-radius: 12px; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .info-box p { color: #856404; font-size: 0.9rem; margin: 0.3rem 0; }
+        .btn { padding: 16px 24px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 16px; width: 100%; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-primary:disabled { background: #b2bec3; cursor: not-allowed; }
+        .message { margin-top: 1rem; padding: 1rem; border-radius: 12px; display: none; text-align: center; font-weight: 600; }
+        .message.success { background: #d4edda; color: #155724; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; display: block; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/store" class="logo">🛒 CamBiz Market</a>
+        <nav><a href="/store">📦 Store</a><a href="/dashboard">👤 Dashboard</a></nav>
+    </header>
+    <main class="container">
+        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+        <div class="card">
+            <h1>🤝 Create Njangi Deal</h1>
+            <p style="color:#636e72; margin-bottom:1.5rem;">Group buying circle — sell in bulk at a discount</p>
+            
+            <div class="form-group"><label>Product *</label><select id="productSelect"><option value="">Loading your products...</option></select></div>
+            <div class="form-row">
+                <div class="form-group"><label>Min Participants *</label><input type="number" id="minParticipants" value="3" min="2"></div>
+                <div class="form-group"><label>Max Participants</label><input type="number" id="maxParticipants" value="10" min="2"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Group Price per Person (XAF) *</label><input type="number" id="groupPrice" placeholder="Discounted price"></div>
+                <div class="form-group"><label>Regular Price (XAF) *</label><input type="number" id="regularPrice" placeholder="Normal price"></div>
+            </div>
+            
+            <div class="info-box" id="savingsBox" style="display:none;">
+                <p>💰 <b>Savings per person:</b> <span id="savingsAmount">0</span> XAF</p>
+                <p>👥 <b>Total group savings:</b> <span id="totalSavings">0</span> XAF</p>
+            </div>
+            
+            <button class="btn btn-primary" onclick="createDeal()">🚀 Create Njangi Deal</button>
+            <div id="message" class="message"></div>
+        </div>
+    </main>
+    <script>
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) { window.location.href = '/dashboard'; }
+        
+        async function loadMyProducts() {
+            try {
+                var r = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                var s = document.getElementById('productSelect');
+                if (d.success && d.data && d.data.length > 0) {
+                    s.innerHTML = '<option value="">-- Select product --</option>' + d.data.map(function(p) { return '<option value="' + p.id + '" data-name="' + p.name + '" data-price="' + (p.discountedPrice || p.price) + '">' + p.name + ' (' + (p.discountedPrice || p.price).toLocaleString() + ' XAF)</option>'; }).join('');
+                } else { s.innerHTML = '<option value="">No products found</option>'; }
+            } catch(e) {}
+        }
+        
+        document.getElementById('groupPrice').addEventListener('input', calcSavings);
+        document.getElementById('regularPrice').addEventListener('input', calcSavings);
+        document.getElementById('minParticipants').addEventListener('input', calcSavings);
+        
+        function calcSavings() {
+            var gp = parseFloat(document.getElementById('groupPrice').value) || 0;
+            var rp = parseFloat(document.getElementById('regularPrice').value) || 0;
+            var mp = parseInt(document.getElementById('minParticipants').value) || 0;
+            if (gp > 0 && rp > 0 && rp > gp) {
+                document.getElementById('savingsBox').style.display = 'block';
+                document.getElementById('savingsAmount').textContent = (rp - gp).toLocaleString();
+                document.getElementById('totalSavings').textContent = ((rp - gp) * mp).toLocaleString();
+            } else { document.getElementById('savingsBox').style.display = 'none'; }
+        }
+        
+        async function createDeal() {
+            var s = document.getElementById('productSelect');
+            var pid = s.value;
+            var pname = s.options[s.selectedIndex].dataset.name;
+            var mp = document.getElementById('minParticipants').value;
+            var mxp = document.getElementById('maxParticipants').value;
+            var gp = document.getElementById('groupPrice').value;
+            var rp = document.getElementById('regularPrice').value;
+            var msg = document.getElementById('message');
+            var btn = document.querySelector('.btn-primary');
+            
+            if (!pid || !mp || !gp || !rp) { msg.textContent = '❌ Please fill in all required fields.'; msg.className = 'message error'; return; }
+            
+            btn.disabled = true; btn.textContent = '⏳ Creating...'; msg.className = 'message';
+            
+            try {
+                var r = await fetch('/api/njangi/create', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ productId: parseInt(pid), productName: pname, minParticipants: parseInt(mp), maxParticipants: parseInt(mxp), individualPrice: parseFloat(gp), regularPrice: parseFloat(rp) }) });
+                var d = await r.json();
+                if (d.success) { msg.textContent = '✅ Njangi deal created! Share with friends!'; msg.className = 'message success'; setTimeout(function() { window.location.href = '/njangi'; }, 1500); }
+                else { msg.textContent = '❌ ' + (d.message || 'Failed'); msg.className = 'message error'; btn.disabled = false; btn.textContent = '🚀 Create Njangi Deal'; }
+            } catch(e) { msg.textContent = '❌ Network error'; msg.className = 'message error'; btn.disabled = false; btn.textContent = '🚀 Create Njangi Deal'; }
+        }
+        
+        loadMyProducts();
+    </script>
+</body>
+</html>
