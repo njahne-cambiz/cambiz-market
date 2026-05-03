@@ -25,37 +25,29 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     
-    // Temporary in-memory order storage
     private final ConcurrentHashMap<Long, OrderResponse> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, String> orderPaymentStatus = new ConcurrentHashMap<>();
     
-    /**
-     * CHECKOUT - Convert cart to order
-     */
     public OrderResponse checkout(Long buyerId, CheckoutRequest request) {
         log.info("Processing checkout for buyer: {}", buyerId);
         
-        // 1. Get buyer's cart
         CartResponse cart = cartService.getCart(buyerId);
         
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
         
-        // 2. Get buyer
         User buyer = userRepository.findById(buyerId)
             .orElseThrow(() -> new RuntimeException("Buyer not found"));
         
         log.info("Buyer {} ({}) checking out", buyer.getId(), buyer.getEmail());
         
-        // 3. Group items by seller
         Map<Long, List<CartItem>> itemsBySeller = cart.getItems().stream()
             .collect(Collectors.groupingBy(CartItem::getSellerId));
         
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<SellerOrderResponse> sellerOrderResponses = new ArrayList<>();
         
-        // 4. Process each seller's order
         for (Map.Entry<Long, List<CartItem>> entry : itemsBySeller.entrySet()) {
             Long sellerId = entry.getKey();
             List<CartItem> sellerItems = entry.getValue();
@@ -66,12 +58,10 @@ public class OrderService {
             BigDecimal sellerSubtotal = BigDecimal.ZERO;
             List<OrderItemResponse> itemResponses = new ArrayList<>();
             
-            // Process items
             for (CartItem cartItem : sellerItems) {
                 Product product = productRepository.findById(cartItem.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found"));
                 
-                // Reduce stock
                 product.setStockQuantity(product.getStockQuantity() - cartItem.getQuantity());
                 productRepository.save(product);
                 
@@ -88,14 +78,12 @@ public class OrderService {
                     .build());
             }
             
-            // Calculate commission (5%)
             BigDecimal commissionRate = new BigDecimal("0.05");
             BigDecimal commission = sellerSubtotal.multiply(commissionRate);
             BigDecimal sellerPayout = sellerSubtotal.subtract(commission);
             
             totalAmount = totalAmount.add(sellerSubtotal);
             
-            // Build seller name
             String sellerName = "Seller";
             if (seller.getFirstName() != null && seller.getLastName() != null) {
                 sellerName = seller.getFirstName() + " " + seller.getLastName();
@@ -105,7 +93,6 @@ public class OrderService {
             
             Long orderId = System.currentTimeMillis();
             
-            // Create seller order response
             sellerOrderResponses.add(SellerOrderResponse.builder()
                 .sellerOrderId(System.currentTimeMillis() + sellerId)
                 .orderId(orderId)
@@ -119,10 +106,8 @@ public class OrderService {
                 .build());
         }
         
-        // 5. Clear cart
         cartService.clearCart(buyerId);
         
-        // 6. Build response
         Long orderId = System.currentTimeMillis();
         String orderNumber = "ORD-" + orderId;
         
@@ -136,7 +121,6 @@ public class OrderService {
             .createdAt(LocalDateTime.now())
             .build();
         
-        // Store order in memory
         orderStorage.put(orderId, orderResponse);
         orderPaymentStatus.put(orderId, "PENDING");
         
@@ -145,17 +129,11 @@ public class OrderService {
         return orderResponse;
     }
     
-    /**
-     * Get buyer's orders
-     */
     public List<OrderResponse> getBuyerOrders(Long buyerId) {
         log.debug("Fetching orders for buyer: {}", buyerId);
         return new ArrayList<>(orderStorage.values());
     }
     
-    /**
-     * Get single order
-     */
     public OrderResponse getOrder(Long orderId, Long userId) {
         log.debug("User {} fetching order: {}", userId, orderId);
         OrderResponse order = orderStorage.get(orderId);
@@ -165,9 +143,6 @@ public class OrderService {
         return order;
     }
     
-    /**
-     * Update order payment status
-     */
     public void updateOrderPaymentStatus(Long orderId, String status) {
         log.info("Updating order {} payment status to: {}", orderId, status);
         
@@ -180,13 +155,30 @@ public class OrderService {
         orderPaymentStatus.put(orderId, status);
         
         if ("PAID".equalsIgnoreCase(status) || "SUCCESS".equalsIgnoreCase(status)) {
+            List<SellerOrderResponse> updatedSellerOrders = new ArrayList<>();
+            if (order.getSellerOrders() != null) {
+                for (SellerOrderResponse so : order.getSellerOrders()) {
+                    updatedSellerOrders.add(SellerOrderResponse.builder()
+                        .sellerOrderId(so.getSellerOrderId())
+                        .orderId(so.getOrderId())
+                        .sellerId(so.getSellerId())
+                        .sellerName(so.getSellerName())
+                        .subtotal(so.getSubtotal())
+                        .commission(so.getCommission())
+                        .sellerPayout(so.getSellerPayout())
+                        .status("CONFIRMED")
+                        .items(so.getItems())
+                        .build());
+                }
+            }
+            
             OrderResponse updatedOrder = OrderResponse.builder()
                 .orderId(order.getOrderId())
                 .orderNumber(order.getOrderNumber())
                 .totalAmount(order.getTotalAmount())
                 .status("CONFIRMED")
                 .paymentMethod(order.getPaymentMethod())
-                .sellerOrders(order.getSellerOrders())
+                .sellerOrders(updatedSellerOrders)
                 .createdAt(order.getCreatedAt())
                 .build();
             
@@ -195,16 +187,10 @@ public class OrderService {
         }
     }
     
-    /**
-     * Get order payment status
-     */
     public String getOrderPaymentStatus(Long orderId) {
         return orderPaymentStatus.getOrDefault(orderId, "UNKNOWN");
     }
     
-    /**
-     * Update order status (for seller/admin)
-     */
     public void updateOrderStatus(Long orderId, String newStatus) {
         log.info("Updating order {} status to: {}", orderId, newStatus);
         
@@ -213,13 +199,30 @@ public class OrderService {
             throw new RuntimeException("Order not found: " + orderId);
         }
         
+        List<SellerOrderResponse> updatedSellerOrders = new ArrayList<>();
+        if (order.getSellerOrders() != null) {
+            for (SellerOrderResponse so : order.getSellerOrders()) {
+                updatedSellerOrders.add(SellerOrderResponse.builder()
+                    .sellerOrderId(so.getSellerOrderId())
+                    .orderId(so.getOrderId())
+                    .sellerId(so.getSellerId())
+                    .sellerName(so.getSellerName())
+                    .subtotal(so.getSubtotal())
+                    .commission(so.getCommission())
+                    .sellerPayout(so.getSellerPayout())
+                    .status(newStatus)
+                    .items(so.getItems())
+                    .build());
+            }
+        }
+        
         OrderResponse updatedOrder = OrderResponse.builder()
             .orderId(order.getOrderId())
             .orderNumber(order.getOrderNumber())
             .totalAmount(order.getTotalAmount())
             .status(newStatus)
             .paymentMethod(order.getPaymentMethod())
-            .sellerOrders(order.getSellerOrders())
+            .sellerOrders(updatedSellerOrders)
             .createdAt(order.getCreatedAt())
             .build();
         
@@ -227,9 +230,6 @@ public class OrderService {
         log.info("Order {} status updated to {}", orderId, newStatus);
     }
     
-    /**
-     * Find the main order ID from a seller order ID
-     */
     public Long findMainOrderIdBySellerOrderId(Long sellerOrderId) {
         for (Map.Entry<Long, OrderResponse> entry : orderStorage.entrySet()) {
             OrderResponse order = entry.getValue();
@@ -244,17 +244,11 @@ public class OrderService {
         return sellerOrderId;
     }
     
-    /**
-     * Get all orders (for admin)
-     */
     public List<OrderResponse> getAllOrders() {
         log.debug("Fetching all orders, count: {}", orderStorage.size());
         return new ArrayList<>(orderStorage.values());
     }
     
-    /**
-     * Get seller's orders
-     */
     public List<SellerOrderResponse> getSellerOrders(Long sellerId) {
         log.debug("Fetching orders for seller: {}", sellerId);
         List<SellerOrderResponse> sellerOrders = new ArrayList<>();
