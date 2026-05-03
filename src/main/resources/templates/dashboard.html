@@ -44,11 +44,11 @@
         .user-dashboard { display: none; }
         .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 2.5rem; margin-bottom: 2rem; }
         .welcome-banner h1 { font-size: 1.8rem; font-weight: 700; }
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .action-card { background: white; border-radius: 16px; padding: 1.8rem 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.2s; display: block; border: 2px solid transparent; }
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .action-card { background: white; border-radius: 16px; padding: 1.5rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.2s; display: block; border: 2px solid transparent; }
         .action-card:hover { border-color: #667eea; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(102,126,234,0.15); }
-        .action-card .icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
-        .action-card .title { font-weight: 600; font-size: 0.9rem; }
+        .action-card .icon { font-size: 2rem; margin-bottom: 0.4rem; }
+        .action-card .title { font-weight: 600; font-size: 0.85rem; }
         
         .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
         
@@ -68,16 +68,16 @@
                 <p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p>
             </div>
             <div class="about-grid">
-                <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect with buyers and sellers across Cameroon. From smartphones to farm produce, find everything you need.</p></div>
-                <div class="about-card"><div class="icon">💳</div><h3>Mobile Money Ready</h3><p>Pay easily with MTN Mobile Money and Orange Money. Secure transactions with buyer protection.</p></div>
-                <div class="about-card"><div class="icon">🚀</div><h3>Boost Your Business</h3><p>Premium seller badges, featured listings, and powerful tools to grow your sales and reach more customers.</p></div>
-                <div class="about-card"><div class="icon">🤖</div><h3>AI-Powered Negotiation</h3><p>Our Makola AI helps you get the best price. Make offers and let AI negotiate for you in real-time.</p></div>
-                <div class="about-card"><div class="icon">🤝</div><h3>Njangi Group Buying</h3><p>Buy together, save together! Join group buying circles and get bulk discounts with friends.</p></div>
-                <div class="about-card"><div class="icon">⭐</div><h3>Trusted Reviews</h3><p>Real reviews from real buyers. Make informed decisions with our verified review system.</p></div>
+                <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect with buyers and sellers across Cameroon.</p></div>
+                <div class="about-card"><div class="icon">💳</div><h3>Mobile Money Ready</h3><p>Pay with MTN Mobile Money and Orange Money.</p></div>
+                <div class="about-card"><div class="icon">🚀</div><h3>Boost Your Business</h3><p>Premium badges, featured listings, and more.</p></div>
+                <div class="about-card"><div class="icon">🤖</div><h3>AI-Powered Negotiation</h3><p>Makola AI negotiates the best price for you.</p></div>
+                <div class="about-card"><div class="icon">🤝</div><h3>Njangi Group Buying</h3><p>Buy together, save together with group deals.</p></div>
+                <div class="about-card"><div class="icon">⭐</div><h3>Trusted Reviews</h3><p>Real reviews from real buyers.</p></div>
             </div>
             <div class="stats-grid">
-                <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products Listed</div></div>
-                <div class="stat-card"><div class="value">2+</div><div class="label">Registered Users</div></div>
+                <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
+                <div class="stat-card"><div class="value">2+</div><div class="label">Users</div></div>
                 <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
                 <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
             </div>
@@ -104,6 +104,7 @@
             </div>
             <div class="quick-actions" id="userActions"></div>
             <div style="text-align:center; margin-top:1rem;"><a href="#" onclick="logout()" style="color:#e74c3c; font-weight:600;">🚪 Logout</a></div>
+            <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
     </div>
 
@@ -123,9 +124,19 @@
             try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if (Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if (payload.userType === 'SELLER') userType = 'SELLER'; } catch(e) {}
             document.getElementById('userTypeDisplay').textContent = userType === 'SELLER' ? '🏪 Seller Dashboard' : '🛒 Buyer Dashboard';
             if (userType === 'SELLER') {
-                document.getElementById('userActions').innerHTML = '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>';
+                document.getElementById('userActions').innerHTML = 
+                    '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div></a>' +
+                    '<a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div></a>' +
+                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a>' +
+                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div></a>' +
+                    '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a>' +
+                    '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div></a>';
             } else {
-                document.getElementById('userActions').innerHTML = '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a><a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi Deals</div></a>';
+                document.getElementById('userActions').innerHTML = 
+                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div></a>' +
+                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div></a>' +
+                    '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div></a>' +
+                    '<a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi Deals</div></a>';
             }
         }
         
