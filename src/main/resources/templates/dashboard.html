@@ -63,7 +63,7 @@
         .action-card .sub { font-size: 0.75rem; color: #565959; }
         
         .cart-mini { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
-        .cart-mini .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        .cart-mini .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; flex-wrap: wrap; gap: 8px; }
         .cart-mini .cart-total { font-weight: 700; font-size: 1.1rem; margin-top: 10px; text-align: right; }
         .cart-mini .btn-cart-action { display: inline-block; padding: 8px 20px; background: #ffd814; color: #0f1111; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-top: 10px; }
         
@@ -79,6 +79,7 @@
         .btn-confirm { background: #ffd814; color: #0f1111; }
         .btn-ship { background: #131921; color: white; }
         .btn-reject { background: #d00; color: white; }
+        .btn-add-cart { background: #10b981; color: white; }
         
         .logout-btn { text-align: center; margin: 1.5rem 0; }
         .logout-btn a { color: #565959; font-weight: 600; text-decoration: none; padding: 10px 24px; border-radius: 4px; font-size: 0.9rem; }
@@ -155,10 +156,22 @@
                     var panel=document.getElementById('buyerPanel');
                     var html=panel.innerHTML;
                     html+='<div class="cart-mini" style="margin-top:15px;"><div class="section-title">💬 My Offers</div>';
-                    for(var i=0;i<d.data.length;i++){var o=d.data[i];var sc=o.status==='ACCEPTED'?'#10b981':o.status==='REJECTED'?'#d00':'#d68910';html+='<div class="cart-item-row"><span>'+o.productName+'</span><span style="color:'+sc+';font-weight:600;">'+o.status+'</span><span>'+o.buyerOffer.toLocaleString()+' XAF</span></div>';}
+                    for(var i=0;i<d.data.length;i++){var o=d.data[i];var sc=o.status==='ACCEPTED'?'#10b981':o.status==='REJECTED'?'#d00':'#d68910';
+                        var actionHtml='';
+                        if(o.status==='ACCEPTED'){actionHtml='<button class="btn-sm btn-add-cart" onclick="addNegotiatedToCart('+o.negotiationId+')">🛒 Add to Cart</button>';}
+                        else if(o.status==='REJECTED'){actionHtml='<span style="color:#d00;">✕</span>';}
+                        else{actionHtml='<span style="color:#d68910;">⏳ Waiting</span>';}
+                        html+='<div class="cart-item-row"><span>'+o.productName+'</span><span style="color:'+sc+';font-weight:600;">'+o.status+'</span><span>'+o.buyerOffer.toLocaleString()+' XAF</span><span>'+actionHtml+'</span></div>';
+                    }
                     html+='</div>';panel.innerHTML=html;
                 }
             }catch(e){}
+        }
+        async function addNegotiatedToCart(nid){
+            try{var r=await fetch('/api/makola/add-to-cart/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});var d=await r.json();
+                if(d.success){alert('✅ Added to cart at negotiated price! Go to cart to checkout.');loadBuyerView();}
+                else{alert('❌ '+(d.message||'Failed'));}
+            }catch(e){alert('Network error');}
         }
         async function loadSellerView(){
             document.getElementById('userActions').innerHTML='<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">View all</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade</div></a>';
