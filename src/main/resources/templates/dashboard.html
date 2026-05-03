@@ -7,16 +7,14 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #eaeded; min-height: 100vh; }
-        
         .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: center; align-items: center; position: sticky; top: 0; z-index: 100; }
         .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; letter-spacing: -0.5px; }
         .header .logo span { color: #febd69; }
-        
         .container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
         
         .hero { text-align: center; margin-bottom: 2.5rem; }
         .hero .icon { font-size: 4.5rem; margin-bottom: 1rem; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes float { 0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);} }
         .hero h1 { font-size: 2.4rem; font-weight: 800; color: #0f1111; }
         .hero p { color: #565959; font-size: 1.15rem; }
         
@@ -27,14 +25,14 @@
         .about-card h3 { color: #0f1111; font-size: 1rem; font-weight: 700; }
         .about-card p { color: #565959; font-size: 0.85rem; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: white; border-radius: 12px; padding: 1.4rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); transition: transform 0.2s; }
         .stat-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .stat-card .value { font-size: 1.8rem; font-weight: 800; color: #131921; }
         .stat-card .label { color: #565959; font-size: 0.75rem; margin-top: 0.3rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
         
         .login-card { background: white; border-radius: 12px; padding: 2.5rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); max-width: 420px; margin: 0 auto; }
-        .login-card::before { content: ''; display: block; height: 4px; background: linear-gradient(90deg, #febd69, #ffd814); margin: -2.5rem -2.5rem 1.5rem -2.5rem; }
+        .login-card::before { content: ''; display: block; height: 4px; background: linear-gradient(90deg,#febd69,#ffd814); margin: -2.5rem -2.5rem 1.5rem -2.5rem; }
         .login-card h2 { font-size: 1.5rem; font-weight: 700; color: #0f1111; }
         .login-card p { color: #565959; margin-bottom: 1.5rem; }
         .btn { padding: 12px 34px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 6px; min-width: 200px; transition: all 0.2s; }
@@ -43,19 +41,13 @@
         .btn-primary:hover { background: #f7ca00; }
         .btn-success { background: white; color: #0f1111; border: 1px solid #d5d9d9; }
         .btn-success:hover { background: #f7fafa; }
-        .btn-sm { padding: 6px 16px; font-size: 0.8rem; min-width: auto; border-radius: 6px; }
-        .btn-confirm { background: #ffd814; color: #0f1111; }
-        .btn-confirm:hover { background: #f7ca00; }
-        .btn-ship { background: #131921; color: white; }
-        .btn-ship:hover { background: #232f3e; }
-        
         .login-form { display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8fafc; border-radius: 12px; text-align: left; border: 1px solid #e8ecf1; }
         .login-form input { display: block; width: 100%; padding: 10px 14px; margin-bottom: 12px; border: 1px solid #a6a6a6; border-radius: 4px; font-size: 14px; }
         .login-form input:focus { border-color: #febd69; outline: none; }
         .login-form button { width: 100%; margin: 0; }
         
         .user-view { display: none; }
-        .welcome-banner { background: linear-gradient(135deg, #131921, #232f3e); color: white; border-radius: 12px; padding: 2rem 2.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .welcome-banner { background: linear-gradient(135deg,#131921,#232f3e); color: white; border-radius: 12px; padding: 2rem 2.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .welcome-banner h1 { font-size: 1.7rem; font-weight: 700; }
         .welcome-banner .subtitle { opacity: 0.9; font-size: 0.9rem; margin-top: 0.3rem; }
         .welcome-banner .badge { background: #febd69; color: #0f1111; padding: 6px 18px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; }
@@ -63,42 +55,42 @@
         .section-title { font-size: 1.1rem; font-weight: 700; color: #0f1111; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; }
         .section-title::after { content: ''; flex: 1; height: 1px; background: #d5d9d9; }
         
-        .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .quick-actions { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
         .action-card { background: white; border-radius: 12px; padding: 1.5rem 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #0f1111; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; border-bottom: 3px solid transparent; }
         .action-card:hover { border-bottom-color: #febd69; transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
         .action-card .icon { font-size: 2.2rem; }
-        .action-card:hover .icon { transform: scale(1.1); }
         .action-card .title { font-weight: 700; font-size: 0.9rem; }
         .action-card .sub { font-size: 0.75rem; color: #565959; }
+        
+        .cart-mini { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+        .cart-mini .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        .cart-mini .cart-total { font-weight: 700; font-size: 1.1rem; margin-top: 10px; text-align: right; }
+        .cart-mini .btn-cart-action { display: inline-block; padding: 8px 20px; background: #ffd814; color: #0f1111; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-top: 10px; }
         
         .order-table { background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); overflow: hidden; }
         .order-row { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr; gap: 10px; padding: 14px 20px; border-bottom: 1px solid #e8ecf1; align-items: center; font-size: 0.85rem; }
         .order-row.header-row { background: #f8fafc; font-weight: 700; color: #565959; font-size: 0.8rem; text-transform: uppercase; }
         .order-row:last-child { border-bottom: none; }
-        .order-row:hover { background: #f8fafc; }
         .status { font-weight: 600; }
         .status-PENDING { color: #d68910; }
         .status-CONFIRMED { color: #2563eb; }
-        .status-SHIPPED { color: #6b46c1; }
         .status-DELIVERED { color: #10b981; }
+        .btn-sm { padding: 6px 16px; font-size: 0.8rem; min-width: auto; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-confirm { background: #ffd814; color: #0f1111; }
+        .btn-ship { background: #131921; color: white; }
         
         .logout-btn { text-align: center; margin: 1.5rem 0; }
         .logout-btn a { color: #565959; font-weight: 600; text-decoration: none; padding: 10px 24px; border-radius: 4px; font-size: 0.9rem; }
         .logout-btn a:hover { background: #f7f7f7; color: #d00; }
-        
         .footer { text-align: center; padding: 1.8rem; color: #565959; font-size: 0.85rem; }
-        
         .empty-state { text-align: center; padding: 2rem; color: #565959; }
-        
-        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.8rem; } .quick-actions { grid-template-columns: repeat(2, 1fr); } .order-row { grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.75rem; } }
-        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } .quick-actions { grid-template-columns: 1fr 1fr; } }
+        @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr);}.hero h1{font-size:1.8rem;}.quick-actions{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:500px){.stats-grid{grid-template-columns:1fr 1fr;}.quick-actions{grid-template-columns:1fr 1fr;}}
     </style>
 </head>
 <body>
     <header class="header"><a href="/store" class="logo">cam<span>Biz</span> Market</a></header>
-    
     <div class="container">
-        <!-- PUBLIC VIEW -->
         <div id="publicView">
             <div class="hero"><div class="icon">🛒</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p></div>
             <div class="about-grid">
@@ -115,26 +107,14 @@
                 <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
                 <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
             </div>
-            <div class="login-card">
-                <h2>Sign In</h2><p>Access your CamBiz Market account</p>
-                <button class="btn btn-primary" onclick="showLogin()">Sign In</button>
-                <a href="/register" class="btn btn-success">Create Account</a>
-                <div class="login-form" id="loginForm">
-                    <input type="email" id="loginEmail" placeholder="Email"><input type="password" id="loginPassword" placeholder="Password">
-                    <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
-                    <p id="loginError" style="color:#d00; margin-top:12px; display:none;"></p>
-                </div>
-            </div>
+            <div class="login-card"><h2>Sign In</h2><p>Access your CamBiz Market account</p><button class="btn btn-primary" onclick="showLogin()">Sign In</button><a href="/register" class="btn btn-success">Create Account</a><div class="login-form" id="loginForm"><input type="email" id="loginEmail" placeholder="Email"><input type="password" id="loginPassword" placeholder="Password"><button class="btn btn-primary" onclick="doLogin()">Sign In</button><p id="loginError" style="color:#d00;margin-top:12px;display:none;"></p></div></div>
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
         
-        <!-- USER VIEW -->
         <div id="userView" class="user-view">
-            <div class="welcome-banner">
-                <div><h1>👋 Welcome back!</h1><p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div>
-                <span class="badge" id="roleBadge"></span>
-            </div>
+            <div class="welcome-banner"><div><h1>👋 Welcome back!</h1><p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div><span class="badge" id="roleBadge"></span></div>
             <div class="stats-grid" id="userStats"></div>
+            <div id="buyerCartPanel" style="display:none;"></div>
             <div class="section-title">Quick Actions</div>
             <div class="quick-actions" id="userActions"></div>
             <div id="sellerOrderPanel" style="display:none;"></div>
@@ -142,112 +122,59 @@
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
     </div>
-
     <script>
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (token) { loadUserDashboard(); checkPremiumStatus(); } else { init(); }
-        
-        async function init() { try { var r = await fetch('/api/products?page=0&size=200'); var d = await r.json(); if (d.data) document.getElementById('pubProductCount').textContent = d.data.length; } catch(e) {} }
-        
-        async function checkPremiumStatus() { try { var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success && d.data && d.data.isPremium) document.getElementById('premiumStatus').textContent = '🏆 Premium | '; } catch(e) {} }
-        
-        async function loadUserDashboard() {
-            document.getElementById('publicView').style.display = 'none';
-            document.getElementById('userView').style.display = 'block';
-            var userType = 'BUYER';
-            try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if (Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if (payload.userType === 'SELLER') userType = 'SELLER'; } catch(e) {}
-            document.getElementById('userTypeDisplay').textContent = userType === 'SELLER' ? '🏪 Seller Dashboard' : '🛒 Buyer Dashboard';
-            document.getElementById('roleBadge').textContent = userType === 'SELLER' ? 'Seller' : 'Buyer';
-            
-            if (userType === 'SELLER') {
-                document.getElementById('userActions').innerHTML = 
-                    '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List an item</div></a>' +
-                    '<a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a>' +
-                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">View all</div></a>' +
-                    '<a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite friends</div></a>' +
-                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse all</div></a>' +
-                    '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade now</div></a>';
-                loadSellerOrders();
-            } else {
-                document.getElementById('userActions').innerHTML = 
-                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">Shop now</div></a>' +
-                    '<a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">Track purchases</div></a>' +
-                    '<a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div><div class="sub">Saved items</div></a>' +
-                    '<a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi Deals</div><div class="sub">Group buying</div></a>' +
-                    '<a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite friends</div></a>' +
-                    '<a href="/register" class="action-card"><div class="icon">🏪</div><div class="title">Become Seller</div><div class="sub">Start selling</div></a>';
-                loadBuyerStats();
-            }
+        var token=localStorage.getItem('token')||sessionStorage.getItem('token');
+        if(token){loadUserDashboard();checkPremiumStatus();}else{init();}
+        async function init(){try{var r=await fetch('/api/products?page=0&size=200');var d=await r.json();if(d.data)document.getElementById('pubProductCount').textContent=d.data.length;}catch(e){}}
+        async function checkPremiumStatus(){try{var r=await fetch('/api/premium/my-status',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success&&d.data&&d.data.isPremium)document.getElementById('premiumStatus').textContent='🏆 Premium | ';}catch(e){}}
+        async function loadUserDashboard(){
+            document.getElementById('publicView').style.display='none';document.getElementById('userView').style.display='block';
+            var userType='BUYER';try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)userType='SELLER';else if(payload.userType==='SELLER')userType='SELLER';}catch(e){}
+            document.getElementById('userTypeDisplay').textContent=userType==='SELLER'?'🏪 Seller Dashboard':'🛒 Buyer Dashboard';
+            document.getElementById('roleBadge').textContent=userType==='SELLER'?'Seller':'Buyer';
+            if(userType==='SELLER'){loadSellerView();}else{loadBuyerView();}
         }
-        
-        async function loadSellerOrders() {
-            try {
-                var r = await fetch('/api/orders/seller-orders', { headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                var panel = document.getElementById('sellerOrderPanel');
-                panel.style.display = 'block';
-                
-                var productCount = 0;
-                try { var pr = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token } }); var pd = await pr.json(); if (pd.success && pd.data) productCount = pd.data.length; } catch(e) {}
-                var orderCount = d.success && d.data ? d.data.length : 0;
-                var revenue = 0;
-                if (d.success && d.data) { for (var i = 0; i < d.data.length; i++) { revenue += d.data[i].sellerPayout || 0; } }
-                
-                document.getElementById('userStats').innerHTML = 
-                    '<div class="stat-card"><div class="value">' + productCount + '</div><div class="label">My Products</div></div>' +
-                    '<div class="stat-card"><div class="value">' + orderCount + '</div><div class="label">Orders Received</div></div>' +
-                    '<div class="stat-card"><div class="value">' + revenue.toLocaleString() + '</div><div class="label">Revenue (XAF)</div></div>';
-                
-                if (d.success && d.data && d.data.length > 0) {
-                    var html = '<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="order-row header-row"><span>Order #</span><span>Product</span><span>Qty</span><span>Status</span><span>Action</span></div>';
-                    for (var j = 0; j < d.data.length; j++) {
-                        var o = d.data[j];
-                        var items = o.items ? o.items.map(function(i) { return i.productName; }).join(', ') : 'Product';
-                        var qty = o.items ? o.items.reduce(function(s, i) { return s + i.quantity; }, 0) : 0;
-                        html += '<div class="order-row">' +
-                            '<span><strong>#' + o.sellerOrderId.toString().slice(-6) + '</strong></span>' +
-                            '<span>' + items + '</span>' +
-                            '<span>' + qty + '</span>' +
-                            '<span class="status status-' + o.status + '">' + o.status + '</span>' +
-                            '<span>' + (o.status === 'PENDING' ? '<button class="btn btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'CONFIRMED\')">Confirm</button>' : 
-                                      o.status === 'CONFIRMED' ? '<button class="btn btn-sm btn-ship" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'SHIPPED\')">Ship</button>' :
-                                      o.status === 'SHIPPED' ? '<button class="btn btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'DELIVERED\')">Deliver</button>' :
-                                      '<span style="color:#10b981;">✅ Done</span>') + '</span>' +
-                            '</div>';
-                    }
-                    html += '</div>';
-                    panel.innerHTML = html;
-                } else {
-                    panel.innerHTML = '<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="empty-state">No orders yet. Your products are waiting for buyers!</div></div>';
+        async function loadBuyerView(){
+            document.getElementById('userActions').innerHTML='<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">Shop now</div></a><a href="/cart" class="action-card"><div class="icon">🛒</div><div class="title">View Cart</div><div class="sub">Checkout</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">Track</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div><div class="sub">Saved</div></a><a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi</div><div class="sub">Groups</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer</div><div class="sub">Earn</div></a>';
+            loadBuyerStats();loadBuyerCart();
+        }
+        async function loadBuyerStats(){
+            document.getElementById('userStats').innerHTML='<div class="stat-card"><div class="icon">🛒</div><div class="value" id="cartCount">-</div><div class="label">Cart Items</div></div><div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist</div></div><div class="stat-card"><div class="icon">📦</div><div class="value" id="orderCount">-</div><div class="label">Orders</div></div><div class="stat-card"><div class="icon">💰</div><div class="value" id="cartTotal">-</div><div class="label">Cart Total</div></div>';
+            try{var cr=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}});var cd=await cr.json();if(cd.success&&cd.data&&cd.data.items){document.getElementById('cartCount').textContent=cd.data.items.length;document.getElementById('cartTotal').textContent=cd.data.total.toLocaleString()+' XAF';}}catch(e){document.getElementById('cartCount').textContent='0';}
+            try{var wr=await fetch('/api/wishlist/count',{headers:{'Authorization':'Bearer '+token}});var wd=await wr.json();if(wd.success)document.getElementById('wishlistCount').textContent=wd.count;}catch(e){document.getElementById('wishlistCount').textContent='0';}
+            try{var o=await fetch('/api/orders/my-orders',{headers:{'Authorization':'Bearer '+token}});var od=await o.json();if(od.success&&od.data)document.getElementById('orderCount').textContent=od.data.length;}catch(e){document.getElementById('orderCount').textContent='0';}
+        }
+        async function loadBuyerCart(){
+            try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();
+                if(d.success&&d.data&&d.data.items&&d.data.items.length>0){
+                    var panel=document.getElementById('buyerCartPanel');panel.style.display='block';
+                    var html='<div class="cart-mini"><div class="section-title">🛒 Your Cart</div>';
+                    for(var i=0;i<d.data.items.length;i++){var item=d.data.items[i];html+='<div class="cart-item-row"><span>'+item.productName+' x'+item.quantity+'</span><span>'+item.effectivePrice.toLocaleString()+' XAF</span></div>';}
+                    html+='<div class="cart-total">Total: '+d.data.total.toLocaleString()+' XAF</div>';
+                    html+='<a href="/cart" class="btn-cart-action">⚡ Buy Now</a></div>';
+                    panel.innerHTML=html;
                 }
-            } catch(e) { document.getElementById('sellerOrderPanel').innerHTML = ''; }
+            }catch(e){}
         }
-        
-        async function updateOrderStatus(orderId, status) {
-            try {
-                var r = await fetch('/api/orders/' + orderId + '/update-status?status=' + status, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                if (d.success) { alert('✅ Order ' + status + '!'); loadSellerOrders(); }
-                else { alert('❌ ' + (d.message || 'Failed')); }
-            } catch(e) { alert('Network error'); }
+        async function loadSellerView(){
+            document.getElementById('userActions').innerHTML='<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">View all</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade</div></a>';
+            loadSellerOrders();
         }
-        
-        async function loadBuyerStats() {
-            document.getElementById('userStats').innerHTML = 
-                '<div class="stat-card"><div class="icon">🛒</div><div class="value" id="cartCount">-</div><div class="label">Cart Items</div></div>' +
-                '<div class="stat-card"><div class="icon">❤️</div><div class="value" id="wishlistCount">-</div><div class="label">Wishlist</div></div>' +
-                '<div class="stat-card"><div class="icon">📦</div><div class="value" id="orderCount">-</div><div class="label">Orders</div></div>';
-            try { var cr = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } }); var cd = await cr.json(); if (cd.success && cd.data && cd.data.items) document.getElementById('cartCount').textContent = cd.data.items.length; } catch(e) { document.getElementById('cartCount').textContent = '0'; }
-            try { var wr = await fetch('/api/wishlist/count', { headers: { 'Authorization': 'Bearer ' + token } }); var wd = await wr.json(); if (wd.success) document.getElementById('wishlistCount').textContent = wd.count; } catch(e) { document.getElementById('wishlistCount').textContent = '0'; }
-            try { var o = await fetch('/api/orders/my-orders', { headers: { 'Authorization': 'Bearer ' + token } }); var od = await o.json(); if (od.success && od.data) document.getElementById('orderCount').textContent = od.data.length; } catch(e) { document.getElementById('orderCount').textContent = '0'; }
+        async function loadSellerOrders(){
+            try{var r=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();var panel=document.getElementById('sellerOrderPanel');panel.style.display='block';
+                var pc=0;try{var pr=await fetch('/api/products/my-products',{headers:{'Authorization':'Bearer '+token}});var pd=await pr.json();if(pd.success&&pd.data)pc=pd.data.length;}catch(e){}
+                var oc=d.success&&d.data?d.data.length:0;var rev=0;if(d.success&&d.data){for(var i=0;i<d.data.length;i++){rev+=d.data[i].sellerPayout||0;}}
+                document.getElementById('userStats').innerHTML='<div class="stat-card"><div class="value">'+pc+'</div><div class="label">My Products</div></div><div class="stat-card"><div class="value">'+oc+'</div><div class="label">Orders</div></div><div class="stat-card"><div class="value">'+rev.toLocaleString()+'</div><div class="label">Revenue (XAF)</div></div>';
+                if(d.success&&d.data&&d.data.length>0){var html='<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="order-row header-row"><span>Order #</span><span>Product</span><span>Qty</span><span>Status</span><span>Action</span></div>';
+                    for(var j=0;j<d.data.length;j++){var o=d.data[j];var items=o.items?o.items.map(function(i){return i.productName;}).join(', '):'Product';var qty=o.items?o.items.reduce(function(s,i){return s+i.quantity;},0):0;
+                        html+='<div class="order-row"><span><strong>#'+o.sellerOrderId.toString().slice(-6)+'</strong></span><span>'+items+'</span><span>'+qty+'</span><span class="status status-'+o.status+'">'+o.status+'</span><span>'+(o.status==='PENDING'?'<button class="btn-sm btn-confirm" onclick="updateOrderStatus('+o.sellerOrderId+',\'CONFIRMED\')">Confirm</button>':o.status==='CONFIRMED'?'<button class="btn-sm btn-ship" onclick="updateOrderStatus('+o.sellerOrderId+',\'SHIPPED\')">Ship</button>':o.status==='SHIPPED'?'<button class="btn-sm btn-confirm" onclick="updateOrderStatus('+o.sellerOrderId+',\'DELIVERED\')">Deliver</button>':'<span style="color:#10b981;">✅ Done</span>')+'</span></div>';}
+                    html+='</div>';panel.innerHTML=html;}else{panel.innerHTML='<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="empty-state">No orders yet.</div></div>';}
+            }catch(e){}
         }
-        
-        function showLogin() { document.getElementById('loginForm').style.display = 'block'; }
-        async function doLogin() {
-            var email = document.getElementById('loginEmail').value; var password = document.getElementById('loginPassword').value; var errorEl = document.getElementById('loginError');
-            try { var r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var d = await r.json(); if (d.success && d.data && d.data.token) { localStorage.setItem('token', d.data.token); location.reload(); } else { errorEl.textContent = d.message || 'Login failed'; errorEl.style.display = 'block'; } } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
-        }
-        function logout() { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; }
+        async function updateOrderStatus(oid,status){try{var r=await fetch('/api/orders/'+oid+'/update-status?status='+status,{method:'PUT',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('✅ Order '+status+'!');loadSellerOrders();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
+        function showLogin(){document.getElementById('loginForm').style.display='block';}
+        async function doLogin(){var email=document.getElementById('loginEmail').value;var password=document.getElementById('loginPassword').value;var errorEl=document.getElementById('loginError');try{var r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})});var d=await r.json();if(d.success&&d.data&&d.data.token){localStorage.setItem('token',d.data.token);location.reload();}else{errorEl.textContent=d.message||'Login failed';errorEl.style.display='block';}}catch(e){errorEl.textContent='Network error';errorEl.style.display='block';}}
+        function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');location.href='/dashboard';}
         init();
     </script>
 </body>
