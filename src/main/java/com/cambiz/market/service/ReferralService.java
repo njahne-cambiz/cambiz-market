@@ -21,6 +21,16 @@ public class ReferralService {
     public String getReferralCode(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) return null;
+        
+        // If user doesn't have a referral code yet, generate one
+        if (user.getReferralCode() == null || user.getReferralCode().isEmpty()) {
+            String name = (user.getFirstName() != null ? user.getFirstName() : "USER").toUpperCase();
+            String code = name.replaceAll("[^A-Z0-9]", "");
+            if (code.length() > 4) code = code.substring(0, 4);
+            user.setReferralCode(code + user.getId());
+            userRepository.save(user);
+        }
+        
         return user.getReferralCode();
     }
     
