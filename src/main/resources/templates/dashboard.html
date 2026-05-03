@@ -7,56 +7,75 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f0f2f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: center; align-items: center; }
-        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
         
-        .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: center; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; letter-spacing: -0.5px; }
         
+        .container { max-width: 950px; margin: 2.5rem auto; padding: 0 1.5rem; }
+        
+        /* PUBLIC HERO */
         .hero { text-align: center; margin-bottom: 2.5rem; }
-        .hero .icon { font-size: 4rem; margin-bottom: 1rem; }
-        .hero h1 { font-size: 2.2rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
-        .hero p { color: #636e72; font-size: 1.1rem; }
+        .hero .icon { font-size: 4.5rem; margin-bottom: 1rem; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .hero h1 { font-size: 2.4rem; font-weight: 800; color: #1a1a2e; margin-bottom: 0.5rem; letter-spacing: -1px; }
+        .hero p { color: #636e72; font-size: 1.15rem; }
         
-        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
-        .about-card { background: white; border-radius: 16px; padding: 1.8rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
-        .about-card .icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
-        .about-card h3 { color: #1a1a2e; margin-bottom: 0.3rem; font-size: 1rem; }
-        .about-card p { color: #636e72; font-size: 0.85rem; line-height: 1.4; }
+        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
+        .about-card { background: white; border-radius: 18px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 2px 16px rgba(0,0,0,0.05); transition: all 0.3s; }
+        .about-card:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .about-card .icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+        .about-card h3 { color: #1a1a2e; margin-bottom: 0.4rem; font-size: 1.05rem; font-weight: 700; }
+        .about-card p { color: #636e72; font-size: 0.88rem; line-height: 1.5; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
-        .stat-card { background: white; border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
-        .stat-card .value { font-size: 1.8rem; font-weight: 700; color: #667eea; }
-        .stat-card .label { color: #636e72; font-size: 0.8rem; margin-top: 0.3rem; }
+        .stat-card { background: white; border-radius: 16px; padding: 1.6rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card .value { font-size: 2rem; font-weight: 800; color: #667eea; }
+        .stat-card .label { color: #636e72; font-size: 0.82rem; margin-top: 0.3rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .login-card { background: white; border-radius: 24px; padding: 3rem 2.5rem; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
-        .login-card h2 { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
-        .login-card p { color: #636e72; margin-bottom: 1.5rem; }
-        .btn { padding: 16px 36px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 16px; margin: 8px; min-width: 200px; transition: all 0.2s; }
-        .btn:hover { transform: translateY(-2px); }
-        .btn-primary { background: #667eea; color: white; box-shadow: 0 4px 16px rgba(102,126,234,0.4); }
-        .btn-success { background: #00b894; color: white; box-shadow: 0 4px 16px rgba(0,184,148,0.3); }
-        .login-form { display: none; margin-top: 2rem; padding: 2rem; background: #f8f9fa; border-radius: 16px; text-align: left; }
-        .login-form input { display: block; width: 100%; padding: 14px 16px; margin-bottom: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 15px; }
-        .login-form input:focus { border-color: #667eea; outline: none; }
+        .login-card { background: white; border-radius: 24px; padding: 3.5rem 2.5rem; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
+        .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #667eea, #764ba2, #00b894); }
+        .login-card h2 { font-size: 1.6rem; font-weight: 800; color: #1a1a2e; margin-bottom: 0.5rem; }
+        .login-card p { color: #636e72; margin-bottom: 2rem; font-size: 1rem; }
+        .btn { padding: 15px 34px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 15px; margin: 8px; min-width: 210px; transition: all 0.25s; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #5a67d8); color: white; box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
+        .btn-primary:hover { box-shadow: 0 10px 28px rgba(102,126,234,0.55); }
+        .btn-success { background: linear-gradient(135deg, #00b894, #00a381); color: white; box-shadow: 0 6px 20px rgba(0,184,148,0.35); }
+        .btn-success:hover { box-shadow: 0 10px 28px rgba(0,184,148,0.5); }
+        .login-form { display: none; margin-top: 2rem; padding: 2rem; background: #f8fafc; border-radius: 16px; text-align: left; border: 1px solid #e8ecf1; }
+        .login-form input { display: block; width: 100%; padding: 14px 16px; margin-bottom: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 15px; transition: border-color 0.2s; }
+        .login-form input:focus { border-color: #667eea; outline: none; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
         .login-form button { width: 100%; margin: 0; }
         
+        /* USER DASHBOARD */
         .user-view { display: none; }
-        .welcome-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 2rem 2.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .welcome-banner h1 { font-size: 1.6rem; font-weight: 700; }
-        .welcome-banner .badge { background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .welcome-banner { background: linear-gradient(135deg, #1a1a2e, #2d3436); color: white; border-radius: 20px; padding: 2.2rem 2.8rem; margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+        .welcome-banner h1 { font-size: 1.7rem; font-weight: 700; }
+        .welcome-banner .subtitle { opacity: 0.8; font-size: 0.95rem; margin-top: 0.3rem; }
+        .welcome-banner .badge { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 25px; font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); }
         
-        .section-title { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 1rem; }
-        .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
-        .action-card { background: white; border-radius: 16px; padding: 1.8rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; border: 2px solid transparent; }
-        .action-card:hover { border-color: #667eea; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(102,126,234,0.15); }
-        .action-card .icon { font-size: 2.2rem; }
-        .action-card .title { font-weight: 600; font-size: 0.9rem; }
-        .action-card .sub { font-size: 0.75rem; color: #b2bec3; }
+        .section-title { font-size: 1.15rem; font-weight: 700; color: #1a1a2e; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: #e8ecf1; }
         
-        .footer { text-align: center; padding: 1.5rem; color: #b2bec3; font-size: 0.85rem; }
+        .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 2.5rem; }
+        .action-card { background: white; border-radius: 18px; padding: 2rem 1.2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); text-align: center; text-decoration: none; color: #1a1a2e; transition: all 0.25s; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; border: 2px solid transparent; position: relative; overflow: hidden; }
+        .action-card:hover { border-color: #667eea; transform: translateY(-4px); box-shadow: 0 12px 30px rgba(102,126,234,0.18); }
+        .action-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #667eea; transform: scaleX(0); transition: transform 0.25s; }
+        .action-card:hover::after { transform: scaleX(1); }
+        .action-card .icon { font-size: 2.4rem; transition: transform 0.25s; }
+        .action-card:hover .icon { transform: scale(1.1); }
+        .action-card .title { font-weight: 700; font-size: 0.95rem; }
+        .action-card .sub { font-size: 0.78rem; color: #b2bec3; }
         
-        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.6rem; } .quick-actions { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } .quick-actions { grid-template-columns: 1fr 1fr; } }
+        .logout-btn { text-align: center; margin: 1.5rem 0; }
+        .logout-btn a { color: #e74c3c; font-weight: 600; text-decoration: none; padding: 10px 24px; border-radius: 10px; transition: all 0.2s; font-size: 0.9rem; }
+        .logout-btn a:hover { background: #fde8e8; }
+        
+        .footer { text-align: center; padding: 1.8rem; color: #b2bec3; font-size: 0.85rem; }
+        
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.8rem; } .quick-actions { grid-template-columns: repeat(2, 1fr); } .welcome-banner { padding: 1.5rem; } }
+        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } .quick-actions { grid-template-columns: 1fr 1fr; } .action-card { padding: 1.5rem 0.8rem; } }
     </style>
 </head>
 <body>
@@ -67,12 +86,12 @@
         <div id="publicView">
             <div class="hero"><div class="icon">🛒</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform — Buy & Sell with Confidence</p></div>
             <div class="about-grid">
-                <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect across Cameroon.</p></div>
-                <div class="about-card"><div class="icon">💳</div><h3>Mobile Money</h3><p>MTN & Orange Money ready.</p></div>
-                <div class="about-card"><div class="icon">🚀</div><h3>Boost Business</h3><p>Premium tools for sellers.</p></div>
-                <div class="about-card"><div class="icon">🤖</div><h3>AI Negotiation</h3><p>Makola AI gets best price.</p></div>
-                <div class="about-card"><div class="icon">🤝</div><h3>Njangi Groups</h3><p>Buy together, save together.</p></div>
-                <div class="about-card"><div class="icon">⭐</div><h3>Trusted Reviews</h3><p>Real buyer reviews.</p></div>
+                <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect with buyers and sellers across Cameroon.</p></div>
+                <div class="about-card"><div class="icon">💳</div><h3>Mobile Money Ready</h3><p>Pay easily with MTN & Orange Money.</p></div>
+                <div class="about-card"><div class="icon">🚀</div><h3>Boost Your Business</h3><p>Premium tools to grow your sales.</p></div>
+                <div class="about-card"><div class="icon">🤖</div><h3>AI-Powered Negotiation</h3><p>Makola AI gets you the best price.</p></div>
+                <div class="about-card"><div class="icon">🤝</div><h3>Njangi Group Buying</h3><p>Buy together, save together.</p></div>
+                <div class="about-card"><div class="icon">⭐</div><h3>Trusted Reviews</h3><p>Real reviews from real buyers.</p></div>
             </div>
             <div class="stats-grid">
                 <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
@@ -96,12 +115,15 @@
         <!-- USER VIEW (Seller or Buyer) -->
         <div id="userView" class="user-view">
             <div class="welcome-banner">
-                <div><h1>👋 Welcome back!</h1><p style="opacity:0.9;"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div>
+                <div>
+                    <h1>👋 Welcome back!</h1>
+                    <p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p>
+                </div>
                 <span class="badge" id="roleBadge"></span>
             </div>
             <div class="section-title">🚀 Quick Actions</div>
             <div class="quick-actions" id="userActions"></div>
-            <div style="text-align:center; margin:1rem 0;"><a href="#" onclick="logout()" style="color:#e74c3c; font-weight:600;">🚪 Logout</a></div>
+            <div class="logout-btn"><a href="#" onclick="logout()">🚪 Logout</a></div>
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
     </div>
