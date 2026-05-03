@@ -48,4 +48,7 @@ public class StoreController {
 
     @GetMapping("/referral")
     public String referral() { return "referral"; }
+
+    @GetMapping("/cart")
+    public String cart() { return "cart"; }
 }
