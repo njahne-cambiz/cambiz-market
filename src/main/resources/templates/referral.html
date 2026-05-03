@@ -3,163 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register | CamBiz Market</title>
+    <title>Referral Program | CamBiz Market</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #667eea, #764ba2); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        body { background: #f0f2f5; min-height: 100vh; }
+        .header { background: #2563eb; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header nav a { color: rgba(255,255,255,0.8); text-decoration: none; margin-left: 2rem; font-size: 0.9rem; }
+        .header nav a:hover { color: white; }
+        .container { max-width: 700px; margin: 2rem auto; padding: 0 1.5rem; }
+        .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; font-weight: 600; }
         
-        .register-card { background: white; border-radius: 20px; padding: 2.5rem; max-width: 520px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-        .register-card .logo { text-align: center; font-size: 2rem; margin-bottom: 0.5rem; }
-        .register-card h1 { text-align: center; color: #2d3436; margin-bottom: 0.3rem; font-size: 1.5rem; }
-        .register-card p { text-align: center; color: #636e72; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .hero { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border-radius: 20px; padding: 2.5rem; text-align: center; margin-bottom: 2rem; }
+        .hero h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .hero p { opacity: 0.9; }
         
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.3rem; color: #2d3436; font-weight: 600; font-size: 0.9rem; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 14px; transition: border-color 0.2s; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .stat-card .value { font-size: 1.8rem; font-weight: 700; color: #2563eb; }
+        .stat-card .label { color: #636e72; font-size: 0.8rem; }
         
-        .referral-box { background: #f0f0ff; border: 2px dashed #667eea; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; text-align: center; }
-        .referral-box p { color: #667eea; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; }
-        .referral-box input { border-color: #667eea !important; background: white; }
+        .code-card { background: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 1.5rem; }
+        .code-display { font-size: 2rem; font-weight: 800; letter-spacing: 3px; color: #2563eb; background: #eff6ff; padding: 1rem; border-radius: 12px; margin: 1rem 0; }
+        .btn { padding: 14px 28px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 15px; margin: 5px; display: inline-block; text-decoration: none; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-whatsapp { background: #25D366; color: white; }
+        .btn-copy { background: #64748b; color: white; }
         
-        .btn-register { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
-        .btn-register:hover { transform: translateY(-2px); }
-        .btn-register:disabled { background: #b2bec3; cursor: not-allowed; transform: none; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 1rem; }
+        .how-it-works { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .step { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.2rem; }
+        .step-num { background: #2563eb; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .step p { color: #636e72; font-size: 0.9rem; }
+        .step p strong { color: #1a1a2e; }
         
-        .message { text-align: center; margin-top: 1rem; padding: 0.75rem; border-radius: 10px; display: none; }
-        .message.success { background: #d4edda; color: #155724; display: block; }
-        .message.error { background: #f8d7da; color: #721c24; display: block; }
-        
-        .login-link { text-align: center; margin-top: 1.5rem; color: #636e72; font-size: 0.9rem; }
-        .login-link a { color: #667eea; font-weight: bold; text-decoration: none; }
-        .login-link a:hover { text-decoration: underline; }
-        
-        .back-link { display: block; text-align: center; margin-bottom: 1rem; color: white; text-decoration: none; font-size: 0.9rem; }
-        
-        @media (max-width: 500px) {
-            .register-card { padding: 1.5rem; }
-            .form-row { grid-template-columns: 1fr; }
-        }
+        .login-prompt { background: white; border-radius: 16px; padding: 3rem 2rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .login-prompt h2 { margin-bottom: 0.5rem; color: #1a1a2e; }
+        .login-prompt p { color: #636e72; margin-bottom: 1.5rem; }
+        .footer { text-align: center; padding: 1.5rem; color: #b2bec3; font-size: 0.85rem; }
     </style>
 </head>
 <body>
-    <div style="width:100%; max-width:520px;">
-        <a href="/store" class="back-link">← Back to Store</a>
+    <header class="header">
+        <a href="/store" class="logo">🛒 CamBiz Market</a>
+        <nav><a href="/store">📦 Store</a><a href="/dashboard">👤 Dashboard</a></nav>
+    </header>
+    <main class="container">
+        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
         
-        <div class="register-card">
-            <div class="logo">🛒</div>
-            <h1>Create Your Account</h1>
-            <p>Join Cameroon's #1 Marketplace</p>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>First Name</label>
-                    <input type="text" id="firstName" placeholder="John">
-                </div>
-                <div class="form-group">
-                    <label>Last Name</label>
-                    <input type="text" id="lastName" placeholder="Doe">
-                </div>
+        <div id="loggedInView" style="display:none;">
+            <div class="hero"><h1>🎁 Refer & Earn</h1><p>Invite friends to CamBiz Market and earn rewards!</p></div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="value" id="totalReferrals">0</div><div class="label">Friends Referred</div></div>
+                <div class="stat-card"><div class="value" id="totalEarned">0 XAF</div><div class="label">Total Earned</div></div>
+                <div class="stat-card"><div class="value">2%</div><div class="label">Commission</div></div>
             </div>
-            
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" id="email" placeholder="you@example.com">
+            <div class="code-card">
+                <p>Your Referral Code</p>
+                <div class="code-display" id="referralCode">---</div>
+                <button class="btn btn-copy" onclick="copyCode()">📋 Copy Code</button>
+                <a class="btn btn-whatsapp" id="whatsappLink" target="_blank">📱 Share on WhatsApp</a>
             </div>
-            
-            <div class="form-group">
-                <label>Phone Number</label>
-                <input type="tel" id="phone" placeholder="+237 6XX XXX XXX">
+            <div class="how-it-works">
+                <div class="section-title">📋 How It Works</div>
+                <div class="step"><div class="step-num">1</div><p><strong>Share your code</strong> — Send your referral link to friends via WhatsApp</p></div>
+                <div class="step"><div class="step-num">2</div><p><strong>They register</strong> — Friends sign up with your referral code</p></div>
+                <div class="step"><div class="step-num">3</div><p><strong>You earn</strong> — Get 500 XAF bonus + 2% commission on their orders</p></div>
             </div>
-            
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="Min. 6 characters">
-            </div>
-            
-            <div class="form-group">
-                <label>I want to</label>
-                <select id="userType">
-                    <option value="BUYER">🛒 Buy Products</option>
-                    <option value="SELLER">🏪 Sell Products</option>
-                </select>
-            </div>
-            
-            <div class="referral-box">
-                <p>🎁 Got a referral code?</p>
-                <input type="text" id="referralCode" placeholder="Enter friend's code (optional)">
-            </div>
-            
-            <button class="btn-register" onclick="register()">🚀 Create Account</button>
-            
-            <div id="message" class="message"></div>
-            
-            <div class="login-link">
-                Already have an account? <a href="/dashboard">Log in</a>
-            </div>
+            <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
         </div>
-    </div>
-
+        
+        <div id="loginView" class="login-prompt">
+            <h2>🔐 Login Required</h2>
+            <p>Please log in to access your referral dashboard and start earning.</p>
+            <a href="/dashboard" class="btn btn-primary">🔑 Go to Dashboard</a>
+        </div>
+    </main>
     <script>
-        async function register() {
-            var firstName = document.getElementById('firstName').value.trim();
-            var lastName = document.getElementById('lastName').value.trim();
-            var email = document.getElementById('email').value.trim();
-            var phone = document.getElementById('phone').value.trim();
-            var password = document.getElementById('password').value;
-            var userType = document.getElementById('userType').value;
-            var referralCode = document.getElementById('referralCode').value.trim();
-            
-            var msgEl = document.getElementById('message');
-            var btn = document.querySelector('.btn-register');
-            
-            if (!firstName || !lastName || !email || !password) {
-                msgEl.textContent = '❌ Please fill in all required fields.';
-                msgEl.className = 'message error';
-                return;
-            }
-            if (password.length < 6) {
-                msgEl.textContent = '❌ Password must be at least 6 characters.';
-                msgEl.className = 'message error';
-                return;
-            }
-            
-            btn.disabled = true;
-            btn.textContent = '⏳ Creating account...';
-            msgEl.className = 'message';
-            
-            var body = { firstName: firstName, lastName: lastName, email: email, phone: phone, password: password, userType: userType };
-            if (referralCode) body.referralCode = referralCode;
-            
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) { loadReferralData(); } else { document.getElementById('loginView').style.display = 'block'; }
+        
+        async function loadReferralData() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('loggedInView').style.display = 'block';
             try {
-                var res = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                var data = await res.json();
-                
-                if (data.success) {
-                    var msg = '🎉 Account created!';
-                    if (referralCode) msg += ' Referral bonus applied!';
-                    msg += ' Redirecting...';
-                    msgEl.textContent = msg;
-                    msgEl.className = 'message success';
-                    btn.textContent = '✅ Done!';
-                    setTimeout(function() { window.location.href = '/dashboard'; }, 1500);
-                } else {
-                    msgEl.textContent = '❌ ' + (data.message || 'Registration failed.');
-                    msgEl.className = 'message error';
-                    btn.disabled = false;
-                    btn.textContent = '🚀 Create Account';
+                var r = await fetch('/api/referral/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                if (d.success && d.data) {
+                    document.getElementById('referralCode').textContent = d.data.referralCode || '---';
+                    document.getElementById('totalReferrals').textContent = d.data.totalReferrals || 0;
+                    document.getElementById('totalEarned').textContent = (d.data.totalEarned || 0).toLocaleString() + ' XAF';
+                    document.getElementById('whatsappLink').href = 'https://wa.me/?text=' + encodeURIComponent('🎁 Join CamBiz Market using my referral code: ' + d.data.referralCode + ' and we both get rewards! Sign up here: ' + d.data.referralLink);
                 }
-            } catch(e) {
-                msgEl.textContent = '❌ Network error. Please try again.';
-                msgEl.className = 'message error';
-                btn.disabled = false;
-                btn.textContent = '🚀 Create Account';
-            }
+            } catch(e) {}
+        }
+        
+        function copyCode() {
+            var code = document.getElementById('referralCode').textContent;
+            navigator.clipboard.writeText(code).then(function() { alert('✅ Code copied!'); });
         }
     </script>
 </body>
