@@ -6,177 +6,94 @@
     <title>Track Order | CamBiz Market</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f5f6fa; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #2d3436, #636e72); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
-        .header nav { display: flex; gap: 1.5rem; }
-        .header nav a { color: white; text-decoration: none; }
+        body { background: #eaeded; min-height: 100vh; }
+        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header .logo span { color: #febd69; }
+        .header nav a { color: white; text-decoration: none; margin-left: 2rem; font-size: 0.9rem; }
         .container { max-width: 700px; margin: 2rem auto; padding: 0 1.5rem; }
-        .back-btn { color: #0984e3; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; }
-        
-        .tracking-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .tracking-card h1 { color: #2d3436; margin-bottom: 0.25rem; }
-        .order-id { color: #636e72; font-size: 0.9rem; margin-bottom: 1.5rem; }
-        
-        .status-badge {
-            display: inline-block; padding: 0.5rem 1.5rem; border-radius: 25px;
-            font-weight: bold; font-size: 1.1rem; margin-bottom: 2rem;
-        }
-        .status-PENDING { background: #ffeaa7; color: #d68910; }
-        .status-CONFIRMED { background: #dfe6e9; color: #2d3436; }
-        .status-PROCESSING { background: #74b9ff; color: white; }
-        .status-SHIPPED { background: #a29bfe; color: white; }
-        .status-OUT_FOR_DELIVERY { background: #fd79a8; color: white; }
-        .status-DELIVERED { background: #00b894; color: white; }
-        .status-CANCELLED { background: #d63031; color: white; }
-        
+        .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; font-weight: 600; }
+        .tracking-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .tracking-card h1 { color: #0f1111; margin-bottom: 0.25rem; }
+        .order-id { color: #565959; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .status-badge { display: inline-block; padding: 0.5rem 1.5rem; border-radius: 25px; font-weight: bold; font-size: 1.1rem; margin-bottom: 2rem; }
+        .status-PENDING { background: #fff3cd; color: #856404; }
+        .status-CONFIRMED { background: #d1ecf1; color: #0c5460; }
+        .status-SHIPPED { background: #e8daef; color: #6c3483; }
+        .status-DELIVERED { background: #d4edda; color: #155724; }
+        .status-CANCELLED { background: #f8d7da; color: #721c24; }
         .timeline { position: relative; padding-left: 40px; }
-        .timeline::before {
-            content: ''; position: absolute; left: 15px; top: 0; bottom: 0;
-            width: 3px; background: #dfe6e9; border-radius: 2px;
-        }
-        .timeline-item {
-            position: relative; margin-bottom: 1.5rem; padding: 1rem;
-            background: #f8f9fa; border-radius: 10px;
-        }
-        .timeline-item::before {
-            content: ''; position: absolute; left: -33px; top: 1.5rem;
-            width: 14px; height: 14px; border-radius: 50%;
-            background: #0984e3; border: 3px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .timeline-item:first-child::before { background: #00b894; width: 18px; height: 18px; left: -35px; }
-        
-        .timeline-item .status-title { font-weight: bold; color: #2d3436; font-size: 1.1rem; }
-        .timeline-item .status-desc { color: #636e72; font-size: 0.9rem; margin: 0.3rem 0; }
+        .timeline::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 3px; background: #d5d9d9; border-radius: 2px; }
+        .timeline-item { position: relative; margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 10px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-item::before { content: ''; position: absolute; left: -33px; top: 1.5rem; width: 14px; height: 14px; border-radius: 50%; background: #febd69; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .timeline-item:first-child::before { background: #10b981; width: 18px; height: 18px; left: -35px; }
+        .timeline-item .status-title { font-weight: bold; color: #0f1111; font-size: 1.1rem; }
+        .timeline-item .status-desc { color: #565959; font-size: 0.9rem; margin: 0.3rem 0; }
         .timeline-item .timestamp { color: #b2bec3; font-size: 0.8rem; }
-        .timeline-item .note { color: #0984e3; font-style: italic; margin-top: 0.3rem; }
-        
-        .share-section { margin-top: 2rem; text-align: center; padding-top: 1.5rem; border-top: 1px solid #dfe6e9; }
-        .share-btn {
-            display: inline-block; background: #25D366; color: white;
-            padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none;
-            font-weight: bold; transition: opacity 0.2s;
-        }
-        .share-btn:hover { opacity: 0.9; }
-        
-        .empty-state { text-align: center; padding: 3rem 1rem; }
+        .share-btn { display: inline-block; background: #25D366; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 1rem; }
+        .empty-state { text-align: center; padding: 3rem; }
         .empty-state .icon { font-size: 4rem; margin-bottom: 1rem; }
-        .empty-state h2 { color: #2d3436; margin-bottom: 0.5rem; }
-        .empty-state p { color: #636e72; }
-
-        @media (max-width: 500px) {
-            .tracking-card { padding: 1.5rem; }
-            .status-badge { font-size: 0.95rem; }
-        }
+        .footer { text-align: center; padding: 1.5rem; color: #b2bec3; font-size: 0.85rem; margin-top: 2rem; }
     </style>
 </head>
 <body>
     <header class="header">
-        <a href="/store" class="logo">🛒 CamBiz Market</a>
-        <nav>
-            <a href="/store">📦 Products</a>
-            <a href="/wishlist">❤️ Wishlist</a>
-            <a href="/dashboard">👤 Dashboard</a>
-        </nav>
+        <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+        <nav><a href="/store">Store</a><a href="/dashboard">Dashboard</a></nav>
     </header>
-
     <main class="container">
         <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
-        <div id="tracking-content">
-            <p style="text-align:center; padding:3rem; color:#636e72;">Loading order tracking...</p>
-        </div>
+        <div id="tracking-content"><p style="text-align:center;padding:3rem;">Loading tracking...</p></div>
+        <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
     </main>
-
     <script>
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('id');
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        var params = new URLSearchParams(window.location.search);
+        var orderId = params.get('id');
         
         if (!orderId) {
-            document.getElementById('tracking-content').innerHTML = `
-                <div class="tracking-card">
-                    <div class="empty-state">
-                        <div class="icon">🔍</div>
-                        <h2>No Order Specified</h2>
-                        <p>Please provide an order ID to track.</p>
-                    </div>
-                </div>`;
+            document.getElementById('tracking-content').innerHTML = '<div class="tracking-card"><div class="empty-state"><div class="icon">🔍</div><h2>No Order Specified</h2></div></div>';
+        } else if (!token) {
+            document.getElementById('tracking-content').innerHTML = '<div class="tracking-card"><div class="empty-state"><div class="icon">🔐</div><h2>Login Required</h2><p>Please log in to track your order.</p><a href="/dashboard" class="share-btn" style="background:#2563eb;">Go to Dashboard</a></div></div>';
         } else {
             loadTracking(orderId);
         }
         
-        async function loadTracking(orderId) {
-            if (!token) {
-                document.getElementById('tracking-content').innerHTML = `
-                    <div class="tracking-card">
-                        <div class="empty-state">
-                            <div class="icon">🔐</div>
-                            <h2>Login Required</h2>
-                            <p>Please log in to track your order.</p>
-                            <a href="/login" class="share-btn" style="background:#0984e3;">Login</a>
-                        </div>
-                    </div>`;
-                return;
-            }
-            
+        async function loadTracking(oid) {
             try {
-                const res = await fetch(`/api/orders/${orderId}/tracking`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
+                var r = await fetch('/api/store-tracking/' + oid, { headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
                 
-                if (data.success && data.data && data.data.length > 0) {
-                    const timeline = data.data;
-                    const latest = timeline[0];
-                    const shareUrl = `https://cambiz-market.onrender.com/order-tracking?id=${orderId}`;
-                    const shareText = `📦 Tracking update for Order #${orderId} on CamBiz Market: ${latest.displayName}! View here: ${shareUrl}`;
+                if (d.success && d.data && d.data.length > 0) {
+                    var timeline = d.data;
+                    var latest = timeline[0];
+                    var shareUrl = 'https://cambiz-market.onrender.com/order-tracking?id=' + oid;
+                    var shareText = '📦 Order #' + oid + ' on CamBiz Market: ' + latest.displayName + '! Track here: ' + shareUrl;
                     
-                    document.getElementById('tracking-content').innerHTML = `
-                        <div class="tracking-card">
-                            <h1>📦 Order Tracking</h1>
-                            <p class="order-id">Order #${orderId}</p>
-                            
-                            <span class="status-badge status-${latest.status}">${latest.displayName}</span>
-                            
-                            <div class="timeline">
-                                ${timeline.map(t => `
-                                    <div class="timeline-item">
-                                        <div class="status-title">✅ ${t.displayName}</div>
-                                        <div class="status-desc">${t.description}</div>
-                                        ${t.note ? `<div class="note">📝 ${t.note}</div>` : ''}
-                                        <div class="timestamp">📅 ${new Date(t.timestamp).toLocaleString('en-GB', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            
-                            <div class="share-section">
-                                <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" 
-                                   target="_blank" class="share-btn">📱 Share on WhatsApp</a>
-                            </div>
-                        </div>
-                    `;
+                    var html = '<div class="tracking-card"><h1>📦 Order Tracking</h1><p class="order-id">Order #' + oid + '</p>';
+                    html += '<span class="status-badge status-' + latest.status + '">' + latest.displayName + '</span>';
+                    html += '<div class="timeline">';
+                    
+                    for (var i = 0; i < timeline.length; i++) {
+                        var t = timeline[i];
+                        html += '<div class="timeline-item">';
+                        html += '<div class="status-title">✅ ' + t.displayName + '</div>';
+                        html += '<div class="status-desc">' + t.description + '</div>';
+                        html += '<div class="timestamp">📅 ' + new Date(t.timestamp).toLocaleString('en-GB', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) + '</div>';
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                    html += '<a href="https://wa.me/?text=' + encodeURIComponent(shareText) + '" target="_blank" class="share-btn">📱 Share on WhatsApp</a>';
+                    html += '</div>';
+                    
+                    document.getElementById('tracking-content').innerHTML = html;
                 } else {
-                    document.getElementById('tracking-content').innerHTML = `
-                        <div class="tracking-card">
-                            <h1>📦 Order #${orderId}</h1>
-                            <div class="empty-state">
-                                <div class="icon">⏳</div>
-                                <h2>Awaiting Confirmation</h2>
-                                <p>Your order has been placed. Tracking updates will appear once the seller confirms.</p>
-                            </div>
-                        </div>
-                    `;
+                    document.getElementById('tracking-content').innerHTML = '<div class="tracking-card"><div class="empty-state"><div class="icon">⏳</div><h2>Awaiting Confirmation</h2><p>Your order has been placed. Tracking updates will appear once the seller confirms.</p></div></div>';
                 }
-            } catch (e) {
-                document.getElementById('tracking-content').innerHTML = `
-                    <div class="tracking-card">
-                        <div class="empty-state">
-                            <div class="icon">⚠️</div>
-                            <h2>Error Loading</h2>
-                            <p>Could not load tracking. Please try again.</p>
-                        </div>
-                    </div>`;
+            } catch(e) {
+                document.getElementById('tracking-content').innerHTML = '<div class="tracking-card"><div class="empty-state"><div class="icon">⚠️</div><h2>Error Loading</h2></div></div>';
             }
         }
     </script>
