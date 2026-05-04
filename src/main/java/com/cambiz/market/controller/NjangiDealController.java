@@ -36,7 +36,10 @@ public class NjangiDealController {
         try {
             Long sellerId = getUserIdFromToken(authHeader);
             var user = userService.findById(sellerId);
-            String sellerName = user != null ? user.getFirstName() + " " + user.getLastName() : "Seller";
+            String sellerName = user != null ? (user.getFirstName() + " " + user.getLastName()) : "Seller";
+            if (user.getBusinessName() != null && !user.getBusinessName().isEmpty()) {
+                sellerName = user.getBusinessName();
+            }
             
             Long productId = Long.valueOf(request.get("productId").toString());
             String productName = request.get("productName").toString();
@@ -44,11 +47,12 @@ public class NjangiDealController {
             int maxParticipants = Integer.parseInt(request.get("maxParticipants").toString());
             double individualPrice = Double.parseDouble(request.get("individualPrice").toString());
             double regularPrice = Double.parseDouble(request.get("regularPrice").toString());
+            int durationDays = request.get("durationDays") != null ? Integer.parseInt(request.get("durationDays").toString()) : 7;
             
             NjangiDeal deal = njangiService.createDeal(productId, productName, sellerId, sellerName,
-                    minParticipants, maxParticipants, individualPrice, regularPrice);
+                    minParticipants, maxParticipants, individualPrice, regularPrice, durationDays);
             
-            return ResponseEntity.ok(Map.of("success", true, "message", "Njangi deal created!", "data", deal));
+            return ResponseEntity.ok(Map.of("success", true, "message", "Njangi deal created! Expires in " + durationDays + " days.", "data", deal));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
@@ -73,7 +77,7 @@ public class NjangiDealController {
         try {
             Long userId = getUserIdFromToken(authHeader);
             var user = userService.findById(userId);
-            String userName = user != null ? user.getFirstName() + " " + user.getLastName() : "User";
+            String userName = user != null ? (user.getFirstName() + " " + user.getLastName()) : "User";
             String userPhone = user != null ? user.getPhone() : "";
             
             NjangiDeal deal = njangiService.joinDeal(dealId, userId, userName, userPhone);

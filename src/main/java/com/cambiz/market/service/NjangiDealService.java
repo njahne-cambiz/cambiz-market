@@ -4,6 +4,7 @@ import com.cambiz.market.model.NjangiDeal;
 import com.cambiz.market.model.NjangiParticipant;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -15,9 +16,11 @@ public class NjangiDealService {
     private long nextId = 1;
     
     public NjangiDeal createDeal(Long productId, String productName, Long sellerId, String sellerName,
-                                  int minParticipants, int maxParticipants, double individualPrice, double regularPrice) {
+                                  int minParticipants, int maxParticipants, double individualPrice, double regularPrice,
+                                  int durationDays) {
         NjangiDeal deal = new NjangiDeal(nextId++, productId, productName, sellerId, sellerName,
                                           minParticipants, maxParticipants, individualPrice, regularPrice);
+        deal.setExpiresAt(LocalDateTime.now().plusDays(durationDays));
         deals.put(deal.getId(), deal);
         return deal;
     }
@@ -37,14 +40,12 @@ public class NjangiDealService {
         if (deal == null) return null;
         if (!"ACTIVE".equals(deal.getStatus())) return null;
         
-        // Check if already joined
         boolean alreadyJoined = deal.getParticipants().stream()
                 .anyMatch(p -> p.getUserId().equals(userId));
         if (alreadyJoined) return deal;
         
         deal.getParticipants().add(new NjangiParticipant(userId, userName, userPhone));
         
-        // Check if filled
         if (deal.getParticipants().size() >= deal.getMinParticipants()) {
             deal.setStatus("FILLED");
         }
