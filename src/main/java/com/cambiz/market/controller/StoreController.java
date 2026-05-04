@@ -51,4 +51,7 @@ public class StoreController {
 
     @GetMapping("/cart")
     public String cart() { return "cart"; }
+
+    @GetMapping("/create-flash-sale")
+    public String createFlashSale() { return "create-flash-sale"; }
 }

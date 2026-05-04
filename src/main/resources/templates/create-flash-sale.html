@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Flash Sale | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #eaeded; min-height: 100vh; }
+        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header .logo span { color: #febd69; }
+        .header nav a { color: #b2bec3; text-decoration: none; margin-left: 2rem; font-size: 0.9rem; }
+        .header nav a:hover { color: white; }
+        .container { max-width: 650px; margin: 2rem auto; padding: 0 1.5rem; }
+        .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; font-weight: 600; }
+        .card { background: white; border-radius: 12px; padding: 2.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .card h1 { color: #0f1111; margin-bottom: 0.5rem; font-size: 1.6rem; }
+        .card .subtitle { color: #565959; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; color: #0f1111; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 13px 16px; border: 2px solid #e8ecf1; border-radius: 8px; font-size: 14px; background: #fafbfc; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #febd69; background: white; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .info-box { background: #fefaf3; border: 1px solid #febd69; border-radius: 8px; padding: 1rem; margin: 1.5rem 0; }
+        .info-box p { font-size: 0.9rem; margin: 0.3rem 0; }
+        .btn { padding: 16px 24px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; width: 100%; }
+        .btn-primary { background: #ffd814; color: #0f1111; }
+        .btn-primary:hover { background: #f7ca00; }
+        .btn-primary:disabled { background: #d5d9d9; cursor: not-allowed; }
+        .message { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; text-align: center; font-weight: 600; }
+        .message.success { background: #d4edda; color: #155724; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; display: block; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+        <nav><a href="/store">📦 Store</a><a href="/dashboard">👤 Dashboard</a></nav>
+    </header>
+    <main class="container">
+        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+        <div class="card">
+            <h1>⚡ Create Flash Sale</h1>
+            <p class="subtitle">Limited-time discount — create urgency and boost sales</p>
+            <div class="form-group"><label>Product *</label><select id="productSelect"><option value="">Loading your products...</option></select></div>
+            <div class="form-row">
+                <div class="form-group"><label>Flash Price (XAF) *</label><input type="number" id="flashPrice" placeholder="Discounted price"></div>
+                <div class="form-group"><label>Duration</label><select id="duration"><option value="1">1 Hour</option><option value="3">3 Hours</option><option value="6">6 Hours</option><option value="12">12 Hours</option><option value="24" selected>24 Hours</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Stock for Flash Sale *</label><input type="number" id="totalStock" value="10" min="1"></div>
+                <div class="form-group"><label>Original Price</label><input type="text" id="originalPrice" readonly></div>
+            </div>
+            <div class="info-box" id="discountBox" style="display:none;">
+                <p>🔥 <b>Discount:</b> <span id="discountPercent">0</span>%</p>
+                <p>💰 <b>Buyer saves:</b> <span id="savingsAmount">0</span> XAF</p>
+            </div>
+            <button class="btn btn-primary" onclick="createFlashSale()">⚡ Launch Flash Sale</button>
+            <div id="message" class="message"></div>
+        </div>
+    </main>
+    <script>
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) { window.location.href = '/dashboard'; }
+        var selectedOriginalPrice = 0;
+        
+        async function loadMyProducts() {
+            try { var r = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); var s = document.getElementById('productSelect');
+                if (d.success && d.data && d.data.length > 0) { s.innerHTML = '<option value="">-- Select product --</option>' + d.data.map(function(p) { return '<option value="' + p.id + '" data-name="' + p.name + '" data-price="' + (p.discountedPrice || p.price) + '">' + p.name + ' (' + (p.discountedPrice || p.price).toLocaleString() + ' XAF)</option>'; }).join(''); }
+                else { s.innerHTML = '<option value="">No products found</option>'; }
+            } catch(e) {}
+        }
+        
+        document.getElementById('productSelect').addEventListener('change', function() {
+            var opt = this.options[this.selectedIndex];
+            selectedOriginalPrice = parseFloat(opt.dataset.price) || 0;
+            document.getElementById('originalPrice').value = selectedOriginalPrice.toLocaleString() + ' XAF';
+            calcDiscount();
+        });
+        document.getElementById('flashPrice').addEventListener('input', calcDiscount);
+        
+        function calcDiscount() {
+            var fp = parseFloat(document.getElementById('flashPrice').value) || 0;
+            if (fp > 0 && selectedOriginalPrice > 0 && fp < selectedOriginalPrice) {
+                document.getElementById('discountBox').style.display = 'block';
+                document.getElementById('discountPercent').textContent = Math.round((1 - fp/selectedOriginalPrice) * 100);
+                document.getElementById('savingsAmount').textContent = (selectedOriginalPrice - fp).toLocaleString();
+            } else { document.getElementById('discountBox').style.display = 'none'; }
+        }
+        
+        async function createFlashSale() {
+            var s = document.getElementById('productSelect');
+            var pid = s.value; var pname = s.options[s.selectedIndex].dataset.name;
+            var fp = document.getElementById('flashPrice').value;
+            var dur = document.getElementById('duration').value;
+            var stock = document.getElementById('totalStock').value;
+            var msg = document.getElementById('message'); var btn = document.querySelector('.btn-primary');
+            if (!pid || !fp || !stock) { msg.textContent = '❌ Please fill in all required fields.'; msg.className = 'message error'; return; }
+            if (parseFloat(fp) >= selectedOriginalPrice) { msg.textContent = '❌ Flash price must be lower than original price.'; msg.className = 'message error'; return; }
+            btn.disabled = true; btn.textContent = '⏳ Launching...'; msg.className = 'message';
+            try {
+                var r = await fetch('/api/flash-sales/create', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ productId: parseInt(pid), productName: pname, originalPrice: selectedOriginalPrice, flashPrice: parseFloat(fp), totalStock: parseInt(stock), durationHours: parseInt(dur) }) });
+                var d = await r.json();
+                if (d.success) { msg.textContent = '✅ Flash sale launched!'; msg.className = 'message success'; setTimeout(function() { window.location.href = '/store'; }, 1500); }
+                else { msg.textContent = '❌ ' + (d.message || 'Failed'); msg.className = 'message error'; btn.disabled = false; btn.textContent = '⚡ Launch Flash Sale'; }
+            } catch(e) { msg.textContent = '❌ Network error'; msg.className = 'message error'; btn.disabled = false; btn.textContent = '⚡ Launch Flash Sale'; }
+        }
+        loadMyProducts();
+    </script>
+</body>
+</html>

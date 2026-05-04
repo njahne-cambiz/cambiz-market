@@ -89,7 +89,7 @@
                 <div class="about-card"><div class="icon">🚀</div><h3>Boost Business</h3><p>Premium seller tools.</p></div>
                 <div class="about-card"><div class="icon">🤖</div><h3>AI Negotiation</h3><p>Makola AI pricing.</p></div>
                 <div class="about-card"><div class="icon">🤝</div><h3>Njangi Groups</h3><p>Buy together, save.</p></div>
-                <div class="about-card"><div class="icon">🎁</div><h3>Refer & Earn</h3><p>Invite friends, earn.</p></div>
+                <div class="about-card"><div class="icon">⚡</div><h3>Flash Sales</h3><p>Limited-time deals.</p></div>
             </div>
             <div class="stats-grid"><div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div><div class="stat-card"><div class="value">2+</div><div class="label">Users</div></div><div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div><div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div></div>
             <div class="login-card"><h2>Sign In</h2><p>Access your CamBiz Market account</p><button class="btn btn-primary" onclick="showLogin()">Sign In</button><a href="/register" class="btn btn-success">Create Account</a><div class="login-form" id="loginForm"><input type="email" id="loginEmail" placeholder="Email"><input type="password" id="loginPassword" placeholder="Password"><button class="btn btn-primary" onclick="doLogin()">Sign In</button><p id="loginError" style="color:#d00;margin-top:12px;display:none;"></p></div></div>
@@ -146,7 +146,14 @@
         async function addNegotiatedToCart(nid){try{var r=await fetch('/api/makola/add-to-cart/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('✅ Added to cart!');loadBuyerCart();loadBuyerStats();loadBuyerOffers();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
         async function dismissOffer(nid){var row=document.getElementById('offer-row-'+nid);if(row){row.remove();}if(document.querySelectorAll('#buyerOffersPanel .panel-row').length===0){document.getElementById('buyerOffersPanel').style.display='none';}}
         async function loadSellerView(){
-            document.getElementById('userActions').innerHTML='<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite</div></a><a href="/njangi" class="action-card"><div class="icon">📋</div><div class="title">My Njangi</div><div class="sub">View deals</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">View all</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade</div></a>';
+            document.getElementById('userActions').innerHTML=
+                '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a>' +
+                '<a href="/create-flash-sale" class="action-card"><div class="icon">⚡</div><div class="title">Flash Sale</div><div class="sub">Limited deal</div></a>' +
+                '<a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a>' +
+                '<a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite</div></a>' +
+                '<a href="/njangi" class="action-card"><div class="icon">📋</div><div class="title">My Njangi</div><div class="sub">View deals</div></a>' +
+                '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">View all</div></a>' +
+                '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade</div></a>';
             document.getElementById('sellerPanel').style.display='block';
             await loadSellerOrders();
             await loadSellerOffers();

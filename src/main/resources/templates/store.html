@@ -6,9 +6,10 @@
     <title>CamBiz Market - Shop Online</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f5f5f5; }
-        .navbar { background: linear-gradient(135deg, #667eea, #764ba2); padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        body { background: #eaeded; }
+        .navbar { background: #131921; padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .navbar h1 { font-size: 24px; }
+        .navbar .logo span { color: #febd69; }
         .premium-badge { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; display: none; }
         .premium-banner { background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 10px 20px; text-align: center; font-size: 14px; }
         .premium-banner a { color: white; text-decoration: underline; font-weight: bold; }
@@ -23,6 +24,15 @@
         .stat { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .stat .value { font-size: 24px; font-weight: bold; color: #667eea; }
         .stat .label { font-size: 12px; color: #666; }
+        
+        .flash-section { margin-bottom: 30px; }
+        .flash-section h2 { color: #e17055; margin-bottom: 15px; }
+        .flash-sale-card { position: relative; border: 2px solid #e17055 !important; }
+        .flash-badge { background: #e17055; color: white; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; position: absolute; top: 8px; left: 8px; z-index: 2; }
+        .flash-timer { color: #e17055; font-weight: 600; font-size: 0.85rem; }
+        .flash-progress { background: #e8ecf1; border-radius: 10px; height: 6px; margin-top: 8px; overflow: hidden; }
+        .flash-progress-fill { background: #e17055; height: 100%; border-radius: 10px; }
+        
         .featured-section { margin-bottom: 30px; }
         .featured-section h2 { margin-bottom: 15px; color: #ff6b6b; }
         .featured-badge { background: #ff6b6b; color: white; padding: 3px 10px; border-radius: 10px; display: inline-block; margin-bottom: 10px; font-size: 12px; font-weight: bold; }
@@ -52,32 +62,71 @@
     </style>
 </head>
 <body>
-    <div class="navbar"><h1>🛒 CamBiz Market</h1><span id="premiumBadge" class="premium-badge">🏆 PREMIUM</span><span style="font-size:12px;opacity:0.8;">Cameroon's #1 Marketplace</span><div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 Search..." onkeyup="if(event.key==='Enter')searchProducts()"><button onclick="searchProducts()">Search</button><button onclick="clearSearch()" style="background:#666;">✕</button></div></div>
-    <div class="premium-banner">🏆 <b>Become a Premium Seller!</b> Get verified badge, lower fees (4.5%), and more! <a href="/premium">Learn More →</a></div>
-    <div class="categories" id="categoryFilters"><button class="cat-btn active" onclick="filterByCategory('all', this)">📦 All</button></div>
-    <div class="container">
-        <div class="featured-section" id="featuredSection" style="display:none;"><h2>⭐ Featured Products</h2><div class="products-grid" id="featuredProducts"></div></div>
-        <div class="stats"><div class="stat"><div class="value" id="totalCount">0</div><div class="label">Total Products</div></div><div class="stat"><div class="value" id="shownCount">0</div><div class="label">Showing</div></div><div class="stat"><div class="value" id="minPrice">0</div><div class="label">Min Price (XAF)</div></div><div class="stat"><div class="value" id="maxPrice">0</div><div class="label">Max Price (XAF)</div></div></div>
-        <h2 style="margin-bottom:15px;">📦 All Products</h2>
-        <div class="products-grid" id="products"><div class="no-results"><p>Loading products...</p></div></div>
+    <div class="navbar">
+        <h1><span class="logo">cam<span>Biz</span> Market</span></h1>
+        <span id="premiumBadge" class="premium-badge">🏆 PREMIUM</span>
+        <span style="font-size:12px;opacity:0.8;">Cameroon's #1 Marketplace</span>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Search..." onkeyup="if(event.key==='Enter')searchProducts()">
+            <button onclick="searchProducts()">Search</button>
+            <button onclick="clearSearch()" style="background:#666;">✕</button>
+        </div>
     </div>
-    <div class="footer"><p>© 2026 CamBiz Market | Built with ❤️ by Musa</p><p style="margin-top:5px;">📧 support@cambiz.cm | 📱 +237 670 000 000</p></div>
+
+    <div class="premium-banner">
+        🏆 <b>Become a Premium Seller!</b> Get verified badge, lower fees (4.5%), and more! 
+        <a href="/premium">Learn More →</a>
+    </div>
+
+    <div class="categories" id="categoryFilters">
+        <button class="cat-btn active" onclick="filterByCategory('all', this)">📦 All</button>
+    </div>
+
+    <div class="container">
+        <div class="flash-section" id="flashSection" style="display:none;">
+            <h2>⚡ Flash Sales</h2>
+            <div class="products-grid" id="flashProducts"></div>
+        </div>
+
+        <div class="featured-section" id="featuredSection" style="display:none;">
+            <h2>⭐ Featured Products</h2>
+            <div class="products-grid" id="featuredProducts"></div>
+        </div>
+
+        <div class="stats">
+            <div class="stat"><div class="value" id="totalCount">0</div><div class="label">Total Products</div></div>
+            <div class="stat"><div class="value" id="shownCount">0</div><div class="label">Showing</div></div>
+            <div class="stat"><div class="value" id="minPrice">0</div><div class="label">Min Price (XAF)</div></div>
+            <div class="stat"><div class="value" id="maxPrice">0</div><div class="label">Max Price (XAF)</div></div>
+        </div>
+        
+        <h2 style="margin-bottom:15px;">📦 All Products</h2>
+        <div class="products-grid" id="products">
+            <div class="no-results"><p>Loading products...</p></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p>
+        <p style="margin-top:5px;">📧 support@cambiz.cm | 📱 +237 670 000 000</p>
+    </div>
 
     <script>
         let allProducts=[],currentFilter='all';
         const categoryEmojis={'Smartphones & Tablets':'📱','Laptops & Computers':'💻','Electronics & Audio':'🎧','Home Appliances':'🏠','Fashion & Clothing':'👗','Food & Essentials':'🍚','Transportation':'🏍️','Accessories':'⌚','Sports and Fitness':'⚽','Books and Stationery':'📚','Jewelry and Watches':'💍','Toys and Games':'🎮','Pet Supplies':'🐾','Beauty and Personal Care':'💄','Baby and Kids':'👶','Health and Medical':'🏥','Agriculture and Farming':'🌾','Building and Construction':'🏗️','Auto and Spare Parts':'🔧','Services and Repairs':'🛠️'};
-        function getProductImage(p){if(p.imageUrls&&p.imageUrls.length>0)return '<img src="'+p.imageUrls[0]+'" alt="'+p.name+'">';return '<span class="emoji">'+(categoryEmojis[p.categoryName]||'📦')+'</span>';}
+        function getProductImage(p){if(p.imageUrls&&p.imageUrls.length>0)return'<img src="'+p.imageUrls[0]+'" alt="'+p.name+'">';return'<span class="emoji">'+(categoryEmojis[p.categoryName]||'📦')+'</span>';}
+        async function loadFlashSales(){try{var r=await fetch('/api/flash-sales/active');var d=await r.json();if(d.success&&d.data&&d.data.length>0){document.getElementById('flashSection').style.display='block';document.getElementById('flashProducts').innerHTML=d.data.map(function(s){return'<div class="product-card flash-sale-card" onclick="window.location.href=\'/product?id='+s.productId+'\'"><div class="flash-badge">⚡ -'+s.discountPercent+'%</div><div class="product-image"><span class="emoji">🔥</span></div><div class="product-info"><div class="product-name">'+s.productName+'</div><div class="product-price"><span class="original">'+s.originalPrice.toLocaleString()+' XAF</span> '+s.flashPrice.toLocaleString()+' XAF</div><div class="flash-timer">⏰ '+s.timeLeft+'</div><div class="flash-progress"><div class="flash-progress-fill" style="width:'+s.soldPercent+'%"></div></div><div style="font-size:0.75rem;color:#565959;">'+s.soldCount+' sold / '+s.remainingStock+' left</div></div></div>';}).join('');}}catch(e){}}
         async function loadReviews(products){for(let p of products){try{const r=await fetch('/api/reviews/product/'+p.id);const d=await r.json();if(d.success&&d.data&&d.data.stats){p.rating=d.data.stats.averageRating;p.reviews=d.data.stats.totalReviews;}}catch(e){p.rating=0;p.reviews=0;}}displayProducts(products);}
         async function loadFeatured(){try{const r=await fetch('/api/featured');const d=await r.json();if(d.success&&d.data&&d.data.length>0){document.getElementById('featuredSection').style.display='block';document.getElementById('featuredProducts').innerHTML=d.data.map(p=>'<div class="product-card featured" onclick="window.location.href=\'/product?id='+p.id+'\'"><div class="featured-badge">⭐ FEATURED</div><button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist('+p.id+',this)">🤍</button><div class="product-image">'+getProductImage(p)+'</div><div class="product-info"><div class="product-category">'+(p.categoryName||'')+'</div><div class="product-name">'+p.name+'</div><div class="product-price">'+(p.discountedPrice?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+(p.discountedPrice||p.price).toLocaleString()+' XAF'+(p.discountedPrice?'<span class="discount">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+p.stockQuantity+' in stock</div></div></div>').join('');}}catch(e){}}
         async function loadProducts(){try{const[pr,cr]=await Promise.all([fetch('/api/products?page=0&size=200'),fetch('/api/categories')]);const pd=await pr.json();const cd=await cr.json();if(pd.success&&pd.data){allProducts=pd.data;updateStats(allProducts);loadReviews(allProducts);}if(cd.success&&cd.data){const c=document.getElementById('categoryFilters');cd.data.forEach(cat=>{const b=document.createElement('button');b.className='cat-btn';b.textContent=(categoryEmojis[cat.nameEn]||'📁')+' '+cat.nameEn;b.onclick=()=>filterByCategory(cat.id,b);c.appendChild(b);});}}catch(e){document.getElementById('products').innerHTML='<div class="no-results"><p>Failed to load</p></div>';}}
-        function displayProducts(products){document.getElementById('shownCount').textContent=products.length;if(products.length===0){document.getElementById('products').innerHTML='<div class="no-results"><p>No products found</p></div>';return;}document.getElementById('products').innerHTML=products.map(p=>{const s='⭐'.repeat(Math.round(p.rating||0));const st=encodeURIComponent('🛍️ '+p.name+' - '+((p.discountedPrice||p.price).toLocaleString())+' XAF on CamBiz Market! https://cambiz-market.onrender.com/product?id='+p.id);return '<div class="product-card" onclick="window.location.href=\'/product?id='+p.id+'\'"><button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist('+p.id+',this)">🤍</button><div class="product-image">'+getProductImage(p)+'</div><div class="product-info"><div class="product-category">'+(p.categoryName||'')+'</div><div class="product-name">'+p.name+'</div><div class="product-reviews">'+s+' <span>('+(p.reviews||0)+' reviews)</span></div><div class="product-price">'+(p.discountedPrice?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+(p.discountedPrice||p.price).toLocaleString()+' XAF'+(p.discountedPrice?'<span class="discount">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+p.stockQuantity+' in stock</div><div class="product-condition">🏷️ '+(p.condition||'NEW')+'</div><a href="https://wa.me/?text='+st+'" target="_blank" class="whatsapp-share" onclick="event.stopPropagation()">📱 Share on WhatsApp</a></div></div>';}).join('');}
+        function displayProducts(products){document.getElementById('shownCount').textContent=products.length;if(products.length===0){document.getElementById('products').innerHTML='<div class="no-results"><p>No products found</p></div>';return;}document.getElementById('products').innerHTML=products.map(p=>{const s='⭐'.repeat(Math.round(p.rating||0));const st=encodeURIComponent('🛍️ '+p.name+' - '+((p.discountedPrice||p.price).toLocaleString())+' XAF on CamBiz Market! https://cambiz-market.onrender.com/product?id='+p.id);return'<div class="product-card" onclick="window.location.href=\'/product?id='+p.id+'\'"><button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist('+p.id+',this)">🤍</button><div class="product-image">'+getProductImage(p)+'</div><div class="product-info"><div class="product-category">'+(p.categoryName||'')+'</div><div class="product-name">'+p.name+'</div><div class="product-reviews">'+s+' <span>('+(p.reviews||0)+' reviews)</span></div><div class="product-price">'+(p.discountedPrice?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+(p.discountedPrice||p.price).toLocaleString()+' XAF'+(p.discountedPrice?'<span class="discount">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+p.stockQuantity+' in stock</div><div class="product-condition">🏷️ '+(p.condition||'NEW')+'</div><a href="https://wa.me/?text='+st+'" target="_blank" class="whatsapp-share" onclick="event.stopPropagation()">📱 Share on WhatsApp</a></div></div>';}).join('');}
         function updateStats(products){document.getElementById('totalCount').textContent=allProducts.length;document.getElementById('shownCount').textContent=products.length;const prices=products.map(p=>p.discountedPrice||p.price).filter(p=>p>0);if(prices.length>0){document.getElementById('minPrice').textContent=Math.min(...prices).toLocaleString();document.getElementById('maxPrice').textContent=Math.max(...prices).toLocaleString();}}
         function filterByCategory(cid,btn){currentFilter=cid;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');let f=cid==='all'?allProducts:allProducts.filter(p=>p.categoryId==cid);updateStats(f);displayProducts(f);}
         function searchProducts(){const q=document.getElementById('searchInput').value.toLowerCase().trim();if(!q){filterByCategory('all',document.querySelector('.cat-btn'));return;}const f=allProducts.filter(p=>p.name.toLowerCase().includes(q)||(p.description&&p.description.toLowerCase().includes(q))||(p.categoryName&&p.categoryName.toLowerCase().includes(q)));document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));updateStats(f);displayProducts(f);}
         function clearSearch(){document.getElementById('searchInput').value='';filterByCategory('all',document.querySelector('.cat-btn'));}
         async function toggleWishlist(pid,he){const token=localStorage.getItem('token')||sessionStorage.getItem('token');if(!token){alert('Please login first.');return;}const iw=he.classList.contains('wishlisted');try{const r=await fetch('/api/wishlist/'+(iw?'remove/':'add/')+pid,{method:iw?'DELETE':'POST',headers:{'Authorization':'Bearer '+token}});const d=await r.json();if(d.success){he.classList.toggle('wishlisted');he.innerHTML=iw?'🤍':'❤️';}}catch(e){}}
         (async function(){const token=localStorage.getItem('token')||sessionStorage.getItem('token');if(token){try{const r=await fetch('/api/premium/my-status',{headers:{'Authorization':'Bearer '+token}});const d=await r.json();if(d.success&&d.data&&d.data.isPremium)document.getElementById('premiumBadge').style.display='inline-block';}catch(e){}}})();
-        loadFeatured();loadProducts();
+        loadFlashSales();loadFeatured();loadProducts();
     </script>
 </body>
 </html>
