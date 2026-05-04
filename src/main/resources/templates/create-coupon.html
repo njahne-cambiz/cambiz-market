@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Coupon | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #eaeded; min-height: 100vh; }
+        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header .logo span { color: #febd69; }
+        .header nav a { color: #b2bec3; text-decoration: none; margin-left: 2rem; font-size: 0.9rem; }
+        .container { max-width: 600px; margin: 2rem auto; padding: 0 1.5rem; }
+        .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; font-weight: 600; }
+        .card { background: white; border-radius: 12px; padding: 2.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .card h1 { color: #0f1111; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; color: #0f1111; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 13px 16px; border: 2px solid #e8ecf1; border-radius: 8px; font-size: 14px; background: #fafbfc; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #febd69; background: white; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .btn { padding: 16px 24px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; width: 100%; }
+        .btn-primary { background: #ffd814; color: #0f1111; }
+        .btn-primary:hover { background: #f7ca00; }
+        .btn-primary:disabled { background: #d5d9d9; cursor: not-allowed; }
+        .message { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; text-align: center; font-weight: 600; }
+        .message.success { background: #d4edda; color: #155724; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; display: block; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+        <nav><a href="/store">📦 Store</a><a href="/dashboard">👤 Dashboard</a></nav>
+    </header>
+    <main class="container">
+        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+        <div class="card">
+            <h1>🏷️ Create Coupon Code</h1>
+            <div class="form-group"><label>Coupon Code *</label><input type="text" id="code" placeholder="e.g. WELCOME10" style="text-transform:uppercase;"></div>
+            <div class="form-row">
+                <div class="form-group"><label>Discount (%) *</label><input type="number" id="discountPercent" placeholder="10" min="1" max="90"></div>
+                <div class="form-group"><label>Max Discount (XAF) *</label><input type="number" id="maxDiscount" placeholder="5000"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Max Uses *</label><input type="number" id="maxUses" value="50" min="1"></div>
+                <div class="form-group"><label>Expires In</label><select id="expiryDays"><option value="7">7 Days</option><option value="14">14 Days</option><option value="30" selected>30 Days</option><option value="60">60 Days</option></select></div>
+            </div>
+            <button class="btn btn-primary" onclick="createCoupon()">🏷️ Create Coupon</button>
+            <div id="message" class="message"></div>
+        </div>
+    </main>
+    <script>
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) { window.location.href = '/dashboard'; }
+        async function createCoupon() {
+            var code = document.getElementById('code').value.trim();
+            var dp = document.getElementById('discountPercent').value;
+            var md = document.getElementById('maxDiscount').value;
+            var mu = document.getElementById('maxUses').value;
+            var ed = document.getElementById('expiryDays').value;
+            var msg = document.getElementById('message'); var btn = document.querySelector('.btn-primary');
+            if (!code || !dp || !md || !mu) { msg.textContent = '❌ Please fill in all fields.'; msg.className = 'message error'; return; }
+            btn.disabled = true; btn.textContent = '⏳ Creating...'; msg.className = 'message';
+            try {
+                var r = await fetch('/api/coupons/create', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ code: code, discountPercent: parseFloat(dp), maxDiscount: parseFloat(md), maxUses: parseInt(mu), expiryDays: parseInt(ed) }) });
+                var d = await r.json();
+                if (d.success) { msg.textContent = '✅ Coupon ' + code + ' created! Share it with customers.'; msg.className = 'message success'; document.getElementById('code').value = ''; btn.disabled = false; btn.textContent = '🏷️ Create Another Coupon'; }
+                else { msg.textContent = '❌ ' + (d.message || 'Failed'); msg.className = 'message error'; btn.disabled = false; btn.textContent = '🏷️ Create Coupon'; }
+            } catch(e) { msg.textContent = '❌ Network error'; msg.className = 'message error'; btn.disabled = false; btn.textContent = '🏷️ Create Coupon'; }
+        }
+    </script>
+</body>
+</html>

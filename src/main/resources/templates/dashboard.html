@@ -46,12 +46,12 @@
         .welcome-banner .badge { background: #febd69; color: #0f1111; padding: 6px 18px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; }
         .section-title { font-size: 1.1rem; font-weight: 700; color: #0f1111; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; }
         .section-title::after { content: ''; flex: 1; height: 1px; background: #d5d9d9; }
-        .quick-actions { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
-        .action-card { background: white; border-radius: 12px; padding: 1.5rem 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #0f1111; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; border-bottom: 3px solid transparent; }
+        .quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .action-card { background: white; border-radius: 12px; padding: 1.5rem 0.8rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #0f1111; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; border-bottom: 3px solid transparent; }
         .action-card:hover { border-bottom-color: #febd69; transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
-        .action-card .icon { font-size: 2.2rem; }
-        .action-card .title { font-weight: 700; font-size: 0.9rem; }
-        .action-card .sub { font-size: 0.75rem; color: #565959; }
+        .action-card .icon { font-size: 2rem; }
+        .action-card .title { font-weight: 700; font-size: 0.85rem; }
+        .action-card .sub { font-size: 0.7rem; color: #565959; }
         .panel-box { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
         .panel-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; flex-wrap: wrap; gap: 8px; }
         .panel-total { font-weight: 700; font-size: 1.1rem; margin-top: 10px; text-align: right; }
@@ -149,6 +149,7 @@
             document.getElementById('userActions').innerHTML=
                 '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a>' +
                 '<a href="/create-flash-sale" class="action-card"><div class="icon">⚡</div><div class="title">Flash Sale</div><div class="sub">Limited deal</div></a>' +
+                '<a href="/create-coupon" class="action-card"><div class="icon">🏷️</div><div class="title">Create Coupon</div><div class="sub">Discount code</div></a>' +
                 '<a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Create Njangi</div><div class="sub">Group deal</div></a>' +
                 '<a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer & Earn</div><div class="sub">Invite</div></a>' +
                 '<a href="/njangi" class="action-card"><div class="icon">📋</div><div class="title">My Njangi</div><div class="sub">View deals</div></a>' +

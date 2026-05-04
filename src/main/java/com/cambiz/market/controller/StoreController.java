@@ -54,4 +54,7 @@ public class StoreController {
 
     @GetMapping("/create-flash-sale")
     public String createFlashSale() { return "create-flash-sale"; }
+
+    @GetMapping("/create-coupon")
+    public String createCoupon() { return "create-coupon"; }
 }

@@ -22,9 +22,18 @@
         .cart-item .price { font-weight: 700; color: #0f1111; }
         .cart-item .qty { text-align: center; color: #565959; }
         .cart-item .remove-btn { background: none; border: none; color: #d00; cursor: pointer; font-size: 1.2rem; }
+        .coupon-section { margin: 15px 0; padding: 15px; background: #f8fafc; border-radius: 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .coupon-section input { flex: 1; padding: 10px 14px; border: 1px solid #d5d9d9; border-radius: 4px; font-size: 14px; min-width: 150px; }
+        .coupon-section input:focus { border-color: #febd69; outline: none; }
+        .btn-coupon { padding: 10px 20px; background: #ffd814; color: #0f1111; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 14px; }
+        .btn-coupon:hover { background: #f7ca00; }
+        .coupon-msg { font-size: 0.85rem; margin-top: 5px; }
+        .coupon-msg.success { color: #10b981; }
+        .coupon-msg.error { color: #d00; }
         .cart-summary { background: #fefaf3; border: 1px solid #febd69; border-radius: 8px; padding: 20px; margin-top: 20px; }
         .cart-summary .total { font-size: 1.4rem; font-weight: 700; color: #0f1111; }
-        .cart-summary .subtotal { color: #565959; font-size: 0.9rem; margin-bottom: 10px; }
+        .cart-summary .subtotal { color: #565959; font-size: 0.9rem; margin-bottom: 5px; }
+        .cart-summary .discount-line { color: #10b981; font-size: 0.9rem; margin-bottom: 5px; }
         .btn { padding: 14px 28px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 15px; width: 100%; }
         .btn-buy { background: #ffd814; color: #0f1111; font-size: 16px; }
         .btn-buy:hover { background: #f7ca00; }
@@ -50,9 +59,15 @@
             <h1>🛒 Shopping Cart</h1>
             <div id="cartItems"></div>
             <div id="emptyCart" class="empty-cart"><div class="icon">🛒</div><h2>Your Cart is Empty</h2><p><a href="/store">Browse products</a> and add items to your cart.</p></div>
+            <div class="coupon-section" id="couponSection" style="display:none;">
+                <input type="text" id="couponCode" placeholder="Enter coupon code" style="text-transform:uppercase;">
+                <button class="btn-coupon" onclick="applyCoupon()">Apply</button>
+                <span class="coupon-msg" id="couponMsg"></span>
+            </div>
             <div class="cart-summary" id="cartSummary" style="display:none;">
-                <p class="subtotal">Subtotal (<span id="itemCount">0</span> items):</p>
-                <p class="total" id="cartTotal">0 XAF</p>
+                <p class="subtotal">Subtotal (<span id="itemCount">0</span> items): <span id="subtotalAmount">0 XAF</span></p>
+                <p class="discount-line" id="discountLine" style="display:none;">Coupon discount: -<span id="discountAmount">0</span> XAF</p>
+                <p class="total">Total: <span id="cartTotal">0 XAF</span></p>
                 <button class="btn btn-buy" id="checkoutBtn" onclick="checkout()">⚡ Buy Now — <span id="checkoutAmount">0 XAF</span></button>
                 <div id="message" class="message"></div>
             </div>
@@ -62,15 +77,62 @@
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) { window.location.href = '/dashboard'; }
+        var cartTotal = 0;
+        var appliedCoupon = null;
+        
         async function loadCart() {
             try { var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json();
-                if (d.success && d.data && d.data.items && d.data.items.length > 0) { document.getElementById('emptyCart').style.display = 'none'; document.getElementById('cartSummary').style.display = 'block';
-                    var html = ''; for (var i = 0; i < d.data.items.length; i++) { var item = d.data.items[i];
+                if (d.success && d.data && d.data.items && d.data.items.length > 0) {
+                    document.getElementById('emptyCart').style.display = 'none';
+                    document.getElementById('cartSummary').style.display = 'block';
+                    document.getElementById('couponSection').style.display = 'flex';
+                    var html = ''; cartTotal = d.data.total;
+                    for (var i = 0; i < d.data.items.length; i++) { var item = d.data.items[i];
                         html += '<div class="cart-item"><div class="cart-item-img">📦</div><div><div class="name">' + item.productName + '</div><div class="seller">' + (item.sellerName || '') + '</div></div><div class="price">' + item.effectivePrice.toLocaleString() + ' XAF</div><div class="qty">x' + item.quantity + '</div><button class="remove-btn" onclick="removeItem(' + item.productId + ')">✕</button></div>'; }
-                    document.getElementById('cartItems').innerHTML = html; document.getElementById('itemCount').textContent = d.data.items.length; document.getElementById('cartTotal').textContent = d.data.total.toLocaleString() + ' XAF'; document.getElementById('checkoutAmount').textContent = d.data.total.toLocaleString() + ' XAF'; }
-                else { document.getElementById('emptyCart').style.display = 'block'; document.getElementById('cartSummary').style.display = 'none'; }
+                    document.getElementById('cartItems').innerHTML = html;
+                    updateDisplay();
+                } else { document.getElementById('emptyCart').style.display = 'block'; document.getElementById('cartSummary').style.display = 'none'; document.getElementById('couponSection').style.display = 'none'; }
             } catch(e) {}
         }
+        
+        function updateDisplay() {
+            document.getElementById('itemCount').textContent = document.querySelectorAll('.cart-item').length;
+            document.getElementById('subtotalAmount').textContent = cartTotal.toLocaleString() + ' XAF';
+            var finalTotal = cartTotal;
+            if (appliedCoupon) {
+                var discount = appliedCoupon.discountPercent ? (cartTotal * appliedCoupon.discountPercent / 100) : 0;
+                if (appliedCoupon.maxDiscount && discount > appliedCoupon.maxDiscount) discount = appliedCoupon.maxDiscount;
+                document.getElementById('discountLine').style.display = 'block';
+                document.getElementById('discountAmount').textContent = discount.toLocaleString();
+                finalTotal = cartTotal - discount;
+            } else {
+                document.getElementById('discountLine').style.display = 'none';
+            }
+            document.getElementById('cartTotal').textContent = finalTotal.toLocaleString() + ' XAF';
+            document.getElementById('checkoutAmount').textContent = finalTotal.toLocaleString() + ' XAF';
+        }
+        
+        async function applyCoupon() {
+            var code = document.getElementById('couponCode').value.trim().toUpperCase();
+            var msgEl = document.getElementById('couponMsg');
+            if (!code) { msgEl.textContent = 'Enter a code'; msgEl.className = 'coupon-msg error'; return; }
+            try {
+                var r = await fetch('/api/coupons/validate/' + code);
+                var d = await r.json();
+                if (d.success) {
+                    appliedCoupon = d.data;
+                    msgEl.textContent = '✅ ' + d.data.discountPercent + '% off applied!';
+                    msgEl.className = 'coupon-msg success';
+                    updateDisplay();
+                } else {
+                    appliedCoupon = null;
+                    msgEl.textContent = '❌ ' + (d.message || 'Invalid coupon');
+                    msgEl.className = 'coupon-msg error';
+                    updateDisplay();
+                }
+            } catch(e) { msgEl.textContent = 'Error'; msgEl.className = 'coupon-msg error'; }
+        }
+        
         async function removeItem(pid) { try { var r = await fetch('/api/cart/remove/' + pid, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success) loadCart(); } catch(e) {} }
         async function checkout() { var btn = document.getElementById('checkoutBtn'); var msg = document.getElementById('message'); btn.disabled = true; btn.textContent = '⏳ Processing...'; msg.className = 'message';
             try { var r = await fetch('/api/orders/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ paymentMethod: 'MTN_MONEY' }) }); var d = await r.json();

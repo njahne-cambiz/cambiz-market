@@ -93,6 +93,9 @@ public class SecurityConfig {
                 
                 // Flash sales active - public
                 .requestMatchers(HttpMethod.GET, "/api/flash-sales/active").permitAll()
+                
+                // Coupon validate - public
+                .requestMatchers(HttpMethod.GET, "/api/coupons/validate/**").permitAll()
 
                 // STATIC & PAGES
                 .requestMatchers("/", "/dashboard/**", "/store/**", "/shop/**", "/product", "/home", "/index", "/about", "/contact").permitAll()
@@ -107,6 +110,7 @@ public class SecurityConfig {
                 .requestMatchers("/create-njangi").permitAll()
                 .requestMatchers("/referral").permitAll()
                 .requestMatchers("/create-flash-sale").permitAll()
+                .requestMatchers("/create-coupon").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 
@@ -130,6 +134,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/njangi/**").authenticated()
                 .requestMatchers("/api/referral/**").authenticated()
                 .requestMatchers("/api/flash-sales/**").authenticated()
+                .requestMatchers("/api/coupons/**").authenticated()
 
                 // Wishlist API
                 .requestMatchers("/api/wishlist/**").authenticated()
