@@ -31,11 +31,10 @@ public class MakolaService {
         Arrays.asList(PriceNegotiation.NegotiationStatus.PENDING,
                       PriceNegotiation.NegotiationStatus.COUNTERED);
 
-    private static final List<PriceNegotiation.NegotiationStatus> ALL_STATUSES =
+    private static final List<PriceNegotiation.NegotiationStatus> BUYER_STATUSES =
         Arrays.asList(PriceNegotiation.NegotiationStatus.PENDING,
                       PriceNegotiation.NegotiationStatus.COUNTERED,
-                      PriceNegotiation.NegotiationStatus.ACCEPTED,
-                      PriceNegotiation.NegotiationStatus.REJECTED);
+                      PriceNegotiation.NegotiationStatus.ACCEPTED);
 
     private static final double MINIMUM_PERCENTAGE = 0.30;
     private static final double FAIR_OFFER_THRESHOLD = 0.80;
@@ -146,6 +145,9 @@ public class MakolaService {
         PriceNegotiation negotiation = negotiationRepository.findById(negotiationId)
             .orElseThrow(() -> new RuntimeException("Negotiation not found"));
 
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
         boolean isBuyer = negotiation.getBuyer().getId().equals(userId);
         boolean isSeller = negotiation.getProduct().getSeller().getId().equals(userId);
 
@@ -218,7 +220,7 @@ public class MakolaService {
             .orElseThrow(() -> new RuntimeException("Buyer not found"));
 
         List<PriceNegotiation> negotiations = negotiationRepository
-            .findByBuyerAndStatusIn(buyer, ALL_STATUSES);
+            .findByBuyerAndStatusIn(buyer, BUYER_STATUSES);
 
         negotiations.forEach(n -> {
             if (n.getProduct() != null) n.getProduct().getName();
