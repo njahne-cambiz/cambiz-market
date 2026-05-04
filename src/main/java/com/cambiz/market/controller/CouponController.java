@@ -41,11 +41,20 @@ public class CouponController {
             String code = request.get("code").toString();
             double discountPercent = Double.parseDouble(request.get("discountPercent").toString());
             double maxDiscount = Double.parseDouble(request.get("maxDiscount").toString());
+            double minOrderAmount = request.get("minOrderAmount") != null ? Double.parseDouble(request.get("minOrderAmount").toString()) : 0;
             int maxUses = Integer.parseInt(request.get("maxUses").toString());
             int expiryDays = Integer.parseInt(request.get("expiryDays").toString());
+            boolean isWelcome = request.get("isWelcome") != null && Boolean.parseBoolean(request.get("isWelcome").toString());
             
-            Coupon coupon = couponService.createCoupon(code, discountPercent, maxDiscount, maxUses,
-                    sellerId, sellerName, expiryDays);
+            Long productId = null;
+            String productName = null;
+            if (request.get("productId") != null) {
+                productId = Long.valueOf(request.get("productId").toString());
+                productName = request.get("productName") != null ? request.get("productName").toString() : null;
+            }
+            
+            Coupon coupon = couponService.createCoupon(code, discountPercent, maxDiscount, minOrderAmount,
+                    productId, productName, maxUses, sellerId, sellerName, expiryDays, isWelcome);
             
             return ResponseEntity.ok(Map.of("success", true, "message", "Coupon created: " + code, "data", coupon));
         } catch (Exception e) {
@@ -55,13 +64,22 @@ public class CouponController {
     
     @GetMapping("/validate/{code}")
     public ResponseEntity<?> validateCoupon(@PathVariable String code) {
-        Coupon coupon = couponService.validateCoupon(code);
+        Coupon coupon = couponService.getCoupon(code);
         if (coupon == null) {
-            return ResponseEntity.ok(Map.of("success", false, "message", "Invalid or expired coupon"));
+            return ResponseEntity.ok(Map.of("success", false, "message", "Invalid coupon code"));
         }
-        return ResponseEntity.ok(Map.of("success", true, "message", "Valid coupon!",
-                "data", Map.of("code", coupon.getCode(), "discountPercent", coupon.getDiscountPercent(),
-                "maxDiscount", coupon.getMaxDiscount())));
+        if (!coupon.isValid()) {
+            return ResponseEntity.ok(Map.of("success", false, "message", "Coupon has expired or been used up"));
+        }
+        return ResponseEntity.ok(Map.of("success", true, "message", "Valid coupon!", "data", coupon));
+    }
+    
+    @GetMapping("/my-welcome")
+    public ResponseEntity<?> getMyWelcomeCoupon(@RequestHeader("Authorization") String authHeader) {
+        Long userId = getUserIdFromToken(authHeader);
+        String code = couponService.generateWelcomeCoupon(userId, "User");
+        Coupon coupon = couponService.getCoupon(code);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Welcome coupon: " + code, "data", coupon));
     }
     
     @GetMapping("/my-coupons")

@@ -30,7 +30,7 @@
         .message.error { background: #f8d7da; color: #721c24; display: block; }
         .share-box { background: #fefaf3; border: 1px solid #febd69; border-radius: 8px; padding: 1rem; margin-top: 1rem; text-align: center; display: none; }
         .share-box .coupon-highlight { font-size: 1.5rem; font-weight: 800; color: #e17055; letter-spacing: 3px; }
-        .share-box p { color: #0f1111; font-size: 0.9rem; margin: 0.5rem 0; }
+        .info-text { font-size: 0.8rem; color: #565959; margin-top: 0.3rem; }
     </style>
 </head>
 <body>
@@ -42,10 +42,16 @@
         <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
         <div class="card">
             <h1>🏷️ Create Coupon Code</h1>
-            <div class="form-group"><label>Coupon Code *</label><input type="text" id="code" placeholder="e.g. WELCOME10" style="text-transform:uppercase;"></div>
+            <div class="form-group"><label>Coupon Code *</label><input type="text" id="code" placeholder="e.g. SAVE20" style="text-transform:uppercase;"></div>
             <div class="form-row">
                 <div class="form-group"><label>Discount (%) *</label><input type="number" id="discountPercent" placeholder="10" min="1" max="90"></div>
                 <div class="form-group"><label>Max Discount (XAF) *</label><input type="number" id="maxDiscount" placeholder="5000"></div>
+            </div>
+            <div class="form-group"><label>Minimum Order Amount (XAF)</label><input type="number" id="minOrder" placeholder="0 = no minimum" value="0"></div>
+            <div class="form-group">
+                <label>Apply to Specific Product (optional)</label>
+                <select id="productSelect"><option value="">All Products</option></select>
+                <span class="info-text">Leave empty to apply coupon to entire cart</span>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>Max Uses *</label><input type="number" id="maxUses" value="50" min="1"></div>
@@ -54,7 +60,7 @@
             <button class="btn btn-primary" onclick="createCoupon()">🏷️ Create Coupon</button>
             <div id="message" class="message"></div>
             <div class="share-box" id="shareBox">
-                <p>🎉 Coupon created! Share it with your customers:</p>
+                <p>🎉 Coupon created! Share it:</p>
                 <div class="coupon-highlight" id="createdCode"></div>
                 <p id="shareDescription"></p>
                 <a class="btn btn-whatsapp" id="whatsappShareLink" target="_blank">📱 Share on WhatsApp</a>
@@ -65,40 +71,45 @@
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) { window.location.href = '/dashboard'; }
         
+        async function loadMyProducts() {
+            try { var r = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); var s = document.getElementById('productSelect');
+                if (d.success && d.data && d.data.length > 0) { s.innerHTML = '<option value="">All Products</option>' + d.data.map(function(p) { return '<option value="' + p.id + '" data-name="' + p.name + '">' + p.name + '</option>'; }).join(''); }
+            } catch(e) {}
+        }
+        
         async function createCoupon() {
             var code = document.getElementById('code').value.trim();
             var dp = document.getElementById('discountPercent').value;
             var md = document.getElementById('maxDiscount').value;
+            var mo = document.getElementById('minOrder').value || '0';
             var mu = document.getElementById('maxUses').value;
             var ed = document.getElementById('expiryDays').value;
+            var ps = document.getElementById('productSelect');
+            var pid = ps.value || null;
+            var pname = pid ? ps.options[ps.selectedIndex].dataset.name : null;
             var msg = document.getElementById('message'); var btn = document.querySelector('.btn-primary');
-            if (!code || !dp || !md || !mu) { msg.textContent = '❌ Please fill in all fields.'; msg.className = 'message error'; return; }
+            if (!code || !dp || !md || !mu) { msg.textContent = '❌ Please fill in all required fields.'; msg.className = 'message error'; return; }
             btn.disabled = true; btn.textContent = '⏳ Creating...'; msg.className = 'message';
             try {
-                var r = await fetch('/api/coupons/create', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ code: code, discountPercent: parseFloat(dp), maxDiscount: parseFloat(md), maxUses: parseInt(mu), expiryDays: parseInt(ed) }) });
+                var body = { code: code, discountPercent: parseFloat(dp), maxDiscount: parseFloat(md), minOrderAmount: parseFloat(mo), maxUses: parseInt(mu), expiryDays: parseInt(ed), isWelcome: false };
+                if (pid) { body.productId = parseInt(pid); body.productName = pname; }
+                var r = await fetch('/api/coupons/create', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(body) });
                 var d = await r.json();
                 if (d.success) {
-                    msg.textContent = '✅ Coupon created!';
-                    msg.className = 'message success';
-                    btn.textContent = '🏷️ Create Another Coupon';
-                    btn.disabled = false;
+                    msg.textContent = '✅ Coupon created!'; msg.className = 'message success';
+                    btn.textContent = '🏷️ Create Another Coupon'; btn.disabled = false;
                     document.getElementById('code').value = '';
-                    
-                    // Show share box
-                    var shareBox = document.getElementById('shareBox');
-                    shareBox.style.display = 'block';
+                    var shareBox = document.getElementById('shareBox'); shareBox.style.display = 'block';
                     document.getElementById('createdCode').textContent = code.toUpperCase();
-                    document.getElementById('shareDescription').textContent = dp + '% off, up to ' + parseInt(md).toLocaleString() + ' XAF off!';
-                    
-                    var shareText = encodeURIComponent('🎉 Use my coupon code ' + code.toUpperCase() + ' on CamBiz Market and get ' + dp + '% off (up to ' + parseInt(md).toLocaleString() + ' XAF)! Shop now: https://cambiz-market.onrender.com/store');
+                    var desc = dp + '% off'; if (parseFloat(mo) > 0) desc += ' (min order ' + parseInt(mo).toLocaleString() + ' XAF)';
+                    if (pid) desc += ' on ' + pname; desc += ' - up to ' + parseInt(md).toLocaleString() + ' XAF off!';
+                    document.getElementById('shareDescription').textContent = desc;
+                    var shareText = encodeURIComponent('🎉 Use my coupon code ' + code.toUpperCase() + ' on CamBiz Market! ' + desc + ' Shop now: https://cambiz-market.onrender.com/store');
                     document.getElementById('whatsappShareLink').href = 'https://wa.me/?text=' + shareText;
-                } else {
-                    msg.textContent = '❌ ' + (d.message || 'Failed');
-                    msg.className = 'message error';
-                    btn.disabled = false; btn.textContent = '🏷️ Create Coupon';
-                }
+                } else { msg.textContent = '❌ ' + (d.message || 'Failed'); msg.className = 'message error'; btn.disabled = false; btn.textContent = '🏷️ Create Coupon'; }
             } catch(e) { msg.textContent = '❌ Network error'; msg.className = 'message error'; btn.disabled = false; btn.textContent = '🏷️ Create Coupon'; }
         }
+        loadMyProducts();
     </script>
 </body>
 </html>
