@@ -24,7 +24,6 @@
         .deal-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
         .badge-active { background: #d4edda; color: #155724; }
         .badge-filled { background: #fff3cd; color: #856404; }
-        .badge-owner { background: #d1ecf1; color: #0c5460; }
         .deal-name { font-size: 1.1rem; font-weight: 700; color: #0f1111; margin-bottom: 0.5rem; }
         .deal-seller { color: #565959; font-size: 0.85rem; margin-bottom: 1rem; }
         .deal-price { font-size: 1.4rem; font-weight: 700; color: #e17055; }
@@ -39,7 +38,6 @@
         .btn-share { background: #25D366; color: white; margin-top: 0.5rem; text-decoration: none; display: block; text-align: center; }
         .empty { text-align: center; padding: 4rem; color: #b2bec3; }
         .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
-        .owner-tag { background: #2563eb; color: white; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -55,8 +53,8 @@
     </main>
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        var currentUserId = null;
-        if(token){try{var payload=JSON.parse(atob(token.split('.')[1]));currentUserId=payload.userId||null;}catch(e){}}
+        var isSeller = false;
+        if(token){try{var payload=JSON.parse(atob(token.split('.')[1]));if(payload.userType==='SELLER'||(payload.roles&&payload.roles.indexOf('ROLE_SELLER')!==-1))isSeller=true;}catch(e){}}
         
         async function loadDeals() {
             try {
@@ -67,11 +65,9 @@
                     grid.innerHTML = d.data.map(function(deal) {
                         var pct = Math.round((deal.participantCount / deal.minParticipants) * 100);
                         var shareText = encodeURIComponent('🤝 Join my Njangi deal! ' + deal.productName + ' - ' + deal.individualPrice.toLocaleString() + ' XAF https://cambiz-market.onrender.com/njangi');
-                        var isOwner = currentUserId && deal.sellerId === currentUserId;
-                        var joinButton = isOwner ? '' : '<button class="btn btn-join" onclick="joinDeal(' + deal.id + ')" ' + (deal.status !== 'ACTIVE' ? 'disabled' : '') + '>' + (deal.status === 'ACTIVE' ? '🤝 Join Deal' : '✅ Filled') + '</button>';
-                        var ownerBadge = isOwner ? '<span class="owner-tag">Your Deal</span>' : '';
+                        var joinButton = isSeller ? '' : '<button class="btn btn-join" onclick="joinDeal(' + deal.id + ')" ' + (deal.status !== 'ACTIVE' ? 'disabled' : '') + '>' + (deal.status === 'ACTIVE' ? '🤝 Join Deal' : '✅ Filled') + '</button>';
                         return '<div class="deal-card">' +
-                            '<div class="deal-header"><span class="deal-badge ' + (deal.status === 'ACTIVE' ? 'badge-active' : 'badge-filled') + '">' + deal.status + '</span>' + ownerBadge + '</div>' +
+                            '<div class="deal-header"><span class="deal-badge ' + (deal.status === 'ACTIVE' ? 'badge-active' : 'badge-filled') + '">' + deal.status + '</span></div>' +
                             '<div class="deal-name">📦 ' + deal.productName + '</div>' +
                             '<div class="deal-seller">🏪 ' + deal.sellerName + '</div>' +
                             '<div class="deal-price">' + deal.individualPrice.toLocaleString() + ' XAF <span class="deal-regular">' + deal.regularPrice.toLocaleString() + '</span></div>' +

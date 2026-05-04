@@ -15,13 +15,13 @@
         .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1rem; display: inline-block; font-weight: 600; }
         .cart-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
         .cart-card h1 { font-size: 1.5rem; color: #0f1111; margin-bottom: 1rem; }
-        .cart-item { display: grid; grid-template-columns: 100px 1fr 120px 80px 40px; gap: 15px; align-items: center; padding: 15px 0; border-bottom: 1px solid #e8ecf1; }
-        .cart-item-img { width: 100px; height: 100px; background: #f7f7f7; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border-radius: 4px; }
+        .cart-item { display: grid; grid-template-columns: 80px 1fr 120px 80px 40px; gap: 15px; align-items: center; padding: 15px 0; border-bottom: 1px solid #e8ecf1; }
+        .cart-item-img { width: 80px; height: 80px; background: #f7f7f7; display: flex; align-items: center; justify-content: center; font-size: 2rem; border-radius: 4px; }
         .cart-item .name { font-weight: 600; color: #0f1111; }
         .cart-item .seller { font-size: 0.8rem; color: #565959; }
         .cart-item .price { font-weight: 700; color: #0f1111; }
         .cart-item .qty { text-align: center; color: #565959; }
-        .cart-item .remove-btn { background: none; border: none; color: #d00; cursor: pointer; font-size: 1.2rem; padding: 5px; }
+        .cart-item .remove-btn { background: none; border: none; color: #d00; cursor: pointer; font-size: 1.2rem; }
         .cart-summary { background: #fefaf3; border: 1px solid #febd69; border-radius: 8px; padding: 20px; margin-top: 20px; }
         .cart-summary .total { font-size: 1.4rem; font-weight: 700; color: #0f1111; }
         .cart-summary .subtotal { color: #565959; font-size: 0.9rem; margin-bottom: 10px; }
@@ -35,7 +35,8 @@
         .message { margin-top: 1rem; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
-        @media (max-width: 600px) { .cart-item { grid-template-columns: 60px 1fr 80px 50px 30px; gap: 8px; font-size: 0.85rem; } .cart-item-img { width: 60px; height: 60px; font-size: 1.5rem; } }
+        .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
+        @media (max-width: 600px) { .cart-item { grid-template-columns: 60px 1fr 80px 50px 30px; gap: 8px; font-size: 0.85rem; } }
     </style>
 </head>
 <body>
@@ -44,7 +45,7 @@
         <nav><a href="/store">Store</a><a href="/dashboard">Dashboard</a></nav>
     </header>
     <main class="container">
-        <a href="/store" class="back-btn">← Continue Shopping</a>
+        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
         <div class="cart-card">
             <h1>🛒 Shopping Cart</h1>
             <div id="cartItems"></div>
@@ -56,67 +57,27 @@
                 <div id="message" class="message"></div>
             </div>
         </div>
+        <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
     </main>
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) { window.location.href = '/dashboard'; }
-        
         async function loadCart() {
-            try {
-                var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                if (d.success && d.data && d.data.items && d.data.items.length > 0) {
-                    document.getElementById('emptyCart').style.display = 'none';
-                    document.getElementById('cartSummary').style.display = 'block';
-                    var html = '';
-                    for (var i = 0; i < d.data.items.length; i++) {
-                        var item = d.data.items[i];
-                        html += '<div class="cart-item">' +
-                            '<div class="cart-item-img">📦</div>' +
-                            '<div><div class="name">' + item.productName + '</div><div class="seller">' + (item.sellerName || '') + '</div></div>' +
-                            '<div class="price">' + item.effectivePrice.toLocaleString() + ' XAF</div>' +
-                            '<div class="qty">x' + item.quantity + '</div>' +
-                            '<button class="remove-btn" onclick="removeItem(' + item.productId + ')">✕</button>' +
-                            '</div>';
-                    }
-                    document.getElementById('cartItems').innerHTML = html;
-                    document.getElementById('itemCount').textContent = d.data.items.length;
-                    document.getElementById('cartTotal').textContent = d.data.total.toLocaleString() + ' XAF';
-                    document.getElementById('checkoutAmount').textContent = d.data.total.toLocaleString() + ' XAF';
-                } else {
-                    document.getElementById('emptyCart').style.display = 'block';
-                    document.getElementById('cartSummary').style.display = 'none';
-                }
+            try { var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json();
+                if (d.success && d.data && d.data.items && d.data.items.length > 0) { document.getElementById('emptyCart').style.display = 'none'; document.getElementById('cartSummary').style.display = 'block';
+                    var html = ''; for (var i = 0; i < d.data.items.length; i++) { var item = d.data.items[i];
+                        html += '<div class="cart-item"><div class="cart-item-img">📦</div><div><div class="name">' + item.productName + '</div><div class="seller">' + (item.sellerName || '') + '</div></div><div class="price">' + item.effectivePrice.toLocaleString() + ' XAF</div><div class="qty">x' + item.quantity + '</div><button class="remove-btn" onclick="removeItem(' + item.productId + ')">✕</button></div>'; }
+                    document.getElementById('cartItems').innerHTML = html; document.getElementById('itemCount').textContent = d.data.items.length; document.getElementById('cartTotal').textContent = d.data.total.toLocaleString() + ' XAF'; document.getElementById('checkoutAmount').textContent = d.data.total.toLocaleString() + ' XAF'; }
+                else { document.getElementById('emptyCart').style.display = 'block'; document.getElementById('cartSummary').style.display = 'none'; }
             } catch(e) {}
         }
-        
-        async function removeItem(productId) {
-            try {
-                var r = await fetch('/api/cart/remove/' + productId, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                if (d.success) loadCart();
-            } catch(e) {}
+        async function removeItem(pid) { try { var r = await fetch('/api/cart/remove/' + pid, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success) loadCart(); } catch(e) {} }
+        async function checkout() { var btn = document.getElementById('checkoutBtn'); var msg = document.getElementById('message'); btn.disabled = true; btn.textContent = '⏳ Processing...'; msg.className = 'message';
+            try { var r = await fetch('/api/orders/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ paymentMethod: 'MTN_MONEY' }) }); var d = await r.json();
+                if (d.success) { msg.textContent = '✅ Order placed! Redirecting...'; msg.className = 'message success'; setTimeout(function() { window.location.href = '/order-tracking?id=' + d.data.orderId; }, 1500); }
+                else { msg.textContent = '❌ ' + (d.message || 'Checkout failed'); msg.className = 'message error'; btn.disabled = false; } }
+            catch(e) { msg.textContent = '❌ Network error'; msg.className = 'message error'; btn.disabled = false; }
         }
-        
-        async function checkout() {
-            var btn = document.getElementById('checkoutBtn');
-            var msg = document.getElementById('message');
-            btn.disabled = true; btn.textContent = '⏳ Processing...'; msg.className = 'message';
-            try {
-                var r = await fetch('/api/orders/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ paymentMethod: 'MTN_MONEY' }) });
-                var d = await r.json();
-                if (d.success) {
-                    msg.textContent = '✅ Order placed! Redirecting...';
-                    msg.className = 'message success';
-                    setTimeout(function() { window.location.href = '/order-tracking?id=' + d.data.orderId; }, 1500);
-                } else {
-                    msg.textContent = '❌ ' + (d.message || 'Checkout failed');
-                    msg.className = 'message error';
-                    btn.disabled = false; btn.textContent = '⚡ Buy Now — ' + document.getElementById('checkoutAmount').textContent;
-                }
-            } catch(e) { msg.textContent = '❌ Network error'; msg.className = 'message error'; btn.disabled = false; }
-        }
-        
         loadCart();
     </script>
 </body>
