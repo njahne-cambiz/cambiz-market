@@ -6,42 +6,45 @@
     <title>Njangi Deals | CamBiz Market</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f0f2f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        body { background: #eaeded; min-height: 100vh; }
+        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
         .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header .logo span { color: #febd69; }
         .header nav a { color: #b2bec3; text-decoration: none; margin-left: 2rem; font-size: 0.9rem; }
         .header nav a:hover { color: white; }
         .container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
-        .back-btn { color: #667eea; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; font-weight: 600; }
-        .hero { background: linear-gradient(135deg, #e17055, #fdcb6e); color: white; border-radius: 20px; padding: 2.5rem; text-align: center; margin-bottom: 2rem; }
+        .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; font-weight: 600; }
+        .hero { background: linear-gradient(135deg, #e17055, #fdcb6e); color: white; border-radius: 12px; padding: 2.5rem; text-align: center; margin-bottom: 2rem; }
         .hero h1 { font-size: 2rem; }
         .hero p { opacity: 0.9; margin-top: 0.5rem; }
         .deals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
-        .deal-card { background: white; border-radius: 16px; padding: 1.8rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.2s; }
+        .deal-card { background: white; border-radius: 12px; padding: 1.8rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); transition: transform 0.2s; }
         .deal-card:hover { transform: translateY(-3px); }
         .deal-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
         .deal-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
         .badge-active { background: #d4edda; color: #155724; }
         .badge-filled { background: #fff3cd; color: #856404; }
-        .deal-name { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
-        .deal-seller { color: #636e72; font-size: 0.85rem; margin-bottom: 1rem; }
+        .badge-owner { background: #d1ecf1; color: #0c5460; }
+        .deal-name { font-size: 1.1rem; font-weight: 700; color: #0f1111; margin-bottom: 0.5rem; }
+        .deal-seller { color: #565959; font-size: 0.85rem; margin-bottom: 1rem; }
         .deal-price { font-size: 1.4rem; font-weight: 700; color: #e17055; }
         .deal-regular { color: #b2bec3; text-decoration: line-through; font-size: 0.9rem; }
-        .deal-savings { color: #00b894; font-size: 0.85rem; font-weight: 600; }
+        .deal-savings { color: #10b981; font-size: 0.85rem; font-weight: 600; }
         .progress-bar { background: #e8ecf1; border-radius: 10px; height: 8px; margin: 1rem 0; overflow: hidden; }
-        .progress-fill { background: #00b894; height: 100%; border-radius: 10px; transition: width 0.3s; }
-        .deal-stats { display: flex; justify-content: space-between; font-size: 0.85rem; color: #636e72; margin-bottom: 1rem; }
-        .btn { padding: 12px 20px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; width: 100%; }
+        .progress-fill { background: #10b981; height: 100%; border-radius: 10px; transition: width 0.3s; }
+        .deal-stats { display: flex; justify-content: space-between; font-size: 0.85rem; color: #565959; margin-bottom: 1rem; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; width: 100%; }
         .btn-join { background: #667eea; color: white; }
         .btn-join:disabled { background: #b2bec3; cursor: not-allowed; }
         .btn-share { background: #25D366; color: white; margin-top: 0.5rem; text-decoration: none; display: block; text-align: center; }
         .empty { text-align: center; padding: 4rem; color: #b2bec3; }
         .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
+        .owner-tag { background: #2563eb; color: white; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
     </style>
 </head>
 <body>
     <header class="header">
-        <a href="/store" class="logo">🛒 CamBiz Market</a>
+        <a href="/store" class="logo">cam<span>Biz</span> Market</a>
         <nav><a href="/store">📦 Store</a><a href="/dashboard">👤 Dashboard</a></nav>
     </header>
     <main class="container">
@@ -52,10 +55,49 @@
     </main>
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        var currentUserId = null;
+        if(token){try{var payload=JSON.parse(atob(token.split('.')[1]));currentUserId=payload.userId||null;}catch(e){}}
+        
         async function loadDeals() {
-            try { var r = await fetch('/api/njangi/active'); var d = await r.json(); var grid = document.getElementById('dealsGrid'); if (d.success && d.data && d.data.length > 0) { grid.innerHTML = d.data.map(function(deal) { var pct = Math.round((deal.participantCount / deal.minParticipants) * 100); var shareText = encodeURIComponent('🤝 Join my Njangi deal! ' + deal.productName + ' - ' + deal.individualPrice.toLocaleString() + ' XAF https://cambiz-market.onrender.com/njangi'); return '<div class="deal-card"><div class="deal-header"><span class="deal-badge ' + (deal.status === 'ACTIVE' ? 'badge-active' : 'badge-filled') + '">' + deal.status + '</span></div><div class="deal-name">📦 ' + deal.productName + '</div><div class="deal-seller">🏪 ' + deal.sellerName + '</div><div class="deal-price">' + deal.individualPrice.toLocaleString() + ' XAF <span class="deal-regular">' + deal.regularPrice.toLocaleString() + '</span></div><div class="deal-savings">💰 Save ' + deal.savingsPerPerson.toLocaleString() + ' XAF each</div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div><div class="deal-stats"><span>👥 ' + deal.participantCount + '/' + deal.minParticipants + '</span><span>' + deal.remainingSpots + ' spots left</span></div><button class="btn btn-join" onclick="joinDeal(' + deal.id + ')" ' + (deal.status !== 'ACTIVE' ? 'disabled' : '') + '>' + (deal.status === 'ACTIVE' ? '🤝 Join Deal' : '✅ Filled') + '</button><a href="https://wa.me/?text=' + shareText + '" target="_blank" class="btn btn-share">📱 Share on WhatsApp</a></div>'; }).join(''); } else { grid.innerHTML = '<div class="empty"><p style="font-size:3rem;">🤝</p><h2>No active deals</h2></div>'; } } catch(e) { grid.innerHTML = '<div class="empty"><p>Failed to load</p></div>'; }
+            try {
+                var r = await fetch('/api/njangi/active');
+                var d = await r.json();
+                var grid = document.getElementById('dealsGrid');
+                if (d.success && d.data && d.data.length > 0) {
+                    grid.innerHTML = d.data.map(function(deal) {
+                        var pct = Math.round((deal.participantCount / deal.minParticipants) * 100);
+                        var shareText = encodeURIComponent('🤝 Join my Njangi deal! ' + deal.productName + ' - ' + deal.individualPrice.toLocaleString() + ' XAF https://cambiz-market.onrender.com/njangi');
+                        var isOwner = currentUserId && deal.sellerId === currentUserId;
+                        var joinButton = isOwner ? '' : '<button class="btn btn-join" onclick="joinDeal(' + deal.id + ')" ' + (deal.status !== 'ACTIVE' ? 'disabled' : '') + '>' + (deal.status === 'ACTIVE' ? '🤝 Join Deal' : '✅ Filled') + '</button>';
+                        var ownerBadge = isOwner ? '<span class="owner-tag">Your Deal</span>' : '';
+                        return '<div class="deal-card">' +
+                            '<div class="deal-header"><span class="deal-badge ' + (deal.status === 'ACTIVE' ? 'badge-active' : 'badge-filled') + '">' + deal.status + '</span>' + ownerBadge + '</div>' +
+                            '<div class="deal-name">📦 ' + deal.productName + '</div>' +
+                            '<div class="deal-seller">🏪 ' + deal.sellerName + '</div>' +
+                            '<div class="deal-price">' + deal.individualPrice.toLocaleString() + ' XAF <span class="deal-regular">' + deal.regularPrice.toLocaleString() + '</span></div>' +
+                            '<div class="deal-savings">💰 Save ' + deal.savingsPerPerson.toLocaleString() + ' XAF each</div>' +
+                            '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+                            '<div class="deal-stats"><span>👥 ' + deal.participantCount + '/' + deal.minParticipants + '</span><span>' + deal.remainingSpots + ' spots left</span></div>' +
+                            joinButton +
+                            '<a href="https://wa.me/?text=' + shareText + '" target="_blank" class="btn btn-share">📱 Share on WhatsApp</a>' +
+                            '</div>';
+                    }).join('');
+                } else {
+                    grid.innerHTML = '<div class="empty"><p style="font-size:3rem;">🤝</p><h2>No active deals</h2><p>Check back soon or create your own!</p></div>';
+                }
+            } catch(e) { document.getElementById('dealsGrid').innerHTML = '<div class="empty"><p>Failed to load deals</p></div>'; }
         }
-        async function joinDeal(dealId) { if (!token) { alert('Please login first.'); return; } try { var r = await fetch('/api/njangi/' + dealId + '/join', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success) { alert('✅ Joined!'); loadDeals(); } else { alert('❌ ' + (d.message || 'Failed')); } } catch(e) { alert('Network error'); } }
+        
+        async function joinDeal(dealId) {
+            if (!token) { alert('Please login first.'); return; }
+            try {
+                var r = await fetch('/api/njangi/' + dealId + '/join', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                if (d.success) { alert('✅ Joined!'); loadDeals(); }
+                else { alert('❌ ' + (d.message || 'Failed')); }
+            } catch(e) { alert('Network error'); }
+        }
+        
         loadDeals();
     </script>
 </body>

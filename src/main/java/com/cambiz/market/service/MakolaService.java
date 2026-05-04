@@ -24,6 +24,9 @@ public class MakolaService {
     @Autowired
     private PriceNegotiationRepository negotiationRepository;
 
+    @Autowired
+    private CartService cartService;
+
     private static final List<PriceNegotiation.NegotiationStatus> ACTIVE_STATUSES =
         Arrays.asList(PriceNegotiation.NegotiationStatus.PENDING,
                       PriceNegotiation.NegotiationStatus.COUNTERED);
@@ -197,7 +200,16 @@ public class MakolaService {
             throw new RuntimeException("This negotiation hasn't been accepted yet");
         }
 
-        return new CartResponse();
+        double finalPrice = negotiation.getFinalPrice() != null ? 
+            negotiation.getFinalPrice().doubleValue() : negotiation.getBuyerOffer().doubleValue();
+        int qty = quantity != null ? quantity : 1;
+
+        cartService.addToCartWithCustomPrice(buyerId, negotiation.getProduct().getId(), qty, finalPrice);
+
+        negotiation.setStatus(PriceNegotiation.NegotiationStatus.CONVERTED_TO_CART);
+        negotiationRepository.save(negotiation);
+
+        return cartService.getCart(buyerId);
     }
 
     @Transactional(readOnly = true)
