@@ -24,9 +24,13 @@
         .btn-primary { background: #ffd814; color: #0f1111; }
         .btn-primary:hover { background: #f7ca00; }
         .btn-primary:disabled { background: #d5d9d9; cursor: not-allowed; }
+        .btn-whatsapp { background: #25D366; color: white; text-align: center; text-decoration: none; display: block; margin-top: 10px; }
         .message { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; text-align: center; font-weight: 600; }
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
+        .share-box { background: #fefaf3; border: 1px solid #febd69; border-radius: 8px; padding: 1rem; margin-top: 1rem; text-align: center; display: none; }
+        .share-box .coupon-highlight { font-size: 1.5rem; font-weight: 800; color: #e17055; letter-spacing: 3px; }
+        .share-box p { color: #0f1111; font-size: 0.9rem; margin: 0.5rem 0; }
     </style>
 </head>
 <body>
@@ -49,11 +53,18 @@
             </div>
             <button class="btn btn-primary" onclick="createCoupon()">🏷️ Create Coupon</button>
             <div id="message" class="message"></div>
+            <div class="share-box" id="shareBox">
+                <p>🎉 Coupon created! Share it with your customers:</p>
+                <div class="coupon-highlight" id="createdCode"></div>
+                <p id="shareDescription"></p>
+                <a class="btn btn-whatsapp" id="whatsappShareLink" target="_blank">📱 Share on WhatsApp</a>
+            </div>
         </div>
     </main>
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) { window.location.href = '/dashboard'; }
+        
         async function createCoupon() {
             var code = document.getElementById('code').value.trim();
             var dp = document.getElementById('discountPercent').value;
@@ -66,8 +77,26 @@
             try {
                 var r = await fetch('/api/coupons/create', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ code: code, discountPercent: parseFloat(dp), maxDiscount: parseFloat(md), maxUses: parseInt(mu), expiryDays: parseInt(ed) }) });
                 var d = await r.json();
-                if (d.success) { msg.textContent = '✅ Coupon ' + code + ' created! Share it with customers.'; msg.className = 'message success'; document.getElementById('code').value = ''; btn.disabled = false; btn.textContent = '🏷️ Create Another Coupon'; }
-                else { msg.textContent = '❌ ' + (d.message || 'Failed'); msg.className = 'message error'; btn.disabled = false; btn.textContent = '🏷️ Create Coupon'; }
+                if (d.success) {
+                    msg.textContent = '✅ Coupon created!';
+                    msg.className = 'message success';
+                    btn.textContent = '🏷️ Create Another Coupon';
+                    btn.disabled = false;
+                    document.getElementById('code').value = '';
+                    
+                    // Show share box
+                    var shareBox = document.getElementById('shareBox');
+                    shareBox.style.display = 'block';
+                    document.getElementById('createdCode').textContent = code.toUpperCase();
+                    document.getElementById('shareDescription').textContent = dp + '% off, up to ' + parseInt(md).toLocaleString() + ' XAF off!';
+                    
+                    var shareText = encodeURIComponent('🎉 Use my coupon code ' + code.toUpperCase() + ' on CamBiz Market and get ' + dp + '% off (up to ' + parseInt(md).toLocaleString() + ' XAF)! Shop now: https://cambiz-market.onrender.com/store');
+                    document.getElementById('whatsappShareLink').href = 'https://wa.me/?text=' + shareText;
+                } else {
+                    msg.textContent = '❌ ' + (d.message || 'Failed');
+                    msg.className = 'message error';
+                    btn.disabled = false; btn.textContent = '🏷️ Create Coupon';
+                }
             } catch(e) { msg.textContent = '❌ Network error'; msg.className = 'message error'; btn.disabled = false; btn.textContent = '🏷️ Create Coupon'; }
         }
     </script>
