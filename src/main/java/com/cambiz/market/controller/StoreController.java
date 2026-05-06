@@ -57,4 +57,7 @@ public class StoreController {
 
     @GetMapping("/create-coupon")
     public String createCoupon() { return "create-coupon"; }
+
+    @GetMapping("/transactions")
+    public String transactions() { return "transactions"; }
 }

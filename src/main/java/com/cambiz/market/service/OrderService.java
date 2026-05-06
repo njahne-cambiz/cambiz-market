@@ -5,6 +5,7 @@ import com.cambiz.market.model.*;
 import com.cambiz.market.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -24,6 +25,9 @@ public class OrderService {
     private final CartService cartService;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    
+    @Autowired
+    private TransactionService transactionService;
     
     private final ConcurrentHashMap<Long, OrderResponse> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, String> orderPaymentStatus = new ConcurrentHashMap<>();
@@ -91,11 +95,8 @@ public class OrderService {
                 sellerName = seller.getFirstName();
             }
             
-            Long orderId = System.currentTimeMillis();
-            
             sellerOrderResponses.add(SellerOrderResponse.builder()
                 .sellerOrderId(System.currentTimeMillis() + sellerId)
-                .orderId(orderId)
                 .sellerId(sellerId)
                 .sellerName(sellerName)
                 .subtotal(sellerSubtotal)
@@ -124,6 +125,21 @@ public class OrderService {
         orderStorage.put(orderId, orderResponse);
         orderPaymentStatus.put(orderId, "PENDING");
         
+        // Record transactions for each seller order
+        String buyerName = buyer.getFirstName() + " " + buyer.getLastName();
+        for (SellerOrderResponse so : sellerOrderResponses) {
+            String productNames = so.getItems().stream()
+                .map(OrderItemResponse::getProductName)
+                .collect(Collectors.joining(", "));
+            transactionService.recordTransaction(
+                orderId, orderNumber, buyerId, buyerName,
+                so.getSellerId(), so.getSellerName(),
+                productNames, so.getSubtotal().doubleValue(),
+                so.getCommission().doubleValue(), so.getSellerPayout().doubleValue(),
+                "SALE", request.getPaymentMethod()
+            );
+        }
+        
         log.info("Order created: {} for amount: {} XAF", orderNumber, totalAmount);
         
         return orderResponse;
@@ -145,43 +161,18 @@ public class OrderService {
     
     public void updateOrderPaymentStatus(Long orderId, String status) {
         log.info("Updating order {} payment status to: {}", orderId, status);
-        
         OrderResponse order = orderStorage.get(orderId);
         if (order == null) {
             log.warn("Order not found: {}", orderId);
             return;
         }
-        
         orderPaymentStatus.put(orderId, status);
-        
         if ("PAID".equalsIgnoreCase(status) || "SUCCESS".equalsIgnoreCase(status)) {
-            List<SellerOrderResponse> updatedSellerOrders = new ArrayList<>();
-            if (order.getSellerOrders() != null) {
-                for (SellerOrderResponse so : order.getSellerOrders()) {
-                    updatedSellerOrders.add(SellerOrderResponse.builder()
-                        .sellerOrderId(so.getSellerOrderId())
-                        .orderId(so.getOrderId())
-                        .sellerId(so.getSellerId())
-                        .sellerName(so.getSellerName())
-                        .subtotal(so.getSubtotal())
-                        .commission(so.getCommission())
-                        .sellerPayout(so.getSellerPayout())
-                        .status("CONFIRMED")
-                        .items(so.getItems())
-                        .build());
-                }
-            }
-            
             OrderResponse updatedOrder = OrderResponse.builder()
-                .orderId(order.getOrderId())
-                .orderNumber(order.getOrderNumber())
-                .totalAmount(order.getTotalAmount())
-                .status("CONFIRMED")
-                .paymentMethod(order.getPaymentMethod())
-                .sellerOrders(updatedSellerOrders)
-                .createdAt(order.getCreatedAt())
-                .build();
-            
+                .orderId(order.getOrderId()).orderNumber(order.getOrderNumber())
+                .totalAmount(order.getTotalAmount()).status("CONFIRMED")
+                .paymentMethod(order.getPaymentMethod()).sellerOrders(order.getSellerOrders())
+                .createdAt(order.getCreatedAt()).build();
             orderStorage.put(orderId, updatedOrder);
             log.info("Order {} status updated to CONFIRMED", orderId);
         }
@@ -193,39 +184,26 @@ public class OrderService {
     
     public void updateOrderStatus(Long orderId, String newStatus) {
         log.info("Updating order {} status to: {}", orderId, newStatus);
-        
         OrderResponse order = orderStorage.get(orderId);
         if (order == null) {
             throw new RuntimeException("Order not found: " + orderId);
         }
-        
         List<SellerOrderResponse> updatedSellerOrders = new ArrayList<>();
         if (order.getSellerOrders() != null) {
             for (SellerOrderResponse so : order.getSellerOrders()) {
                 updatedSellerOrders.add(SellerOrderResponse.builder()
-                    .sellerOrderId(so.getSellerOrderId())
-                    .orderId(so.getOrderId())
-                    .sellerId(so.getSellerId())
-                    .sellerName(so.getSellerName())
-                    .subtotal(so.getSubtotal())
-                    .commission(so.getCommission())
-                    .sellerPayout(so.getSellerPayout())
-                    .status(newStatus)
-                    .items(so.getItems())
-                    .build());
+                    .sellerOrderId(so.getSellerOrderId()).orderId(so.getOrderId())
+                    .sellerId(so.getSellerId()).sellerName(so.getSellerName())
+                    .subtotal(so.getSubtotal()).commission(so.getCommission())
+                    .sellerPayout(so.getSellerPayout()).status(newStatus)
+                    .items(so.getItems()).build());
             }
         }
-        
         OrderResponse updatedOrder = OrderResponse.builder()
-            .orderId(order.getOrderId())
-            .orderNumber(order.getOrderNumber())
-            .totalAmount(order.getTotalAmount())
-            .status(newStatus)
-            .paymentMethod(order.getPaymentMethod())
-            .sellerOrders(updatedSellerOrders)
-            .createdAt(order.getCreatedAt())
-            .build();
-        
+            .orderId(order.getOrderId()).orderNumber(order.getOrderNumber())
+            .totalAmount(order.getTotalAmount()).status(newStatus)
+            .paymentMethod(order.getPaymentMethod()).sellerOrders(updatedSellerOrders)
+            .createdAt(order.getCreatedAt()).build();
         orderStorage.put(orderId, updatedOrder);
         log.info("Order {} status updated to {}", orderId, newStatus);
     }
@@ -235,9 +213,7 @@ public class OrderService {
             OrderResponse order = entry.getValue();
             if (order.getSellerOrders() != null) {
                 for (SellerOrderResponse so : order.getSellerOrders()) {
-                    if (so.getSellerOrderId().equals(sellerOrderId)) {
-                        return entry.getKey();
-                    }
+                    if (so.getSellerOrderId().equals(sellerOrderId)) return entry.getKey();
                 }
             }
         }
@@ -245,24 +221,18 @@ public class OrderService {
     }
     
     public List<OrderResponse> getAllOrders() {
-        log.debug("Fetching all orders, count: {}", orderStorage.size());
         return new ArrayList<>(orderStorage.values());
     }
     
     public List<SellerOrderResponse> getSellerOrders(Long sellerId) {
-        log.debug("Fetching orders for seller: {}", sellerId);
         List<SellerOrderResponse> sellerOrders = new ArrayList<>();
-        
         for (OrderResponse order : orderStorage.values()) {
             if (order.getSellerOrders() != null) {
                 for (SellerOrderResponse sellerOrder : order.getSellerOrders()) {
-                    if (sellerOrder.getSellerId().equals(sellerId)) {
-                        sellerOrders.add(sellerOrder);
-                    }
+                    if (sellerOrder.getSellerId().equals(sellerId)) sellerOrders.add(sellerOrder);
                 }
             }
         }
-        
         return sellerOrders;
     }
 }

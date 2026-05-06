@@ -111,6 +111,7 @@ public class SecurityConfig {
                 .requestMatchers("/referral").permitAll()
                 .requestMatchers("/create-flash-sale").permitAll()
                 .requestMatchers("/create-coupon").permitAll()
+                .requestMatchers("/transactions").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 
@@ -135,6 +136,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/referral/**").authenticated()
                 .requestMatchers("/api/flash-sales/**").authenticated()
                 .requestMatchers("/api/coupons/**").authenticated()
+                .requestMatchers("/api/transactions/**").authenticated()
 
                 // Wishlist API
                 .requestMatchers("/api/wishlist/**").authenticated()

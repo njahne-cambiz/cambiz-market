@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #eaeded; min-height: 100vh; }
+        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header .logo span { color: #febd69; }
+        .header nav a { color: #b2bec3; text-decoration: none; margin-left: 2rem; font-size: 0.9rem; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
+        .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; font-weight: 600; }
+        .card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+        .card h1 { color: #0f1111; margin-bottom: 1rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: #f8fafc; border-radius: 8px; padding: 1.2rem; text-align: center; }
+        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #131921; }
+        .stat-card .label { font-size: 0.75rem; color: #565959; }
+        .txn-table { width: 100%; border-collapse: collapse; }
+        .txn-table th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.8rem; color: #565959; text-transform: uppercase; }
+        .txn-table td { padding: 12px; border-bottom: 1px solid #e8ecf1; font-size: 0.85rem; }
+        .txn-table tr:hover { background: #f8fafc; }
+        .badge { padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+        .badge-sale { background: #d4edda; color: #155724; }
+        .badge-commission { background: #fff3cd; color: #856404; }
+        .badge-payout { background: #d1ecf1; color: #0c5460; }
+        .amount-plus { color: #10b981; }
+        .amount-minus { color: #d00; }
+        .empty { text-align: center; padding: 3rem; color: #565959; }
+        .login-prompt { text-align: center; padding: 3rem; }
+        .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+        <nav><a href="/store">📦 Store</a><a href="/dashboard">👤 Dashboard</a></nav>
+    </header>
+    <main class="container">
+        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+        <div id="loggedInView" style="display:none;">
+            <div class="card"><h1>💰 Transaction History</h1>
+                <div class="stats-grid" id="statsGrid"></div>
+            </div>
+            <div class="card">
+                <div class="txn-table-wrapper" style="overflow-x:auto;">
+                    <table class="txn-table">
+                        <thead><tr><th>Date</th><th>Order</th><th>Product</th><th>Buyer</th><th>Type</th><th>Amount</th></tr></thead>
+                        <tbody id="txnBody"><tr><td colspan="6" class="empty">Loading transactions...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
+        </div>
+        <div id="loginView" class="login-prompt"><h2>🔐 Login Required</h2><p>Please log in to view transactions.</p><a href="/dashboard" class="btn" style="background:#ffd814;color:#0f1111;padding:12px 34px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;margin-top:1rem;">Go to Dashboard</a></div>
+    </main>
+    <script>
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) { loadTransactions(); } else { document.getElementById('loginView').style.display = 'block'; }
+        
+        async function loadTransactions() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('loggedInView').style.display = 'block';
+            
+            try {
+                var [txnRes, statsRes] = await Promise.all([
+                    fetch('/api/transactions/my-transactions', { headers: { 'Authorization': 'Bearer ' + token } }),
+                    fetch('/api/transactions/stats', { headers: { 'Authorization': 'Bearer ' + token } })
+                ]);
+                var txnData = await txnRes.json();
+                var statsData = await statsRes.json();
+                
+                if (statsData.success && statsData.data) {
+                    var s = statsData.data;
+                    document.getElementById('statsGrid').innerHTML =
+                        '<div class="stat-card"><div class="value">' + (s.totalTransactions || 0) + '</div><div class="label">Transactions</div></div>' +
+                        '<div class="stat-card"><div class="value">' + (s.totalSales || 0).toLocaleString() + ' XAF</div><div class="label">Total Sales</div></div>' +
+                        '<div class="stat-card"><div class="value amount-minus">' + (s.totalCommission || 0).toLocaleString() + ' XAF</div><div class="label">Commission</div></div>' +
+                        '<div class="stat-card"><div class="value amount-plus">' + (s.totalPayout || 0).toLocaleString() + ' XAF</div><div class="label">Net Payout</div></div>';
+                }
+                
+                if (txnData.success && txnData.data && txnData.data.length > 0) {
+                    var html = '';
+                    for (var i = 0; i < txnData.data.length; i++) {
+                        var t = txnData.data[i];
+                        var badgeClass = t.type === 'SALE' ? 'badge-sale' : (t.type === 'COMMISSION' ? 'badge-commission' : 'badge-payout');
+                        var amountSign = t.type === 'COMMISSION' ? 'amount-minus' : 'amount-plus';
+                        html += '<tr><td>' + new Date(t.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) + '</td><td>' + t.orderNumber + '</td><td>' + (t.productName || 'Order') + '</td><td>' + (t.buyerName || 'Buyer') + '</td><td><span class="badge ' + badgeClass + '">' + t.type + '</span></td><td class="' + amountSign + '">' + (t.type === 'COMMISSION' ? '-' : '') + t.orderAmount.toLocaleString() + ' XAF</td></tr>';
+                    }
+                    document.getElementById('txnBody').innerHTML = html;
+                } else {
+                    document.getElementById('txnBody').innerHTML = '<tr><td colspan="6" class="empty">No transactions yet.</td></tr>';
+                }
+            } catch(e) { document.getElementById('txnBody').innerHTML = '<tr><td colspan="6" class="empty">Error loading.</td></tr>'; }
+        }
+    </script>
+</body>
+</html>
