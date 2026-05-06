@@ -1,53 +1,65 @@
 package com.cambiz.market.service;
 
+import com.cambiz.market.model.Payment;
 import com.cambiz.market.model.Transaction;
+import com.cambiz.market.model.TransactionStatus;
+import com.cambiz.market.model.TransactionType;
+import com.cambiz.market.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
-    
-    private final ConcurrentHashMap<Long, Transaction> transactions = new ConcurrentHashMap<>();
-    private long nextId = 1;
-    
-    public Transaction recordTransaction(Long orderId, String orderNumber, Long buyerId, String buyerName,
-                                          Long sellerId, String sellerName, String productName, double orderAmount,
-                                          double commission, double sellerPayout, String type, String paymentMethod) {
-        Transaction transaction = new Transaction(nextId++, orderId, orderNumber, buyerId, buyerName,
-                sellerId, sellerName, productName, orderAmount, commission, sellerPayout, type, paymentMethod);
-        transactions.put(transaction.getId(), transaction);
-        return transaction;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Transactional
+    public Transaction createPurchaseTransaction(Long orderId, Long buyerId, Long sellerId, Double amount,
+                                                  Payment.PaymentMethod paymentMethod) {
+        double commissionRate = 0.05;
+        Double platformFee = amount * commissionRate;
+        Double netAmount = amount - platformFee;
+
+        Transaction txn = new Transaction(
+                orderId, buyerId, sellerId, amount, platformFee, netAmount,
+                TransactionType.PURCHASE, paymentMethod, TransactionStatus.PENDING,
+                "Payment for Order #" + orderId
+        );
+
+        return transactionRepository.save(txn);
     }
-    
-    public List<Transaction> getSellerTransactions(Long sellerId) {
-        return transactions.values().stream()
-                .filter(t -> t.getSellerId().equals(sellerId))
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .collect(Collectors.toList());
+
+    public Page<Transaction> getBuyerTransactions(Long buyerId, int page, int size) {
+        return transactionRepository.findByBuyerIdOrderByCreatedAtDesc(
+                buyerId, PageRequest.of(page, size));
     }
-    
-    public List<Transaction> getBuyerTransactions(Long buyerId) {
-        return transactions.values().stream()
-                .filter(t -> t.getBuyerId().equals(buyerId))
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .collect(Collectors.toList());
+
+    public Page<Transaction> getSellerTransactions(Long sellerId, int page, int size) {
+        return transactionRepository.findBySellerIdOrderByCreatedAtDesc(
+                sellerId, PageRequest.of(page, size));
     }
-    
-    public List<Transaction> getAllTransactions() {
-        return transactions.values().stream()
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .collect(Collectors.toList());
-    }
-    
+
     public Map<String, Object> getSellerStats(Long sellerId) {
-        List<Transaction> sellerTxns = getSellerTransactions(sellerId);
-        double totalSales = sellerTxns.stream().mapToDouble(Transaction::getOrderAmount).sum();
-        double totalCommission = sellerTxns.stream().mapToDouble(Transaction::getCommission).sum();
-        double totalPayout = sellerTxns.stream().mapToDouble(Transaction::getSellerPayout).sum();
-        
+        Page<Transaction> allTxns = transactionRepository.findBySellerIdOrderByCreatedAtDesc(
+                sellerId, PageRequest.of(0, 1000));
+        List<Transaction> sellerTxns = allTxns.getContent();
+
+        double totalSales = sellerTxns.stream()
+                .filter(t -> t.getType() == TransactionType.PURCHASE)
+                .mapToDouble(Transaction::getAmount).sum();
+        double totalCommission = sellerTxns.stream()
+                .filter(t -> t.getType() == TransactionType.PURCHASE)
+                .mapToDouble(Transaction::getPlatformFee).sum();
+        double totalPayout = sellerTxns.stream()
+                .filter(t -> t.getType() == TransactionType.PURCHASE)
+                .mapToDouble(Transaction::getNetAmount).sum();
+
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("totalTransactions", sellerTxns.size());
         stats.put("totalSales", totalSales);

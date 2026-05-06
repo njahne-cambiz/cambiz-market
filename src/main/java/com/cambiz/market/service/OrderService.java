@@ -126,17 +126,10 @@ public class OrderService {
         orderPaymentStatus.put(orderId, "PENDING");
         
         // Record transactions for each seller order
-        String buyerName = buyer.getFirstName() + " " + buyer.getLastName();
         for (SellerOrderResponse so : sellerOrderResponses) {
-            String productNames = so.getItems().stream()
-                .map(OrderItemResponse::getProductName)
-                .collect(Collectors.joining(", "));
-            transactionService.recordTransaction(
-                orderId, orderNumber, buyerId, buyerName,
-                so.getSellerId(), so.getSellerName(),
-                productNames, so.getSubtotal().doubleValue(),
-                so.getCommission().doubleValue(), so.getSellerPayout().doubleValue(),
-                "SALE", request.getPaymentMethod()
+            transactionService.createPurchaseTransaction(
+                orderId, buyerId, so.getSellerId(), so.getSubtotal().doubleValue(),
+                Payment.PaymentMethod.valueOf(request.getPaymentMethod())
             );
         }
         
