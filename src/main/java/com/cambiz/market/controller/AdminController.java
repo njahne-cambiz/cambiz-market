@@ -1,5 +1,8 @@
 package com.cambiz.market.controller;
 
+import com.cambiz.market.dto.AdminStatusDTO;
+import com.cambiz.market.model.Transaction;
+import com.cambiz.market.model.TransactionType;
 import com.cambiz.market.model.User;
 import com.cambiz.market.repository.ProductRepository;
 import com.cambiz.market.repository.UserRepository;
@@ -31,15 +34,25 @@ public class AdminController {
 
     @GetMapping("/stats")
     public ResponseEntity<?> getAdminStats() {
-        Map<String, Object> stats = new LinkedHashMap<>();
         List<User> allUsers = userRepository.findAll();
-        stats.put("totalUsers", allUsers.size());
-        stats.put("totalSellers", allUsers.stream().filter(u -> u.getUserType() == User.UserType.SELLER).count());
-        stats.put("totalBuyers", allUsers.stream().filter(u -> u.getUserType() == User.UserType.BUYER).count());
-        stats.put("totalAdmins", allUsers.stream().filter(u -> u.getUserType() == User.UserType.ADMIN).count());
-        stats.put("premiumSellers", allUsers.stream().filter(u -> "PREMIUM".equals(u.getAccountType())).count());
-        stats.put("totalProducts", productRepository.count());
-        stats.put("totalOrders", orderService.getAllOrders().size());
+        List<Transaction> allTxns = transactionService.getAllTransactions();
+        
+        double totalRevenue = allTxns.stream()
+                .filter(t -> t.getType() == TransactionType.PURCHASE)
+                .mapToDouble(Transaction::getPlatformFee)
+                .sum();
+
+        AdminStatusDTO stats = AdminStatusDTO.builder()
+                .totalUsers(allUsers.size())
+                .totalSellers(allUsers.stream().filter(u -> u.getUserType() == User.UserType.SELLER).count())
+                .totalBuyers(allUsers.stream().filter(u -> u.getUserType() == User.UserType.BUYER).count())
+                .totalOrders(orderService.getAllOrders().size())
+                .totalProducts(productRepository.count())
+                .premiumSellers(allUsers.stream().filter(u -> "PREMIUM".equals(u.getAccountType())).count())
+                .totalRevenue(totalRevenue)
+                .pendingDisputes(0)
+                .build();
+
         return ResponseEntity.ok(Map.of("success", true, "data", stats));
     }
 
