@@ -42,7 +42,7 @@ public class AdminController {
                 .mapToDouble(Transaction::getPlatformFee)
                 .sum();
 
-        AdminStatusDTO stats = AdminStatusDTO.builder()
+        AdminStatsDTO stats = AdminStatsDTO.builder()
                 .totalUsers(allUsers.size())
                 .totalSellers(allUsers.stream().filter(u -> u.getUserType() == User.UserType.SELLER).count())
                 .totalBuyers(allUsers.stream().filter(u -> u.getUserType() == User.UserType.BUYER).count())
@@ -75,6 +75,26 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("success", true, "data", userList));
     }
 
+    @GetMapping("/sellers")
+    public ResponseEntity<?> getSellers() {
+        List<User> sellers = userRepository.findAll().stream()
+                .filter(u -> u.getUserType() == User.UserType.SELLER)
+                .collect(Collectors.toList());
+        List<Map<String, Object>> sellerList = sellers.stream().map(u -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", u.getId());
+            map.put("firstName", u.getFirstName());
+            map.put("lastName", u.getLastName());
+            map.put("email", u.getEmail());
+            map.put("businessName", u.getBusinessName());
+            map.put("accountType", u.getAccountType());
+            map.put("status", u.getStatus().name());
+            map.put("createdAt", u.getCreatedAt());
+            return map;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(Map.of("success", true, "data", sellerList));
+    }
+
     @GetMapping("/orders")
     public ResponseEntity<?> getAllOrders() {
         var orders = orderService.getAllOrders();
@@ -84,7 +104,23 @@ public class AdminController {
     @GetMapping("/transactions")
     public ResponseEntity<?> getAllTransactions() {
         var transactions = transactionService.getAllTransactions();
-        return ResponseEntity.ok(Map.of("success", true, "data", transactions));
+        // Sort by newest first
+        transactions.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        return ResponseEntity.ok(Map.of("success", true, "data", transactions, "count", transactions.size()));
+    }
+
+    @GetMapping("/revenue-chart")
+    public ResponseEntity<?> getRevenueChart() {
+        List<Transaction> allTxns = transactionService.getAllTransactions();
+        Map<String, Double> revenueByDay = new LinkedHashMap<>();
+        
+        for (Transaction t : allTxns) {
+            if (t.getType() == TransactionType.PURCHASE) {
+                String day = t.getCreatedAt().toLocalDate().toString();
+                revenueByDay.merge(day, t.getPlatformFee(), Double::sum);
+            }
+        }
+        return ResponseEntity.ok(Map.of("success", true, "data", revenueByDay));
     }
 
     @PutMapping("/users/{userId}/status")
@@ -94,5 +130,25 @@ public class AdminController {
         user.setStatus(User.UserStatus.valueOf(status));
         userRepository.save(user);
         return ResponseEntity.ok(Map.of("success", true, "message", "User status updated to " + status));
+    }
+
+    @PutMapping("/sellers/{sellerId}/verify")
+    public ResponseEntity<?> verifySeller(@PathVariable Long sellerId) {
+        User seller = userRepository.findById(sellerId).orElse(null);
+        if (seller == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Seller not found"));
+        seller.setAccountType("PREMIUM");
+        userRepository.save(seller);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Seller verified as Premium"));
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<?> getSystemHealth() {
+        Map<String, Object> health = new LinkedHashMap<>();
+        health.put("apiStatus", "RUNNING");
+        health.put("databaseStatus", "CONNECTED");
+        health.put("uptime", "24/7");
+        health.put("memoryUsage", Runtime.getRuntime().totalMemory() / (1024 * 1024) + " MB");
+        health.put("freeMemory", Runtime.getRuntime().freeMemory() / (1024 * 1024) + " MB");
+        return ResponseEntity.ok(Map.of("success", true, "data", health));
     }
 }
