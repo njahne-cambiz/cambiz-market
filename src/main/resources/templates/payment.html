@@ -30,12 +30,14 @@
         .btn-pay { background: #ffd814; color: #0f1111; }
         .btn-pay:hover { background: #f7ca00; }
         .btn-pay:disabled { background: #d5d9d9; cursor: not-allowed; }
+        .btn-track { background: #2563eb; color: white; }
         .message { margin-top: 15px; padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
         .message.info { background: #d1ecf1; color: #0c5460; display: block; }
         .step-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; color: #565959; font-size: 0.85rem; }
         .step-indicator .active { color: #febd69; font-weight: 700; }
+        .step-indicator .done { color: #10b981; }
         .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1rem; display: inline-block; font-weight: 600; }
         .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
     </style>
@@ -48,7 +50,7 @@
     <main class="container">
         <a href="/cart" class="back-btn">← Back to Cart</a>
         <div class="card">
-            <div class="step-indicator">
+            <div class="step-indicator" id="steps">
                 <span>🛒 Cart</span> <span>→</span> <span class="active">💳 Payment</span> <span>→</span> <span>✅ Confirmed</span>
             </div>
             <h1>💳 Complete Payment</h1>
@@ -59,7 +61,7 @@
                 <p style="font-size:0.8rem; color:#565959; margin-top:5px;">Order #<span id="orderNumber">---</span></p>
             </div>
 
-            <div class="payment-options">
+            <div class="payment-options" id="paymentOptions">
                 <div class="payment-option" data-method="MTN_MONEY" onclick="selectPayment('MTN_MONEY', this)">
                     <div class="icon">📱</div>
                     <div><div class="name">MTN Mobile Money</div><div class="desc">Pay with MTN Momo</div></div>
@@ -87,16 +89,10 @@
         var orderData = JSON.parse(localStorage.getItem('lastOrder') || '{}');
         
         if (!token) { window.location.href = '/dashboard'; }
+        if (!orderData.orderId) { window.location.href = '/cart'; }
         
-        // Safety net: No order data = redirect to cart
-        if (!orderData.orderId) {
-            window.location.href = '/cart';
-        }
-        
-        if (orderData.orderId) {
-            document.getElementById('orderTotal').textContent = (orderData.totalAmount || 0).toLocaleString() + ' XAF';
-            document.getElementById('orderNumber').textContent = orderData.orderNumber || '---';
-        }
+        document.getElementById('orderTotal').textContent = (orderData.totalAmount || 0).toLocaleString() + ' XAF';
+        document.getElementById('orderNumber').textContent = orderData.orderNumber || '---';
 
         function selectPayment(method, el) {
             document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
@@ -114,13 +110,7 @@
             
             if (!selectedMethod) { msg.textContent = '❌ Please select a payment method.'; msg.className = 'message error'; return; }
             if (!phone) { msg.textContent = '❌ Please enter your phone number.'; msg.className = 'message error'; return; }
-            
-            // Validate Cameroon phone number (9 digits, starts with 6)
-            if (!/^[6][25789][0-9]{7}$/.test(phone)) {
-                msg.textContent = '❌ Invalid Cameroon number. Must be 9 digits starting with 6 (e.g. 677105536).';
-                msg.className = 'message error';
-                return;
-            }
+            if (!/^[6][25789][0-9]{7}$/.test(phone)) { msg.textContent = '❌ Invalid Cameroon number. Must be 9 digits starting with 6.'; msg.className = 'message error'; return; }
             
             btn.disabled = true; btn.textContent = '⏳ Processing...'; msg.className = 'message';
             
@@ -133,35 +123,25 @@
                 var d = await r.json();
                 
                 if (d.success) {
-                    msg.textContent = '📲 Please check your phone for the PIN prompt to authorize the payment.';
-                    msg.className = 'message info';
-                    btn.textContent = '⏳ Awaiting PIN...';
-                    btn.style.background = '#2563eb';
-                    btn.style.color = 'white';
+                    // Update steps
+                    document.getElementById('steps').innerHTML = '<span>🛒 Cart</span> <span>→</span> <span class="done">💳 Payment</span> <span>→</span> <span class="active">✅ Confirmed</span>';
                     
-                    // Check payment status after 5 seconds
-                    setTimeout(async function() {
-                        try {
-                            var statusRes = await fetch('/api/payments/status/' + orderData.orderId, {
-                                headers: { 'Authorization': 'Bearer ' + token }
-                            });
-                            var statusData = await statusRes.json();
-                            if (statusData.success && statusData.data && statusData.data.status === 'SUCCESS') {
-                                msg.textContent = '✅ Payment confirmed! Redirecting to tracking...';
-                                msg.className = 'message success';
-                                btn.textContent = '✅ Paid!';
-                                btn.style.background = '#10b981';
-                                localStorage.removeItem('lastOrder');
-                                setTimeout(function() { window.location.href = '/order-tracking?id=' + orderData.orderId; }, 1500);
-                            } else {
-                                msg.textContent = '✅ Order placed! You can track it in your orders.';
-                                msg.className = 'message info';
-                                btn.textContent = '📋 Track Order';
-                                btn.onclick = function() { window.location.href = '/order-tracking?id=' + orderData.orderId; };
-                                localStorage.removeItem('lastOrder');
-                            }
-                        } catch(e) {}
-                    }, 5000);
+                    // Hide payment options and phone
+                    document.getElementById('paymentOptions').style.display = 'none';
+                    document.getElementById('phoneGroup').style.display = 'none';
+                    
+                    msg.textContent = '📲 Please check your phone for the PIN prompt to authorize payment.';
+                    msg.className = 'message info';
+                    
+                    // Change button to track order
+                    btn.className = 'btn btn-track';
+                    btn.textContent = '📋 Track My Order';
+                    btn.disabled = false;
+                    var oid = orderData.orderId;
+                    btn.onclick = function() { window.location.href = '/order-tracking?id=' + oid; };
+                    
+                    // Also show a track link
+                    msg.innerHTML += '<br><a href="/order-tracking?id=' + oid + '" style="color:#2563eb;font-weight:700;display:inline-block;margin-top:10px;">→ View Order Tracking Now</a>';
                     
                 } else {
                     msg.textContent = '❌ ' + (d.message || 'Payment failed. Please try again.');
