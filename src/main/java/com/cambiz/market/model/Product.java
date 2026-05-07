@@ -28,6 +28,9 @@ public class Product {
     @Column(nullable = false)
     private Double price;
     
+    @Column(name = "min_acceptable_price")
+    private Double minAcceptablePrice;
+    
     private Double discountedPrice;
     
     private Integer stockQuantity = 1;

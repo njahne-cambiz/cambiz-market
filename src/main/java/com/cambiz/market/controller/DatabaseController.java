@@ -84,4 +84,16 @@ public class DatabaseController {
         }
         return ResponseEntity.ok(Map.of("success", true, "results", results));
     }
+
+    @PostMapping("/add-map-column")
+    public ResponseEntity<Map<String, Object>> addMapColumn() {
+        List<String> results = new ArrayList<>();
+        try {
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS min_acceptable_price DOUBLE PRECISION");
+            results.add("min_acceptable_price column added");
+        } catch (Exception e) {
+            results.add("min_acceptable_price: " + e.getMessage());
+        }
+        return ResponseEntity.ok(Map.of("success", true, "results", results));
+    }
 }

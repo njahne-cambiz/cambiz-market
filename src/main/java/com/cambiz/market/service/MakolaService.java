@@ -36,7 +36,7 @@ public class MakolaService {
                       PriceNegotiation.NegotiationStatus.COUNTERED,
                       PriceNegotiation.NegotiationStatus.ACCEPTED);
 
-    private static final double MINIMUM_PERCENTAGE = 0.30;
+    private static final double DEFAULT_MINIMUM_PERCENTAGE = 0.30;
     private static final double FAIR_OFFER_THRESHOLD = 0.80;
     private static final double GOOD_OFFER_THRESHOLD = 0.90;
     private static final int NEGOTIATION_EXPIRY_DAYS = 7;
@@ -57,11 +57,18 @@ public class MakolaService {
 
         double originalPrice = product.getPrice() != null ? product.getPrice() : 0;
         double offerAmount = request.getOfferAmount().doubleValue();
-        double minOffer = originalPrice * MINIMUM_PERCENTAGE;
+        
+        // Use seller's MAP if set, otherwise fall back to 30% of original price
+        double minOffer;
+        if (product.getMinAcceptablePrice() != null && product.getMinAcceptablePrice() > 0) {
+            minOffer = product.getMinAcceptablePrice();
+        } else {
+            minOffer = originalPrice * DEFAULT_MINIMUM_PERCENTAGE;
+        }
 
         if (offerAmount < minOffer) {
-            throw new RuntimeException("Offer cannot be less than 30% of original price (" + 
-                String.format("%.0f", minOffer) + " XAF)");
+            throw new RuntimeException("Offer cannot be less than " + 
+                String.format("%.0f", minOffer) + " XAF (seller's minimum acceptable price)");
         }
 
         double offerPercentage = offerAmount / originalPrice;
