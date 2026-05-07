@@ -19,18 +19,16 @@
         .stat-card { background: #f8fafc; border-radius: 8px; padding: 1.2rem; text-align: center; }
         .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #131921; }
         .stat-card .label { font-size: 0.75rem; color: #565959; }
-        .txn-table { width: 100%; border-collapse: collapse; }
-        .txn-table th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.8rem; color: #565959; text-transform: uppercase; }
-        .txn-table td { padding: 12px; border-bottom: 1px solid #e8ecf1; font-size: 0.85rem; }
-        .txn-table tr:hover { background: #f8fafc; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.8rem; color: #565959; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #e8ecf1; font-size: 0.85rem; }
+        tr:hover { background: #f8fafc; }
         .badge { padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
-        .badge-sale { background: #d4edda; color: #155724; }
-        .badge-commission { background: #fff3cd; color: #856404; }
-        .badge-payout { background: #d1ecf1; color: #0c5460; }
+        .badge-PURCHASE { background: #d4edda; color: #155724; }
+        .badge-COMMISSION { background: #fff3cd; color: #856404; }
         .amount-plus { color: #10b981; }
         .amount-minus { color: #d00; }
         .empty { text-align: center; padding: 3rem; color: #565959; }
-        .login-prompt { text-align: center; padding: 3rem; }
         .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
     </style>
 </head>
@@ -41,33 +39,34 @@
     </header>
     <main class="container">
         <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
-        <div id="loggedInView" style="display:none;">
+        <div id="loggedInView">
             <div class="card"><h1>💰 Transaction History</h1>
-                <div class="stats-grid" id="statsGrid"></div>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card"><div class="value">-</div><div class="label">Transactions</div></div>
+                    <div class="stat-card"><div class="value">-</div><div class="label">Total Sales</div></div>
+                    <div class="stat-card"><div class="value">-</div><div class="label">Commission</div></div>
+                    <div class="stat-card"><div class="value">-</div><div class="label">Net Payout</div></div>
+                </div>
             </div>
             <div class="card">
-                <div class="txn-table-wrapper" style="overflow-x:auto;">
-                    <table class="txn-table">
-                        <thead><tr><th>Date</th><th>Order</th><th>Product</th><th>Buyer</th><th>Type</th><th>Amount</th></tr></thead>
-                        <tbody id="txnBody"><tr><td colspan="6" class="empty">Loading transactions...</td></tr></tbody>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead><tr><th>Date</th><th>Order</th><th>Product</th><th>Type</th><th>Amount</th><th>Fee</th><th>Payout</th></tr></thead>
+                        <tbody id="txnBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
         </div>
-        <div id="loginView" class="login-prompt"><h2>🔐 Login Required</h2><p>Please log in to view transactions.</p><a href="/dashboard" class="btn" style="background:#ffd814;color:#0f1111;padding:12px 34px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;margin-top:1rem;">Go to Dashboard</a></div>
     </main>
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (token) { loadTransactions(); } else { document.getElementById('loginView').style.display = 'block'; }
+        if (!token) { window.location.href = '/dashboard'; }
         
-        async function loadTransactions() {
-            document.getElementById('loginView').style.display = 'none';
-            document.getElementById('loggedInView').style.display = 'block';
-            
+        async function loadData() {
             try {
                 var [txnRes, statsRes] = await Promise.all([
-                    fetch('/api/transactions/my-transactions', { headers: { 'Authorization': 'Bearer ' + token } }),
+                    fetch('/api/transactions/my-transactions?page=0&size=50', { headers: { 'Authorization': 'Bearer ' + token } }),
                     fetch('/api/transactions/stats', { headers: { 'Authorization': 'Bearer ' + token } })
                 ]);
                 var txnData = await txnRes.json();
@@ -75,7 +74,8 @@
                 
                 if (statsData.success && statsData.data) {
                     var s = statsData.data;
-                    document.getElementById('statsGrid').innerHTML =
+                    var grid = document.getElementById('statsGrid');
+                    grid.innerHTML =
                         '<div class="stat-card"><div class="value">' + (s.totalTransactions || 0) + '</div><div class="label">Transactions</div></div>' +
                         '<div class="stat-card"><div class="value">' + (s.totalSales || 0).toLocaleString() + ' XAF</div><div class="label">Total Sales</div></div>' +
                         '<div class="stat-card"><div class="value amount-minus">' + (s.totalCommission || 0).toLocaleString() + ' XAF</div><div class="label">Commission</div></div>' +
@@ -86,16 +86,26 @@
                     var html = '';
                     for (var i = 0; i < txnData.data.length; i++) {
                         var t = txnData.data[i];
-                        var badgeClass = t.type === 'SALE' ? 'badge-sale' : (t.type === 'COMMISSION' ? 'badge-commission' : 'badge-payout');
-                        var amountSign = t.type === 'COMMISSION' ? 'amount-minus' : 'amount-plus';
-                        html += '<tr><td>' + new Date(t.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) + '</td><td>' + t.orderNumber + '</td><td>' + (t.productName || 'Order') + '</td><td>' + (t.buyerName || 'Buyer') + '</td><td><span class="badge ' + badgeClass + '">' + t.type + '</span></td><td class="' + amountSign + '">' + (t.type === 'COMMISSION' ? '-' : '') + t.orderAmount.toLocaleString() + ' XAF</td></tr>';
+                        var date = new Date(t.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                        html += '<tr>' +
+                            '<td>' + date + '</td>' +
+                            '<td>#' + t.orderId.toString().slice(-8) + '</td>' +
+                            '<td>' + (t.description || 'Order') + '</td>' +
+                            '<td><span class="badge badge-' + t.type + '">' + t.type + '</span></td>' +
+                            '<td class="amount-plus">' + t.amount.toLocaleString() + ' XAF</td>' +
+                            '<td class="amount-minus">-' + t.platformFee.toLocaleString() + ' XAF</td>' +
+                            '<td class="amount-plus">' + t.netAmount.toLocaleString() + ' XAF</td>' +
+                            '</tr>';
                     }
                     document.getElementById('txnBody').innerHTML = html;
                 } else {
-                    document.getElementById('txnBody').innerHTML = '<tr><td colspan="6" class="empty">No transactions yet.</td></tr>';
+                    document.getElementById('txnBody').innerHTML = '<tr><td colspan="7" class="empty">No transactions yet. Make a sale to see data here.</td></tr>';
                 }
-            } catch(e) { document.getElementById('txnBody').innerHTML = '<tr><td colspan="6" class="empty">Error loading.</td></tr>'; }
+            } catch(e) {
+                document.getElementById('txnBody').innerHTML = '<tr><td colspan="7" class="empty">Error loading. Please refresh.</td></tr>';
+            }
         }
+        loadData();
     </script>
 </body>
 </html>
