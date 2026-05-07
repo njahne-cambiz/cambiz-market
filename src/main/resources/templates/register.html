@@ -19,6 +19,11 @@
         .referral-box { background: #f0f0ff; border: 2px dashed #667eea; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; text-align: center; }
         .referral-box p { color: #667eea; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; }
         .referral-box input { border-color: #667eea !important; background: white; }
+        .password-strength { height: 4px; background: #dfe6e9; border-radius: 2px; margin-top: 5px; transition: all 0.3s; }
+        .password-strength.weak { background: #d00; width: 25%; }
+        .password-strength.medium { background: #f59e0b; width: 60%; }
+        .password-strength.strong { background: #10b981; width: 100%; }
+        .password-hint { font-size: 0.75rem; color: #636e72; margin-top: 3px; }
         .btn-register { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
         .btn-register:hover { transform: translateY(-2px); }
         .btn-register:disabled { background: #b2bec3; cursor: not-allowed; transform: none; }
@@ -45,7 +50,12 @@
             </div>
             <div class="form-group"><label>Email Address</label><input type="email" id="email" placeholder="you@example.com"></div>
             <div class="form-group"><label>Phone Number</label><input type="tel" id="phone" placeholder="+237 6XX XXX XXX"></div>
-            <div class="form-group"><label>Password</label><input type="password" id="password" placeholder="Min. 6 characters"></div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Min. 8 characters, letters + numbers" oninput="checkPasswordStrength()">
+                <div class="password-strength" id="passwordStrength"></div>
+                <p class="password-hint" id="passwordHint">Must be at least 8 characters with letters and numbers</p>
+            </div>
             <div class="form-group">
                 <label>I want to</label>
                 <select id="userType" onchange="toggleBusinessName()">
@@ -61,13 +71,37 @@
                 <p>🎁 Got a referral code?</p>
                 <input type="text" id="referralCode" placeholder="Enter friend's code (optional)">
             </div>
-            <button class="btn-register" onclick="register()">🚀 Create Account</button>
+            <button class="btn-register" id="registerBtn" onclick="register()">🚀 Create Account</button>
             <div id="message" class="message"></div>
             <div class="login-link">Already have an account? <a href="/dashboard">Log in</a></div>
         </div>
     </div>
     <script>
         function toggleBusinessName() { document.getElementById('businessNameGroup').style.display = document.getElementById('userType').value === 'SELLER' ? 'block' : 'none'; }
+        
+        function checkPasswordStrength() {
+            var pw = document.getElementById('password').value;
+            var bar = document.getElementById('passwordStrength');
+            var hint = document.getElementById('passwordHint');
+            bar.className = 'password-strength';
+            if (pw.length >= 8 && /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw)) {
+                bar.classList.add('strong');
+                hint.textContent = '✅ Strong password';
+                hint.style.color = '#10b981';
+            } else if (pw.length >= 6 && /[a-zA-Z]/.test(pw)) {
+                bar.classList.add('medium');
+                hint.textContent = '⚠️ Add numbers to make it stronger';
+                hint.style.color = '#f59e0b';
+            } else if (pw.length > 0) {
+                bar.classList.add('weak');
+                hint.textContent = '❌ Too weak — use at least 8 characters with letters and numbers';
+                hint.style.color = '#d00';
+            } else {
+                hint.textContent = 'Must be at least 8 characters with letters and numbers';
+                hint.style.color = '#636e72';
+            }
+        }
+        
         async function register() {
             var firstName = document.getElementById('firstName').value.trim();
             var lastName = document.getElementById('lastName').value.trim();
@@ -78,19 +112,60 @@
             var businessName = document.getElementById('businessName').value.trim();
             var referralCode = document.getElementById('referralCode').value.trim();
             var msgEl = document.getElementById('message');
-            var btn = document.querySelector('.btn-register');
-            if (!firstName || !lastName || !email || !password) { msgEl.textContent = '❌ Please fill in all required fields.'; msgEl.className = 'message error'; return; }
-            if (userType === 'SELLER' && !businessName) { msgEl.textContent = '❌ Please enter your business/shop name.'; msgEl.className = 'message error'; return; }
-            if (password.length < 6) { msgEl.textContent = '❌ Password must be at least 6 characters.'; msgEl.className = 'message error'; return; }
-            btn.disabled = true; btn.textContent = '⏳ Creating account...'; msgEl.className = 'message';
+            var btn = document.getElementById('registerBtn');
+            
+            if (!firstName || !lastName || !email || !password) {
+                msgEl.textContent = '❌ Please fill in all required fields.';
+                msgEl.className = 'message error';
+                return;
+            }
+            if (userType === 'SELLER' && !businessName) {
+                msgEl.textContent = '❌ Please enter your business/shop name.';
+                msgEl.className = 'message error';
+                return;
+            }
+            if (password.length < 8) {
+                msgEl.textContent = '❌ Password must be at least 8 characters.';
+                msgEl.className = 'message error';
+                return;
+            }
+            if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+                msgEl.textContent = '❌ Password must contain both letters and numbers.';
+                msgEl.className = 'message error';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Creating account...';
+            msgEl.className = 'message';
+            
             var body = { firstName: firstName, lastName: lastName, email: email, phone: phone, password: password, userType: userType, businessName: businessName };
             if (referralCode) body.referralCode = referralCode;
+            
             try {
                 var res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 var data = await res.json();
-                if (data.success) { msgEl.textContent = '🎉 Account created! Redirecting...'; msgEl.className = 'message success'; btn.textContent = '✅ Done!'; setTimeout(function() { window.location.href = '/dashboard'; }, 1500); }
-                else { msgEl.textContent = '❌ ' + (data.message || 'Registration failed.'); msgEl.className = 'message error'; btn.disabled = false; btn.textContent = '🚀 Create Account'; }
-            } catch(e) { msgEl.textContent = '❌ Network error.'; msgEl.className = 'message error'; btn.disabled = false; btn.textContent = '🚀 Create Account'; }
+                
+                if (data.success) {
+                    var msg = '🎉 Account created!';
+                    if (referralCode) msg += ' Referral bonus applied!';
+                    msg += ' Redirecting...';
+                    msgEl.textContent = msg;
+                    msgEl.className = 'message success';
+                    btn.textContent = '✅ Done!';
+                    setTimeout(function() { window.location.href = '/dashboard'; }, 1500);
+                } else {
+                    msgEl.textContent = '❌ ' + (data.message || 'Registration failed. Please try again.');
+                    msgEl.className = 'message error';
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Create Account';
+                }
+            } catch(e) {
+                msgEl.textContent = '❌ Network error. Please check your connection and try again.';
+                msgEl.className = 'message error';
+                btn.disabled = false;
+                btn.textContent = '🚀 Create Account';
+            }
         }
     </script>
 </body>
