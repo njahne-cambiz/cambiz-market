@@ -44,70 +44,46 @@ public class JwtUtils {
         }
     }
 
-    private Key getSigningKey() {
-        return signingKey;
-    }
+    private Key getSigningKey() { return signingKey; }
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-        return Jwts.builder()
-                .claims(claims)
-                .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey())
-                .compact();
+        return Jwts.builder().claims(claims).subject(username)
+                .issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigningKey()).compact();
     }
-    
+
     public String generateTokenWithRoles(String username, List<String> roles, String userType) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roles);
         claims.put("userType", userType);
-        return Jwts.builder()
-                .claims(claims)
-                .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey())
-                .compact();
+        return Jwts.builder().claims(claims).subject(username)
+                .issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigningKey()).compact();
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
+    public String extractUsername(String token) { return extractClaim(token, Claims::getSubject); }
 
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
+    public Date extractExpiration(String token) { return extractClaim(token, Claims::getExpiration); }
 
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         return resolver.apply(extractAllClaims(token));
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith((SecretKey) signingKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+    public Claims extractAllClaims(String token) {
+        return Jwts.parser().verifyWith((SecretKey) signingKey).build()
+                .parseSignedClaims(token).getPayload();
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
+    private boolean isTokenExpired(String token) { return extractExpiration(token).before(new Date()); }
 
     public boolean validateToken(String token, UserDetails userDetails) {
-        boolean usernameMatches = extractUsername(token).equals(userDetails.getUsername());
-        boolean notExpired = !isTokenExpired(token);
-        return usernameMatches && notExpired;
+        return extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     public Long getUserIdFromToken(String token) {
         String subject = extractUsername(token);
-        try {
-            return Long.parseLong(subject);
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Cannot extract user ID from token. Subject is not a numeric ID: " + subject);
-        }
+        try { return Long.parseLong(subject); }
+        catch (NumberFormatException e) { throw new RuntimeException("Cannot extract user ID: " + subject); }
     }
 }
