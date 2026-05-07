@@ -44,6 +44,7 @@
         .welcome-banner h1 { font-size: 1.7rem; font-weight: 700; }
         .welcome-banner .subtitle { opacity: 0.9; font-size: 0.9rem; margin-top: 0.3rem; }
         .welcome-banner .badge { background: #febd69; color: #0f1111; padding: 6px 18px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; }
+        .welcome-banner .badge-admin { background: #d00; color: white; padding: 6px 18px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; }
         .section-title { font-size: 1.1rem; font-weight: 700; color: #0f1111; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; }
         .section-title::after { content: ''; flex: 1; height: 1px; background: #d5d9d9; }
         .quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
@@ -96,7 +97,10 @@
             <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
         </div>
         <div id="userView" class="user-view">
-            <div class="welcome-banner"><div><h1>👋 Welcome back!</h1><p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div><span class="badge" id="roleBadge"></span></div>
+            <div class="welcome-banner">
+                <div><h1>👋 Welcome back!</h1><p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div>
+                <span id="roleBadgeEl"></span>
+            </div>
             <div class="stats-grid" id="userStats"></div>
             <div id="buyerCartPanel" style="display:none;"></div>
             <div id="buyerOffersPanel" style="display:none;"></div>
@@ -114,13 +118,16 @@
         async function checkPremiumStatus(){try{var r=await fetch('/api/premium/my-status',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success&&d.data&&d.data.isPremium)document.getElementById('premiumStatus').textContent='🏆 Premium | ';}catch(e){}}
         async function loadUserDashboard(){
             document.getElementById('publicView').style.display='none';document.getElementById('userView').style.display='block';
-            var userType='BUYER';try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)userType='SELLER';else if(payload.userType==='SELLER')userType='SELLER';}catch(e){}
-            document.getElementById('userTypeDisplay').textContent=userType==='SELLER'?'🏪 Seller Dashboard':'🛒 Buyer Dashboard';
-            document.getElementById('roleBadge').textContent=userType==='SELLER'?'Seller':'Buyer';
-            if(userType==='SELLER'){loadSellerView();}else{loadBuyerView();}
+            var userType='BUYER';try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];if(Array.isArray(roles)&&roles.indexOf('ROLE_ADMIN')!==-1)userType='ADMIN';else if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)userType='SELLER';else if(payload.userType==='SELLER')userType='SELLER';else if(payload.userType==='ADMIN')userType='ADMIN';}catch(e){}
+            document.getElementById('userTypeDisplay').textContent=userType==='ADMIN'?'🛡️ Admin Dashboard':userType==='SELLER'?'🏪 Seller Dashboard':'🛒 Buyer Dashboard';
+            if(userType==='ADMIN'){
+                document.getElementById('roleBadgeEl').innerHTML='<span class="badge badge-admin">🔒 Admin</span>';
+                document.getElementById('userActions').innerHTML='<a href="/admin" class="action-card"><div class="icon">🛡️</div><div class="title">Admin Panel</div><div class="sub">Manage platform</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">View all</div></a><a href="/transactions" class="action-card"><div class="icon">💰</div><div class="title">Transactions</div><div class="sub">History</div></a>';
+            }else if(userType==='SELLER'){loadSellerView();}else{loadBuyerView();}
         }
         async function loadBuyerView(){
             document.getElementById('userActions').innerHTML='<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">Shop now</div></a><a href="/cart" class="action-card"><div class="icon">🛒</div><div class="title">View Cart</div><div class="sub">Checkout</div></a><a href="/orders" class="action-card"><div class="icon">📋</div><div class="title">My Orders</div><div class="sub">Track</div></a><a href="/wishlist" class="action-card"><div class="icon">❤️</div><div class="title">Wishlist</div><div class="sub">Saved</div></a><a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi</div><div class="sub">Groups</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer</div><div class="sub">Earn</div></a>';
+            document.getElementById('roleBadgeEl').innerHTML='<span class="badge">Buyer</span>';
             loadBuyerStats();loadBuyerCart();loadBuyerOffers();
         }
         async function loadBuyerStats(){
@@ -146,6 +153,7 @@
         async function addNegotiatedToCart(nid){try{var r=await fetch('/api/makola/add-to-cart/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){alert('✅ Added to cart!');loadBuyerCart();loadBuyerStats();loadBuyerOffers();}else{alert('❌ '+(d.message||'Failed'));}}catch(e){alert('Network error');}}
         async function dismissOffer(nid){var row=document.getElementById('offer-row-'+nid);if(row){row.remove();}if(document.querySelectorAll('#buyerOffersPanel .panel-row').length===0){document.getElementById('buyerOffersPanel').style.display='none';}}
         async function loadSellerView(){
+            document.getElementById('roleBadgeEl').innerHTML='<span class="badge">Seller</span>';
             document.getElementById('userActions').innerHTML=
                 '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a>' +
                 '<a href="/create-flash-sale" class="action-card"><div class="icon">⚡</div><div class="title">Flash Sale</div><div class="sub">Limited deal</div></a>' +
