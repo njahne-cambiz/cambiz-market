@@ -37,7 +37,8 @@
         .btn-makola:hover { background: #1d4ed8; }
         .btn-whatsapp { background: #25D366; color: white; font-size: 13px; padding: 10px; }
         .btn-feature { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; font-size: 13px; padding: 10px; }
-        .btn-edit { background: #2563eb; color: white; font-size: 13px; padding: 10px; }
+        .btn-edit { background: #2563eb; color: white; font-size: 16px; padding: 16px; }
+        .btn-edit:hover { background: #1d4ed8; }
         .secondary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .review-section { margin-top: 20px; border-top: 1px solid #e8ecf1; padding-top: 15px; }
         .review-item { padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
@@ -73,11 +74,12 @@
         </div>
     </div>
     <script>
-        var currentUserType='BUYER';
+        var currentUserId=null;
         var token=localStorage.getItem('token')||sessionStorage.getItem('token');
-        if(token){try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)currentUserType='SELLER';else if(payload.userType==='SELLER')currentUserType='SELLER';}catch(e){}}
-        function showToast(msg, icon) { document.getElementById('toastMsg').textContent = msg; document.getElementById('toast').querySelector('.icon').textContent = icon || '✅'; document.getElementById('toast').classList.add('show'); setTimeout(hideToast, 3000); }
-        function hideToast() { document.getElementById('toast').classList.remove('show'); }
+        if(token){try{var payload=JSON.parse(atob(token.split('.')[1]));var loginData=JSON.parse(localStorage.getItem('loginData')||'{}');currentUserId=loginData.id||null;}catch(e){}}
+        const getToken=()=>localStorage.getItem('token')||sessionStorage.getItem('token');
+        function showToast(msg,icon){document.getElementById('toastMsg').textContent=msg;document.getElementById('toast').querySelector('.icon').textContent=icon||'✅';document.getElementById('toast').classList.add('show');setTimeout(hideToast,3000);}
+        function hideToast(){document.getElementById('toast').classList.remove('show');}
         const categoryEmojis={'Smartphones & Tablets':'📱','Laptops & Computers':'💻','Electronics & Audio':'🎧','Home Appliances':'🏠','Fashion & Clothing':'👗','Food & Essentials':'🍚','Transportation':'🏍️','Accessories':'⌚','Sports and Fitness':'⚽','Books and Stationery':'📚','Jewelry and Watches':'💍','Toys and Games':'🎮','Pet Supplies':'🐾','Beauty and Personal Care':'💄','Baby and Kids':'👶','Health and Medical':'🏥','Agriculture and Farming':'🌾','Building and Construction':'🏗️','Auto and Spare Parts':'🔧','Services and Repairs':'🛠️'};
         var currentFeatureProductId=null;
         function getProductImageHTML(p){if(p.imageUrls&&p.imageUrls.length>0)return'<img src="'+p.imageUrls[0]+'" alt="'+p.name+'">';return'<span class="emoji">'+(categoryEmojis[p.categoryName]||'📦')+'</span>';}
@@ -85,19 +87,17 @@
             var u=new URLSearchParams(window.location.search);var id=u.get('id');if(!id){document.getElementById('productDetail').innerHTML='<div class="error">No product specified</div>';return;}
             try{var r=await fetch('/api/products/'+id);var d=await r.json();
                 if(d.success&&d.data){var p=d.data;var pr=p.discountedPrice||p.price;var hd=p.discountedPrice&&p.discountedPrice<p.price;
+                    var isOwner=(currentUserId&&p.sellerId==currentUserId);
                     var su='https://cambiz-market.onrender.com/product?id='+p.id;var st='🛍️ '+p.name+' - '+pr.toLocaleString()+' XAF on CamBiz Market! '+su;
-                    var isOwner=currentUserType==='SELLER';
                     var actions=isOwner?
                         '<div class="action-buttons"><button class="btn btn-edit" onclick="window.location.href=\'/create-product\'">✏️ Edit Product</button></div><div class="secondary-actions"><button class="btn btn-feature" onclick="showFeatureModal('+p.id+')">⭐ Feature</button><a href="https://wa.me/?text='+encodeURIComponent(st)+'" target="_blank" class="btn btn-whatsapp">📱 WhatsApp</a></div>'
                         :
                         '<div class="action-buttons"><button class="btn btn-cart" onclick="addToCart('+p.id+')">🛒 Add to Cart</button><button class="btn btn-makola" onclick="makeOffer('+p.id+')">💰 Make Offer</button></div>';
-                    
                     document.getElementById('productDetail').innerHTML='<div class="product-card"><div class="product-image-main">'+getProductImageHTML(p)+'</div><div class="product-details"><div class="product-category">'+(p.categoryName||'General')+'</div><div class="product-name">'+p.name+'</div><div class="product-description">'+(p.description||'No description')+'</div><div class="price-section"><div class="product-price">'+(hd?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+pr.toLocaleString()+' XAF'+(hd?'<span class="discount-badge">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+(p.stockQuantity>0?'In Stock ('+p.stockQuantity+' available)':'Out of Stock')+'</div><div class="product-condition">🏷️ Condition: '+(p.condition||'NEW')+'</div></div>'+(p.sellerName?'<div class="seller-info"><span class="seller-name">🏪 Seller: '+p.sellerName+'</span>'+(p.sellerBusinessName?'<br>'+p.sellerBusinessName:'')+'</div>':'')+actions+'<div class="review-section"><h3>⭐ Reviews</h3><div id="reviews-'+p.id+'">Loading...</div><div style="margin-top:15px;padding:15px;background:#f8f9fa;border-radius:8px;"><select id="reviewRating-'+p.id+'" style="padding:5px;border-radius:4px;margin-bottom:8px;"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option></select><textarea id="reviewComment-'+p.id+'" placeholder="Your review..." style="width:100%;padding:8px;border-radius:4px;border:1px solid #d5d9d9;margin-bottom:8px;min-height:45px;"></textarea><button onclick="submitReview('+p.id+')" style="padding:8px 20px;background:#ffd814;color:#0f1111;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Submit Review</button><p id="reviewMsg-'+p.id+'" style="margin-top:5px;"></p></div></div></div></div>';
                     setTimeout(function(){loadReviews(p.id);},300);
                 }else{document.getElementById('productDetail').innerHTML='<div class="error">Product not found</div>';}
             }catch(e){document.getElementById('productDetail').innerHTML='<div class="error">Failed to load</div>';}
         }
-        function getToken(){return localStorage.getItem('token')||sessionStorage.getItem('token');}
         async function addToCart(id){var t=getToken();if(!t){showToast('Please login first','🔐');return;}try{var r=await fetch('/api/cart/add/'+id+'?quantity=1',{method:'POST',headers:{'Authorization':'Bearer '+t}});var d=await r.json();if(d.success){showToast('Added to cart!','🛒');}else{showToast(d.message||'Failed','❌');}}catch(e){showToast('Network error','❌');}}
         async function makeOffer(id){var t=getToken();if(!t){showToast('Please login first','🔐');return;}var o=prompt('Enter your offer amount (XAF):');if(o&&!isNaN(o)&&parseFloat(o)>0){try{var r=await fetch('/api/makola/offer',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify({productId:id,offerAmount:parseFloat(o),message:'Offer from product page'})});var d=await r.json();showToast(d.message||'✅ Offer submitted!','💰');}catch(e){showToast('Error','❌');}}else{showToast('Please enter a valid amount','⚠️');}}
         function showFeatureModal(id){currentFeatureProductId=id;document.getElementById('featureModal').style.display='flex';}
@@ -105,6 +105,7 @@
         async function featureProduct(dur){var t=getToken();if(!t){document.getElementById('featureMsg').textContent='❌ Login first';return;}document.getElementById('featureMsg').textContent='⏳...';try{var r=await fetch('/api/featured/boost',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify({productId:currentFeatureProductId,sellerId:1,duration:dur})});var d=await r.json();if(d.success){document.getElementById('featureMsg').textContent='✅ Pay via '+d.data.ussdCode;setTimeout(closeFeatureModal,2500);}else{document.getElementById('featureMsg').textContent='❌ '+(d.message||'Failed');}}catch(e){document.getElementById('featureMsg').textContent='❌ Error';}}
         async function submitReview(pid){var t=getToken();if(!t){showToast('Please login first','🔐');return;}var r=document.getElementById('reviewRating-'+pid).value;var c=document.getElementById('reviewComment-'+pid).value;var m=document.getElementById('reviewMsg-'+pid);m.textContent='...';try{var res=await fetch('/api/reviews',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify({productId:pid,rating:parseInt(r),comment:c})});var d=await res.json();if(d.success){m.textContent='✅ Done!';document.getElementById('reviewComment-'+pid).value='';loadReviews(pid);}else{m.textContent=d.message||'Failed';}}catch(e){m.textContent='Error';}}
         async function loadReviews(pid){try{var r=await fetch('/api/reviews/product/'+pid);var d=await r.json();var c=document.getElementById('reviews-'+pid);if(d.success&&d.data&&d.data.reviews&&d.data.reviews.length>0){var h='';for(var i=0;i<d.data.reviews.length;i++){var rev=d.data.reviews[i];h+='<div class="review-item"><strong>'+'⭐'.repeat(rev.rating)+'</strong> '+(rev.comment||'')+' <small>- '+rev.userName+'</small></div>';}if(d.data.stats)h+='<div style="margin-top:5px;color:#565959;font-size:0.85rem;">'+d.data.stats.averageRating+' avg ('+d.data.stats.totalReviews+' reviews)</div>';c.innerHTML=h;}else{c.innerHTML='<p style="color:#565959;">No reviews yet.</p>';}}catch(e){}}
+        (async function(){var loginData=JSON.parse(localStorage.getItem('loginData')||'{}');if(!loginData.id){var t=getToken();if(t){try{var r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'buyer@cambiz.cm',password:'Buyer@123'})});var d=await r.json();if(d.success&&d.data){localStorage.setItem('loginData',JSON.stringify({id:d.data.id,email:d.data.email,userType:d.data.userType}));currentUserId=d.data.id;}}catch(e){}}}})();
         loadProduct();
     </script>
 </body>

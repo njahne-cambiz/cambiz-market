@@ -16,8 +16,6 @@
         .search-bar { display: flex; gap: 10px; }
         .search-bar input { padding: 10px 20px; border: none; border-radius: 25px; font-size: 14px; width: 300px; outline: none; }
         .search-bar button { padding: 10px 20px; background: #ff6b6b; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
-        
-        /* Cart Dropdown */
         .cart-nav { position: relative; cursor: pointer; }
         .cart-nav .cart-icon { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 8px; }
         .cart-nav .cart-count { background: #febd69; color: #131921; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; position: absolute; top: -5px; right: -8px; }
@@ -29,7 +27,6 @@
         .cart-dropdown .btn-checkout:hover { background: #f7ca00; }
         .cart-dropdown .btn-view-cart { display: block; width: 100%; padding: 8px; background: white; color: #2563eb; border: 1px solid #d5d9d9; border-radius: 6px; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; margin-top: 5px; font-size: 0.85rem; }
         .cart-dropdown .empty-cart { text-align: center; padding: 15px; color: #565959; font-size: 0.9rem; }
-        
         .categories { display: flex; gap: 8px; padding: 15px 30px; overflow-x: auto; background: white; border-bottom: 1px solid #eee; flex-wrap: wrap; }
         .cat-btn { padding: 8px 16px; border: 2px solid #667eea; border-radius: 20px; background: white; color: #667eea; cursor: pointer; white-space: nowrap; font-size: 13px; transition: all 0.3s; }
         .cat-btn:hover, .cat-btn.active { background: #667eea; color: white; }
@@ -38,7 +35,6 @@
         .stat { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .stat .value { font-size: 24px; font-weight: bold; color: #667eea; }
         .stat .label { font-size: 12px; color: #666; }
-        
         .flash-section { margin-bottom: 30px; }
         .flash-section h2 { color: #e17055; margin-bottom: 15px; }
         .flash-sale-card { position: relative; border: 2px solid #e17055 !important; }
@@ -46,7 +42,6 @@
         .flash-timer { color: #e17055; font-weight: 600; font-size: 0.85rem; }
         .flash-progress { background: #e8ecf1; border-radius: 10px; height: 6px; margin-top: 8px; overflow: hidden; }
         .flash-progress-fill { background: #e17055; height: 100%; border-radius: 10px; }
-        
         .featured-section { margin-bottom: 30px; }
         .featured-section h2 { margin-bottom: 15px; color: #ff6b6b; }
         .featured-badge { background: #ff6b6b; color: white; padding: 3px 10px; border-radius: 10px; display: inline-block; margin-bottom: 10px; font-size: 12px; font-weight: bold; }
@@ -84,7 +79,6 @@
             <button onclick="searchProducts()">Search</button>
             <button onclick="clearSearch()" style="background:#666;">✕</button>
         </div>
-        <!-- Cart Dropdown -->
         <div class="cart-nav" onclick="toggleCartDropdown()">
             <span class="cart-icon">🛒</span>
             <span class="cart-count" id="navCartCount">0</span>
@@ -108,19 +102,16 @@
             <h2>⚡ Flash Sales</h2>
             <div class="products-grid" id="flashProducts"></div>
         </div>
-
         <div class="featured-section" id="featuredSection" style="display:none;">
             <h2>⭐ Featured Products</h2>
             <div class="products-grid" id="featuredProducts"></div>
         </div>
-
         <div class="stats">
             <div class="stat"><div class="value" id="totalCount">0</div><div class="label">Total Products</div></div>
             <div class="stat"><div class="value" id="shownCount">0</div><div class="label">Showing</div></div>
             <div class="stat"><div class="value" id="minPrice">0</div><div class="label">Min Price (XAF)</div></div>
             <div class="stat"><div class="value" id="maxPrice">0</div><div class="label">Max Price (XAF)</div></div>
         </div>
-        
         <h2 style="margin-bottom:15px;">📦 All Products</h2>
         <div class="products-grid" id="products">
             <div class="no-results"><p>Loading products...</p></div>
@@ -135,52 +126,34 @@
     <script>
         let allProducts=[],currentFilter='all';
         const categoryEmojis={'Smartphones & Tablets':'📱','Laptops & Computers':'💻','Electronics & Audio':'🎧','Home Appliances':'🏠','Fashion & Clothing':'👗','Food & Essentials':'🍚','Transportation':'🏍️','Accessories':'⌚','Sports and Fitness':'⚽','Books and Stationery':'📚','Jewelry and Watches':'💍','Toys and Games':'🎮','Pet Supplies':'🐾','Beauty and Personal Care':'💄','Baby and Kids':'👶','Health and Medical':'🏥','Agriculture and Farming':'🌾','Building and Construction':'🏗️','Auto and Spare Parts':'🔧','Services and Repairs':'🛠️'};
+        const getToken=()=>localStorage.getItem('token')||sessionStorage.getItem('token');
         function getProductImage(p){if(p.imageUrls&&p.imageUrls.length>0)return'<img src="'+p.imageUrls[0]+'" alt="'+p.name+'">';return'<span class="emoji">'+(categoryEmojis[p.categoryName]||'📦')+'</span>';}
         
-        // Cart Dropdown
-        var cartToken = localStorage.getItem('token') || sessionStorage.getItem('token');
-        function toggleCartDropdown() {
-            var dd = document.getElementById('cartDropdown');
-            dd.classList.toggle('show');
-            if (dd.classList.contains('show')) loadCartDropdown();
-        }
-        async function loadCartDropdown() {
-            if (!cartToken) { document.getElementById('cartDropdownContent').innerHTML = '<div class="empty-cart"><a href="/dashboard" style="color:#2563eb;">Login to view cart</a></div>'; return; }
-            try {
-                var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + cartToken } });
-                var d = await r.json();
-                if (d.success && d.data && d.data.items && d.data.items.length > 0) {
-                    var html = '';
-                    for (var i = 0; i < d.data.items.length; i++) {
-                        var item = d.data.items[i];
-                        html += '<div class="cart-item"><span>' + item.productName + ' x' + item.quantity + '</span><span>' + item.effectivePrice.toLocaleString() + ' XAF</span></div>';
-                    }
-                    html += '<div class="cart-total">Total: ' + d.data.total.toLocaleString() + ' XAF</div>';
-                    html += '<a href="/cart" class="btn-checkout">⚡ Buy Now</a>';
-                    html += '<a href="/cart" class="btn-view-cart">View Full Cart</a>';
-                    document.getElementById('cartDropdownContent').innerHTML = html;
-                    document.getElementById('navCartCount').textContent = d.data.items.length;
-                } else {
-                    document.getElementById('cartDropdownContent').innerHTML = '<div class="empty-cart">Your cart is empty</div>';
-                    document.getElementById('navCartCount').textContent = '0';
-                }
-            } catch(e) {}
-        }
+        function toggleCartDropdown(){var dd=document.getElementById('cartDropdown');dd.classList.toggle('show');if(dd.classList.contains('show'))loadCartDropdown();}
+        async function loadCartDropdown(){var token=getToken();var cc=document.getElementById('cartDropdownContent');if(!token){cc.innerHTML='<div class="empty-cart"><a href="/dashboard" style="color:#2563eb;">Login to view cart</a></div>';return;}try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success&&d.data&&d.data.items&&d.data.items.length>0){var html='';for(var i=0;i<d.data.items.length;i++){var item=d.data.items[i];html+='<div class="cart-item"><span>'+item.productName+' x'+item.quantity+'</span><span>'+item.effectivePrice.toLocaleString()+' XAF</span></div>';}html+='<div class="cart-total">Total: '+d.data.total.toLocaleString()+' XAF</div>';html+='<a href="/cart" class="btn-checkout">⚡ Buy Now</a>';html+='<a href="/cart" class="btn-view-cart">View Full Cart</a>';cc.innerHTML=html;document.getElementById('navCartCount').textContent=d.data.items.length;}else{cc.innerHTML='<div class="empty-cart">Your cart is empty</div>';document.getElementById('navCartCount').textContent='0';}}catch(e){console.error('Cart Error:',e);}}
         
-        async function loadFlashSales(){try{var r=await fetch('/api/flash-sales/active');var d=await r.json();if(d.success&&d.data&&d.data.length>0){document.getElementById('flashSection').style.display='block';document.getElementById('flashProducts').innerHTML=d.data.map(function(s){return'<div class="product-card flash-sale-card" onclick="window.location.href=\'/product?id='+s.productId+'\'"><div class="flash-badge">⚡ -'+s.discountPercent+'%</div><div class="product-image"><span class="emoji">🔥</span></div><div class="product-info"><div class="product-name">'+s.productName+'</div><div class="product-price"><span class="original">'+s.originalPrice.toLocaleString()+' XAF</span> '+s.flashPrice.toLocaleString()+' XAF</div><div class="flash-timer">⏰ '+s.timeLeft+'</div><div class="flash-progress"><div class="flash-progress-fill" style="width:'+s.soldPercent+'%"></div></div><div style="font-size:0.75rem;color:#565959;">'+s.soldCount+' sold / '+s.remainingStock+' left</div></div></div>';}).join('');}}catch(e){}}
-        async function loadReviews(products){for(let p of products){try{const r=await fetch('/api/reviews/product/'+p.id);const d=await r.json();if(d.success&&d.data&&d.data.stats){p.rating=d.data.stats.averageRating;p.reviews=d.data.stats.totalReviews;}}catch(e){p.rating=0;p.reviews=0;}}displayProducts(products);}
-        async function loadFeatured(){try{const r=await fetch('/api/featured');const d=await r.json();if(d.success&&d.data&&d.data.length>0){document.getElementById('featuredSection').style.display='block';document.getElementById('featuredProducts').innerHTML=d.data.map(p=>'<div class="product-card featured" onclick="window.location.href=\'/product?id='+p.id+'\'"><div class="featured-badge">⭐ FEATURED</div><button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist('+p.id+',this)">🤍</button><div class="product-image">'+getProductImage(p)+'</div><div class="product-info"><div class="product-category">'+(p.categoryName||'')+'</div><div class="product-name">'+p.name+'</div><div class="product-price">'+(p.discountedPrice?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+(p.discountedPrice||p.price).toLocaleString()+' XAF'+(p.discountedPrice?'<span class="discount">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+p.stockQuantity+' in stock</div></div></div>').join('');}}catch(e){}}
-        async function loadProducts(){try{const[pr,cr]=await Promise.all([fetch('/api/products?page=0&size=200'),fetch('/api/categories')]);const pd=await pr.json();const cd=await cr.json();if(pd.success&&pd.data){allProducts=pd.data;updateStats(allProducts);loadReviews(allProducts);}if(cd.success&&cd.data){const c=document.getElementById('categoryFilters');cd.data.forEach(cat=>{const b=document.createElement('button');b.className='cat-btn';b.textContent=(categoryEmojis[cat.nameEn]||'📁')+' '+cat.nameEn;b.onclick=()=>filterByCategory(cat.id,b);c.appendChild(b);});}}catch(e){document.getElementById('products').innerHTML='<div class="no-results"><p>Failed to load</p></div>';}}
-        function displayProducts(products){document.getElementById('shownCount').textContent=products.length;if(products.length===0){document.getElementById('products').innerHTML='<div class="no-results"><p>No products found</p></div>';return;}document.getElementById('products').innerHTML=products.map(p=>{const s='⭐'.repeat(Math.round(p.rating||0));return'<div class="product-card" onclick="window.location.href=\'/product?id='+p.id+'\'"><button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist('+p.id+',this)">🤍</button><div class="product-image">'+getProductImage(p)+'</div><div class="product-info"><div class="product-category">'+(p.categoryName||'')+'</div><div class="product-name">'+p.name+'</div><div class="product-reviews">'+s+' <span>('+(p.reviews||0)+' reviews)</span></div><div class="product-price">'+(p.discountedPrice?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+(p.discountedPrice||p.price).toLocaleString()+' XAF'+(p.discountedPrice?'<span class="discount">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+p.stockQuantity+' in stock</div><div class="product-condition">🏷️ '+(p.condition||'NEW')+'</div></div></div>';}).join('');}
-        function updateStats(products){document.getElementById('totalCount').textContent=allProducts.length;document.getElementById('shownCount').textContent=products.length;const prices=products.map(p=>p.discountedPrice||p.price).filter(p=>p>0);if(prices.length>0){document.getElementById('minPrice').textContent=Math.min(...prices).toLocaleString();document.getElementById('maxPrice').textContent=Math.max(...prices).toLocaleString();}}
-        function filterByCategory(cid,btn){currentFilter=cid;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');let f=cid==='all'?allProducts:allProducts.filter(p=>p.categoryId==cid);updateStats(f);displayProducts(f);}
-        function searchProducts(){const q=document.getElementById('searchInput').value.toLowerCase().trim();if(!q){filterByCategory('all',document.querySelector('.cat-btn'));return;}const f=allProducts.filter(p=>p.name.toLowerCase().includes(q)||(p.description&&p.description.toLowerCase().includes(q))||(p.categoryName&&p.categoryName.toLowerCase().includes(q)));document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));updateStats(f);displayProducts(f);}
+        async function addToCart(id){var t=getToken();if(!t){alert('Please login first.');return;}try{var r=await fetch('/api/cart/add/'+id+'?quantity=1',{method:'POST',headers:{'Authorization':'Bearer '+t}});var d=await r.json();if(d.success){loadCartDropdown();alert('✅ Added to cart!');}else{alert(d.message||'Failed');}}catch(e){alert('Network error');}}
+        
+        async function loadFlashSales(){try{var r=await fetch('/api/flash-sales/active');var d=await r.json();if(d.success&&d.data&&d.data.length>0){document.getElementById('flashSection').style.display='block';document.getElementById('flashProducts').innerHTML=d.data.map(function(s){return'<div class="product-card flash-sale-card" onclick="window.location.href=\'/product?id='+s.productId+'\'"><div class="flash-badge">⚡ -'+s.discountPercent+'%</div><div class="product-image"><span class="emoji">🔥</span></div><div class="product-info"><div class="product-name">'+s.productName+'</div><div class="product-price"><span class="original">'+s.originalPrice.toLocaleString()+' XAF</span> '+s.flashPrice.toLocaleString()+' XAF</div><div class="flash-timer">⏰ '+s.timeLeft+'</div><div class="flash-progress"><div class="flash-progress-fill" style="width:'+s.soldPercent+'%"></div></div><div style="font-size:0.75rem;color:#565959;">'+s.soldCount+' sold / '+s.remainingStock+' left</div></div></div>';}).join('');}else{document.getElementById('flashSection').style.display='none';}}catch(e){}}
+        async function loadFeatured(){try{var r=await fetch('/api/featured');var d=await r.json();if(d.success&&d.data&&d.data.length>0){document.getElementById('featuredSection').style.display='block';document.getElementById('featuredProducts').innerHTML=d.data.map(p=>'<div class="product-card featured" onclick="window.location.href=\'/product?id='+p.id+'\'"><div class="featured-badge">⭐ FEATURED</div><button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist('+p.id+',this)">🤍</button><div class="product-image">'+getProductImage(p)+'</div><div class="product-info"><div class="product-category">'+(p.categoryName||'')+'</div><div class="product-name">'+p.name+'</div><div class="product-price">'+(p.discountedPrice?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+(p.discountedPrice||p.price).toLocaleString()+' XAF'+(p.discountedPrice?'<span class="discount">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+p.stockQuantity+' in stock</div></div></div>').join('');}else{document.getElementById('featuredSection').style.display='none';}}catch(e){}}
+        
+        async function loadProducts(){try{var[pr,cr]=await Promise.all([fetch('/api/products?page=0&size=200'),fetch('/api/categories')]);var pd=await pr.json();var cd=await cr.json();if(pd.success&&pd.data){allProducts=pd.data;updateStats(allProducts);displayProducts(allProducts);loadReviews(allProducts);}if(cd.success&&cd.data){var container=document.getElementById('categoryFilters');cd.data.forEach(function(cat){var b=document.createElement('button');b.className='cat-btn';var name=cat.nameEn||cat.name;b.textContent=(categoryEmojis[name]||'📁')+' '+name;b.onclick=function(){filterByCategory(cat.id,b);};container.appendChild(b);});}}catch(e){document.getElementById('products').innerHTML='<div class="no-results"><p>Failed to load</p></div>';}}
+        
+        async function loadReviews(products){for(var i=0;i<products.length;i++){try{var r=await fetch('/api/reviews/product/'+products[i].id);var d=await r.json();if(d.success&&d.data&&d.data.stats){products[i].rating=d.data.stats.averageRating;products[i].reviews=d.data.stats.totalReviews;}}catch(e){products[i].rating=0;products[i].reviews=0;}}displayProducts(products);}
+        
+        function displayProducts(products){document.getElementById('shownCount').textContent=products.length;if(products.length===0){document.getElementById('products').innerHTML='<div class="no-results"><p>No products found</p></div>';return;}document.getElementById('products').innerHTML=products.map(function(p){var s='⭐'.repeat(Math.round(p.rating||0));var rc=p.reviews||0;return'<div class="product-card" onclick="window.location.href=\'/product?id='+p.id+'\'"><button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist('+p.id+',this)">🤍</button><div class="product-image">'+getProductImage(p)+'</div><div class="product-info"><div class="product-category">'+(p.categoryName||'')+'</div><div class="product-name">'+p.name+'</div><div class="product-reviews">'+s+' <span>('+rc+' reviews)</span></div><div class="product-price">'+(p.discountedPrice?'<span class="original">'+p.price.toLocaleString()+' XAF</span>':'')+(p.discountedPrice||p.price).toLocaleString()+' XAF'+(p.discountedPrice?'<span class="discount">-'+Math.round((1-p.discountedPrice/p.price)*100)+'%</span>':'')+'</div><div class="product-stock">✅ '+p.stockQuantity+' in stock</div><div class="product-condition">🏷️ '+(p.condition||'NEW')+'</div></div></div>';}).join('');}
+        
+        function updateStats(products){document.getElementById('totalCount').textContent=allProducts.length;document.getElementById('shownCount').textContent=products.length;var prices=products.map(function(p){return p.discountedPrice||p.price;}).filter(function(p){return p>0;});document.getElementById('minPrice').textContent=prices.length?Math.min.apply(null,prices).toLocaleString():'0';document.getElementById('maxPrice').textContent=prices.length?Math.max.apply(null,prices).toLocaleString():'0';}
+        
+        function filterByCategory(cid,btn){currentFilter=cid;document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');var f=cid==='all'?allProducts:allProducts.filter(function(p){return p.categoryId==cid;});updateStats(f);displayProducts(f);}
+        function searchProducts(){var q=document.getElementById('searchInput').value.toLowerCase().trim();if(!q){filterByCategory('all',document.querySelector('.cat-btn'));return;}var f=allProducts.filter(function(p){return p.name.toLowerCase().includes(q)||(p.description&&p.description.toLowerCase().includes(q))||(p.categoryName&&p.categoryName.toLowerCase().includes(q));});document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.remove('active');});updateStats(f);displayProducts(f);}
         function clearSearch(){document.getElementById('searchInput').value='';filterByCategory('all',document.querySelector('.cat-btn'));}
-        async function toggleWishlist(pid,he){const token=localStorage.getItem('token')||sessionStorage.getItem('token');if(!token){alert('Please login first.');return;}const iw=he.classList.contains('wishlisted');try{const r=await fetch('/api/wishlist/'+(iw?'remove/':'add/')+pid,{method:iw?'DELETE':'POST',headers:{'Authorization':'Bearer '+token}});const d=await r.json();if(d.success){he.classList.toggle('wishlisted');he.innerHTML=iw?'🤍':'❤️';}}catch(e){}}
-        (async function(){const token=localStorage.getItem('token')||sessionStorage.getItem('token');if(token){try{const r=await fetch('/api/premium/my-status',{headers:{'Authorization':'Bearer '+token}});const d=await r.json();if(d.success&&d.data&&d.data.isPremium)document.getElementById('premiumBadge').style.display='inline-block';}catch(e){}}})();
+        async function toggleWishlist(pid,he){var token=getToken();if(!token){alert('Please login first.');return;}var iw=he.classList.contains('wishlisted');try{var r=await fetch('/api/wishlist/'+(iw?'remove/':'add/')+pid,{method:iw?'DELETE':'POST',headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success){he.classList.toggle('wishlisted');he.innerHTML=iw?'🤍':'❤️';}}catch(e){}}
+        
+        (async function(){var token=getToken();if(token){try{var r=await fetch('/api/premium/my-status',{headers:{'Authorization':'Bearer '+token}});var d=await r.json();if(d.success&&d.data&&d.data.isPremium)document.getElementById('premiumBadge').style.display='inline-block';}catch(e){}}})();
+        
         loadFlashSales();loadFeatured();loadProducts();
-        // Close cart dropdown when clicking outside
-        document.addEventListener('click', function(e) { if (!e.target.closest('.cart-nav')) { document.getElementById('cartDropdown').classList.remove('show'); } });
+        document.addEventListener('click',function(e){if(!e.target.closest('.cart-nav')){document.getElementById('cartDropdown').classList.remove('show');}});
     </script>
 </body>
 </html>
