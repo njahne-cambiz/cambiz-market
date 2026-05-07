@@ -79,7 +79,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/admin/expire-featured").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/admin/expire-premium").permitAll()
 
-                // Database migration - temporary public access
+                // Database migration - public
                 .requestMatchers("/api/admin/db/**").permitAll()
 
                 // Featured products - public to view
@@ -112,6 +112,7 @@ public class SecurityConfig {
                 .requestMatchers("/create-flash-sale").permitAll()
                 .requestMatchers("/create-coupon").permitAll()
                 .requestMatchers("/transactions").permitAll()
+                .requestMatchers("/admin").hasRole("ADMIN")
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 

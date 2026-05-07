@@ -60,4 +60,7 @@ public class StoreController {
 
     @GetMapping("/transactions")
     public String transactions() { return "transactions"; }
+
+    @GetMapping("/admin")
+    public String admin() { return "admin"; }
 }

@@ -45,6 +45,10 @@ public class TransactionService {
                 sellerId, PageRequest.of(page, size));
     }
 
+    public List<Transaction> getAllTransactions() {
+        return transactionRepository.findAll();
+    }
+
     public Map<String, Object> getSellerStats(Long sellerId) {
         Page<Transaction> allTxns = transactionRepository.findBySellerIdOrderByCreatedAtDesc(
                 sellerId, PageRequest.of(0, 1000));

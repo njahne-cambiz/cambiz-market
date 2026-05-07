@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #eaeded; min-height: 100vh; }
+        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header .logo span { color: #febd69; }
+        .header .admin-badge { background: #d00; color: white; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 12px; padding: 1.4rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .stat-card .value { font-size: 1.8rem; font-weight: 800; color: #131921; }
+        .stat-card .label { color: #565959; font-size: 0.75rem; margin-top: 0.3rem; font-weight: 500; }
+        .section-title { font-size: 1.2rem; font-weight: 700; color: #0f1111; margin-bottom: 1rem; }
+        .card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 10px; text-align: left; font-size: 0.75rem; color: #565959; text-transform: uppercase; }
+        td { padding: 10px; border-bottom: 1px solid #e8ecf1; font-size: 0.85rem; }
+        tr:hover { background: #f8fafc; }
+        .badge { padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+        .badge-SELLER { background: #d1ecf1; color: #0c5460; }
+        .badge-BUYER { background: #d4edda; color: #155724; }
+        .badge-ADMIN { background: #f8d7da; color: #721c24; }
+        .badge-ACTIVE { background: #d4edda; color: #155724; }
+        .badge-SUSPENDED { background: #f8d7da; color: #721c24; }
+        .btn-sm { padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-suspend { background: #d00; color: white; }
+        .btn-activate { background: #10b981; color: white; }
+        .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
+        .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1rem; display: inline-block; font-weight: 600; }
+        @media(max-width:768px){.stats-grid{grid-template-columns:repeat(3,1fr);}}
+        @media(max-width:500px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+        <span class="admin-badge">🔒 ADMIN</span>
+    </header>
+    <div class="container">
+        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+        <h1 style="margin-bottom:1.5rem;color:#0f1111;">🛡️ Admin Dashboard</h1>
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card"><div class="value">-</div><div class="label">Total Users</div></div>
+            <div class="stat-card"><div class="value">-</div><div class="label">Sellers</div></div>
+            <div class="stat-card"><div class="value">-</div><div class="label">Buyers</div></div>
+            <div class="stat-card"><div class="value">-</div><div class="label">Premium</div></div>
+            <div class="stat-card"><div class="value">-</div><div class="label">Products</div></div>
+            <div class="stat-card"><div class="value">-</div><div class="label">Orders</div></div>
+        </div>
+        
+        <div class="card">
+            <div class="section-title">👥 Users</div>
+            <div style="overflow-x:auto;">
+                <table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="userTable"><tr><td colspan="6" style="text-align:center;color:#565959;">Loading...</td></tr></tbody></table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="section-title">📦 Recent Orders</div>
+            <div style="overflow-x:auto;">
+                <table><thead><tr><th>Order #</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody id="orderTable"><tr><td colspan="4" style="text-align:center;color:#565959;">Loading...</td></tr></tbody></table>
+            </div>
+        </div>
+        
+        <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
+    </div>
+    <script>
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) { window.location.href = '/dashboard'; }
+        
+        async function loadData() {
+            try {
+                var [statsRes, usersRes, ordersRes] = await Promise.all([
+                    fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } }),
+                    fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } }),
+                    fetch('/api/admin/orders', { headers: { 'Authorization': 'Bearer ' + token } })
+                ]);
+                var stats = await statsRes.json();
+                var users = await usersRes.json();
+                var orders = await ordersRes.json();
+                
+                if (stats.success && stats.data) {
+                    var s = stats.data;
+                    document.getElementById('statsGrid').innerHTML =
+                        '<div class="stat-card"><div class="value">' + (s.totalUsers || 0) + '</div><div class="label">Total Users</div></div>' +
+                        '<div class="stat-card"><div class="value">' + (s.totalSellers || 0) + '</div><div class="label">Sellers</div></div>' +
+                        '<div class="stat-card"><div class="value">' + (s.totalBuyers || 0) + '</div><div class="label">Buyers</div></div>' +
+                        '<div class="stat-card"><div class="value">' + (s.premiumSellers || 0) + '</div><div class="label">Premium</div></div>' +
+                        '<div class="stat-card"><div class="value">' + (s.totalProducts || 0) + '</div><div class="label">Products</div></div>' +
+                        '<div class="stat-card"><div class="value">' + (s.totalOrders || 0) + '</div><div class="label">Orders</div></div>';
+                }
+                
+                if (users.success && users.data) {
+                    var html = '';
+                    for (var i = 0; i < users.data.length; i++) {
+                        var u = users.data[i];
+                        html += '<tr><td>' + u.id + '</td><td>' + (u.firstName || '') + ' ' + (u.lastName || '') + '</td><td>' + u.email + '</td>' +
+                            '<td><span class="badge badge-' + u.userType + '">' + u.userType + (u.accountType === 'PREMIUM' ? ' ⭐' : '') + '</span></td>' +
+                            '<td><span class="badge badge-' + u.status + '">' + u.status + '</span></td>' +
+                            '<td>' + (u.status === 'ACTIVE' ? '<button class="btn-sm btn-suspend" onclick="updateUserStatus(' + u.id + ',\'SUSPENDED\')">Suspend</button>' : '<button class="btn-sm btn-activate" onclick="updateUserStatus(' + u.id + ',\'ACTIVE\')">Activate</button>') + '</td></tr>';
+                    }
+                    document.getElementById('userTable').innerHTML = html;
+                }
+                
+                if (orders.success && orders.data) {
+                    var ohtml = '';
+                    for (var j = 0; j < Math.min(orders.data.length, 10); j++) {
+                        var o = orders.data[j];
+                        ohtml += '<tr><td>' + o.orderNumber + '</td><td>' + o.totalAmount.toLocaleString() + ' XAF</td><td>' + o.status + '</td><td>' + new Date(o.createdAt).toLocaleDateString() + '</td></tr>';
+                    }
+                    document.getElementById('orderTable').innerHTML = ohtml || '<tr><td colspan="4" style="text-align:center;">No orders</td></tr>';
+                }
+            } catch(e) {}
+        }
+        
+        async function updateUserStatus(userId, status) {
+            try {
+                var r = await fetch('/api/admin/users/' + userId + '/status?status=' + status, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                if (d.success) { alert('✅ User ' + status); loadData(); }
+                else { alert('❌ ' + d.message); }
+            } catch(e) { alert('Network error'); }
+        }
+        
+        loadData();
+    </script>
+</body>
+</html>
