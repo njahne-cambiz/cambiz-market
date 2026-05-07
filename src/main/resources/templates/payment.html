@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment | CamBiz Market</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #eaeded; min-height: 100vh; }
+        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .header .logo { font-size: 1.4rem; font-weight: 700; color: white; text-decoration: none; }
+        .header .logo span { color: #febd69; }
+        .container { max-width: 550px; margin: 2rem auto; padding: 0 1.5rem; }
+        .card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .card h1 { color: #0f1111; margin-bottom: 0.5rem; font-size: 1.5rem; }
+        .card .order-info { background: #fefaf3; border: 1px solid #febd69; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .card .order-info .total { font-size: 1.5rem; font-weight: 700; color: #0f1111; }
+        .payment-options { display: grid; gap: 12px; margin: 20px 0; }
+        .payment-option { padding: 18px; border: 2px solid #e8ecf1; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.2s; }
+        .payment-option:hover { border-color: #febd69; background: #fefaf3; }
+        .payment-option.selected { border-color: #febd69; background: #fefaf3; }
+        .payment-option .icon { font-size: 2rem; }
+        .payment-option .name { font-weight: 700; color: #0f1111; }
+        .payment-option .desc { font-size: 0.8rem; color: #565959; }
+        .form-group { margin: 15px 0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #0f1111; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #d5d9d9; border-radius: 6px; font-size: 15px; }
+        .form-group .hint { font-size: 0.75rem; color: #565959; margin-top: 4px; }
+        .btn { padding: 14px 28px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; width: 100%; }
+        .btn-pay { background: #ffd814; color: #0f1111; }
+        .btn-pay:hover { background: #f7ca00; }
+        .btn-pay:disabled { background: #d5d9d9; cursor: not-allowed; }
+        .message { margin-top: 15px; padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; display: none; }
+        .message.success { background: #d4edda; color: #155724; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; display: block; }
+        .message.info { background: #d1ecf1; color: #0c5460; display: block; }
+        .step-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; color: #565959; font-size: 0.85rem; }
+        .step-indicator .active { color: #febd69; font-weight: 700; }
+        .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1rem; display: inline-block; font-weight: 600; }
+        .footer { text-align: center; padding: 2rem; color: #b2bec3; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+        <a href="/dashboard" style="color:white;text-decoration:none;">Dashboard</a>
+    </header>
+    <main class="container">
+        <a href="/cart" class="back-btn">← Back to Cart</a>
+        <div class="card">
+            <div class="step-indicator">
+                <span>🛒 Cart</span> <span>→</span> <span class="active">💳 Payment</span> <span>→</span> <span>✅ Confirmed</span>
+            </div>
+            <h1>💳 Complete Payment</h1>
+            
+            <div class="order-info">
+                <p style="color:#565959;">Order Total</p>
+                <div class="total" id="orderTotal">0 XAF</div>
+                <p style="font-size:0.8rem; color:#565959; margin-top:5px;">Order #<span id="orderNumber">---</span></p>
+            </div>
+
+            <div class="payment-options">
+                <div class="payment-option" data-method="MTN_MONEY" onclick="selectPayment('MTN_MONEY', this)">
+                    <div class="icon">📱</div>
+                    <div><div class="name">MTN Mobile Money</div><div class="desc">Pay with MTN Momo</div></div>
+                </div>
+                <div class="payment-option" data-method="ORANGE_MONEY" onclick="selectPayment('ORANGE_MONEY', this)">
+                    <div class="icon">🍊</div>
+                    <div><div class="name">Orange Money</div><div class="desc">Pay with Orange Money</div></div>
+                </div>
+            </div>
+
+            <div class="form-group" id="phoneGroup" style="display:none;">
+                <label id="phoneLabel">Phone Number</label>
+                <input type="tel" id="phoneNumber" placeholder="e.g. 677105536" maxlength="9">
+                <div class="hint">Cameroon number — 9 digits starting with 6</div>
+            </div>
+
+            <button class="btn btn-pay" id="payBtn" onclick="processPayment()" disabled>💳 Pay Now</button>
+            <div id="message" class="message"></div>
+        </div>
+        <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
+    </main>
+    <script>
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        var selectedMethod = null;
+        var orderData = JSON.parse(localStorage.getItem('lastOrder') || '{}');
+        
+        if (!token) { window.location.href = '/dashboard'; }
+        
+        // Safety net: No order data = redirect to cart
+        if (!orderData.orderId) {
+            window.location.href = '/cart';
+        }
+        
+        if (orderData.orderId) {
+            document.getElementById('orderTotal').textContent = (orderData.totalAmount || 0).toLocaleString() + ' XAF';
+            document.getElementById('orderNumber').textContent = orderData.orderNumber || '---';
+        }
+
+        function selectPayment(method, el) {
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedMethod = method;
+            document.getElementById('phoneGroup').style.display = 'block';
+            document.getElementById('phoneLabel').textContent = method === 'MTN_MONEY' ? 'MTN Mobile Money Number' : 'Orange Money Number';
+            document.getElementById('payBtn').disabled = false;
+        }
+
+        async function processPayment() {
+            var phone = document.getElementById('phoneNumber').value.trim();
+            var btn = document.getElementById('payBtn');
+            var msg = document.getElementById('message');
+            
+            if (!selectedMethod) { msg.textContent = '❌ Please select a payment method.'; msg.className = 'message error'; return; }
+            if (!phone) { msg.textContent = '❌ Please enter your phone number.'; msg.className = 'message error'; return; }
+            
+            // Validate Cameroon phone number (9 digits, starts with 6)
+            if (!/^[6][25789][0-9]{7}$/.test(phone)) {
+                msg.textContent = '❌ Invalid Cameroon number. Must be 9 digits starting with 6 (e.g. 677105536).';
+                msg.className = 'message error';
+                return;
+            }
+            
+            btn.disabled = true; btn.textContent = '⏳ Processing...'; msg.className = 'message';
+            
+            try {
+                var r = await fetch('/api/payments/initiate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ orderId: orderData.orderId, paymentMethod: selectedMethod, phoneNumber: phone, amount: orderData.totalAmount })
+                });
+                var d = await r.json();
+                
+                if (d.success) {
+                    msg.textContent = '📲 Please check your phone for the PIN prompt to authorize the payment.';
+                    msg.className = 'message info';
+                    btn.textContent = '⏳ Awaiting PIN...';
+                    btn.style.background = '#2563eb';
+                    btn.style.color = 'white';
+                    
+                    // Check payment status after 5 seconds
+                    setTimeout(async function() {
+                        try {
+                            var statusRes = await fetch('/api/payments/status/' + orderData.orderId, {
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            });
+                            var statusData = await statusRes.json();
+                            if (statusData.success && statusData.data && statusData.data.status === 'SUCCESS') {
+                                msg.textContent = '✅ Payment confirmed! Redirecting to tracking...';
+                                msg.className = 'message success';
+                                btn.textContent = '✅ Paid!';
+                                btn.style.background = '#10b981';
+                                localStorage.removeItem('lastOrder');
+                                setTimeout(function() { window.location.href = '/order-tracking?id=' + orderData.orderId; }, 1500);
+                            } else {
+                                msg.textContent = '✅ Order placed! You can track it in your orders.';
+                                msg.className = 'message info';
+                                btn.textContent = '📋 Track Order';
+                                btn.onclick = function() { window.location.href = '/order-tracking?id=' + orderData.orderId; };
+                                localStorage.removeItem('lastOrder');
+                            }
+                        } catch(e) {}
+                    }, 5000);
+                    
+                } else {
+                    msg.textContent = '❌ ' + (d.message || 'Payment failed. Please try again.');
+                    msg.className = 'message error';
+                    btn.disabled = false; btn.textContent = '💳 Pay Now';
+                }
+            } catch(e) {
+                msg.textContent = '❌ Network error. Please try again.';
+                msg.className = 'message error';
+                btn.disabled = false; btn.textContent = '💳 Pay Now';
+            }
+        }
+    </script>
+</body>
+</html>

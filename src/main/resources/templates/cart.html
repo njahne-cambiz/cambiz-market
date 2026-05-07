@@ -15,7 +15,7 @@
         .back-btn { color: #2563eb; text-decoration: none; margin-bottom: 1rem; display: inline-block; font-weight: 600; }
         .cart-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
         .cart-card h1 { font-size: 1.5rem; color: #0f1111; margin-bottom: 1rem; }
-        .cart-item { display: grid; grid-template-columns: 80px 1fr 120px 80px 40px; gap: 15px; align-items: center; padding: 15px 0; border-bottom: 1px solid #e8ecf1; }
+        .cart-item { display: grid; grid-template-columns: 80px 1fr 120px 80px 40px; gap: 15px; align-items: center; padding: 15px 0; border-bottom: 1px solid #e8ecf1; transition: opacity 0.2s ease; }
         .cart-item-img { width: 80px; height: 80px; background: #f7f7f7; display: flex; align-items: center; justify-content: center; font-size: 2rem; border-radius: 4px; }
         .cart-item .name { font-weight: 600; color: #0f1111; }
         .cart-item .seller { font-size: 0.8rem; color: #565959; }
@@ -38,6 +38,7 @@
         .btn-buy:disabled { background: #d5d9d9; cursor: not-allowed; }
         .empty-cart { text-align: center; padding: 4rem 2rem; }
         .empty-cart .icon { font-size: 4rem; margin-bottom: 1rem; }
+        .empty-cart a { color: #2563eb; font-weight: 600; }
         .message { margin-top: 1rem; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
@@ -56,11 +57,13 @@
             <h1>🛒 Shopping Cart</h1>
             <div id="cartItems"></div>
             <div id="emptyCart" class="empty-cart"><div class="icon">🛒</div><h2>Your Cart is Empty</h2><p><a href="/store">Browse products</a></p></div>
+            
             <div class="coupon-section" id="couponSection" style="display:none;">
                 <input type="text" id="couponCode" placeholder="Enter coupon code" style="text-transform:uppercase;">
                 <button class="btn-coupon" onclick="applyCoupon()">Apply</button>
                 <span class="coupon-msg" id="couponMsg"></span>
             </div>
+            
             <div class="cart-summary" id="cartSummary" style="display:none;">
                 <p class="subtotal">Subtotal (<span id="itemCount">0</span> items): <span id="subtotalAmount">0 XAF</span></p>
                 <p class="discount-line" id="discountLine" style="display:none;">Coupon: -<span id="discountAmount">0</span> XAF</p>
@@ -71,73 +74,182 @@
         </div>
         <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
     </main>
+
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) { window.location.href = '/dashboard'; }
+
         var cartTotal = 0, appliedCoupon = null, cartProductIds = [];
-        
+
         async function loadCart() {
-            try { var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json();
+            try {
+                var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                
+                const emptyCartEl = document.getElementById('emptyCart');
+                const summaryEl = document.getElementById('cartSummary');
+                const couponSectionEl = document.getElementById('couponSection');
+
                 if (d.success && d.data && d.data.items && d.data.items.length > 0) {
-                    document.getElementById('emptyCart').style.display = 'none';
-                    document.getElementById('cartSummary').style.display = 'block';
-                    document.getElementById('couponSection').style.display = 'flex';
-                    var html = ''; cartTotal = d.data.total; cartProductIds = [];
-                    for (var i = 0; i < d.data.items.length; i++) { var item = d.data.items[i]; cartProductIds.push(item.productId);
-                        html += '<div class="cart-item"><div class="cart-item-img">📦</div><div><div class="name">' + item.productName + '</div><div class="seller">' + (item.sellerName || '') + '</div></div><div class="price">' + item.effectivePrice.toLocaleString() + ' XAF</div><div class="qty">x' + item.quantity + '</div><button class="remove-btn" onclick="removeItem(' + item.productId + ')">✕</button></div>'; }
-                    document.getElementById('cartItems').innerHTML = html; updateDisplay();
-                } else { document.getElementById('emptyCart').style.display = 'block'; document.getElementById('cartSummary').style.display = 'none'; document.getElementById('couponSection').style.display = 'none'; }
-            } catch(e) {}
+                    emptyCartEl.style.display = 'none';
+                    summaryEl.style.display = 'block';
+                    couponSectionEl.style.display = 'flex';
+                    
+                    cartTotal = d.data.total;
+                    cartProductIds = d.data.items.map(item => item.productId);
+                    
+                    var html = d.data.items.map(item => `
+                        <div class="cart-item" id="item-${item.productId}">
+                            <div class="cart-item-img">📦</div>
+                            <div>
+                                <div class="name">${item.productName}</div>
+                                <div class="seller">${item.sellerName || 'CamBiz Verified'}</div>
+                            </div>
+                            <div class="price">${item.effectivePrice.toLocaleString()} XAF</div>
+                            <div class="qty">x${item.quantity}</div>
+                            <button class="remove-btn" onclick="removeItem(${item.productId})">✕</button>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('cartItems').innerHTML = html;
+                    
+                    validateExistingCoupon();
+                    updateDisplay();
+                    if (!appliedCoupon) checkWelcomeCoupon();
+                } else {
+                    emptyCartEl.style.display = 'block';
+                    summaryEl.style.display = 'none';
+                    couponSectionEl.style.display = 'none';
+                }
+            } catch (e) { console.error("Load Cart Error:", e); }
         }
-        function updateDisplay() {
-            document.getElementById('itemCount').textContent = cartProductIds.length;
-            document.getElementById('subtotalAmount').textContent = cartTotal.toLocaleString() + ' XAF';
-            var finalTotal = cartTotal;
-            if (appliedCoupon) {
-                var discount = appliedCoupon.discountPercent ? (cartTotal * appliedCoupon.discountPercent / 100) : 0;
-                if (appliedCoupon.maxDiscount && discount > appliedCoupon.maxDiscount) discount = appliedCoupon.maxDiscount;
-                document.getElementById('discountLine').style.display = 'block';
-                document.getElementById('discountAmount').textContent = discount.toLocaleString();
-                finalTotal = cartTotal - discount;
-            } else { document.getElementById('discountLine').style.display = 'none'; }
-            document.getElementById('cartTotal').textContent = finalTotal.toLocaleString() + ' XAF';
-            document.getElementById('checkoutAmount').textContent = finalTotal.toLocaleString() + ' XAF';
-        }
+
         async function applyCoupon() {
             var code = document.getElementById('couponCode').value.trim().toUpperCase();
             var msgEl = document.getElementById('couponMsg');
-            if (!code) { msgEl.textContent = 'Enter a code'; msgEl.className = 'coupon-msg error'; return; }
+            if (!code) { showCouponMsg('Enter a code', 'error'); return; }
+            
             try {
                 var r = await fetch('/api/coupons/validate/' + code);
                 var d = await r.json();
                 if (d.success && d.data) {
-                    // Check product-specific and minimum order
                     var coupon = d.data;
                     if (coupon.productId && cartProductIds.indexOf(coupon.productId) === -1) {
-                        msgEl.textContent = '❌ This coupon is for a specific product not in your cart';
-                        msgEl.className = 'coupon-msg error'; return;
+                        showCouponMsg('❌ Coupon is for a specific product not in your cart', 'error');
+                        return;
                     }
                     if (coupon.minOrderAmount && cartTotal < coupon.minOrderAmount) {
-                        msgEl.textContent = '❌ Minimum order of ' + coupon.minOrderAmount.toLocaleString() + ' XAF required';
-                        msgEl.className = 'coupon-msg error'; return;
+                        showCouponMsg('❌ Minimum order of ' + coupon.minOrderAmount.toLocaleString() + ' XAF required', 'error');
+                        return;
                     }
                     appliedCoupon = coupon;
-                    msgEl.textContent = '✅ ' + coupon.discountPercent + '% off applied!';
-                    msgEl.className = 'coupon-msg success'; updateDisplay();
+                    showCouponMsg('✅ ' + coupon.discountPercent + '% off applied!', 'success');
+                    updateDisplay();
                 } else {
                     appliedCoupon = null;
-                    msgEl.textContent = '❌ ' + (d.message || 'Invalid coupon');
-                    msgEl.className = 'coupon-msg error'; updateDisplay();
+                    showCouponMsg('❌ ' + (d.message || 'Invalid coupon'), 'error');
+                    updateDisplay();
                 }
-            } catch(e) { msgEl.textContent = 'Error'; msgEl.className = 'coupon-msg error'; }
+            } catch (e) { showCouponMsg('Network Error', 'error'); }
         }
-        async function removeItem(pid) { try { var r = await fetch('/api/cart/remove/' + pid, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }); var d = await r.json(); if (d.success) loadCart(); } catch(e) {} }
-        async function checkout() { var btn = document.getElementById('checkoutBtn'); var msg = document.getElementById('message'); btn.disabled = true; btn.textContent = '⏳ Processing...'; msg.className = 'message';
-            try { var r = await fetch('/api/orders/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ paymentMethod: 'MTN_MONEY' }) }); var d = await r.json();
-                if (d.success) { msg.textContent = '✅ Order placed!'; msg.className = 'message success'; setTimeout(function() { window.location.href = '/order-tracking?id=' + d.data.orderId; }, 1500); }
-                else { msg.textContent = '❌ ' + (d.message || 'Failed'); msg.className = 'message error'; btn.disabled = false; } }
-            catch(e) { msg.textContent = '❌ Network error'; msg.className = 'message error'; btn.disabled = false; }
+
+        function validateExistingCoupon() {
+            if (!appliedCoupon) return;
+            if (appliedCoupon.minOrderAmount && cartTotal < appliedCoupon.minOrderAmount) {
+                appliedCoupon = null;
+                showCouponMsg('❌ Coupon removed: Minimum amount not met', 'error');
+            }
+            if (appliedCoupon.productId && !cartProductIds.includes(appliedCoupon.productId)) {
+                appliedCoupon = null;
+                showCouponMsg('❌ Coupon removed: Required product not in cart', 'error');
+            }
         }
+
+        function showCouponMsg(txt, type) {
+            var msgEl = document.getElementById('couponMsg');
+            msgEl.textContent = txt;
+            msgEl.className = 'coupon-msg ' + type;
+        }
+
+        async function checkWelcomeCoupon() {
+            try {
+                var r = await fetch('/api/coupons/my-welcome', { headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                if (d.success && d.data) {
+                    document.getElementById('couponCode').value = d.data.code;
+                    applyCoupon();
+                }
+            } catch (e) {}
+        }
+
+        function updateDisplay() {
+            document.getElementById('itemCount').textContent = cartProductIds.length;
+            document.getElementById('subtotalAmount').textContent = cartTotal.toLocaleString() + ' XAF';
+            
+            var discount = 0;
+            if (appliedCoupon) {
+                discount = appliedCoupon.discountPercent ? (cartTotal * appliedCoupon.discountPercent / 100) : 0;
+                if (appliedCoupon.maxDiscount && discount > appliedCoupon.maxDiscount) discount = appliedCoupon.maxDiscount;
+                
+                document.getElementById('discountLine').style.display = 'block';
+                document.getElementById('discountAmount').textContent = discount.toLocaleString();
+            } else {
+                document.getElementById('discountLine').style.display = 'none';
+            }
+            
+            var finalTotal = cartTotal - discount;
+            document.getElementById('cartTotal').textContent = finalTotal.toLocaleString() + ' XAF';
+            document.getElementById('checkoutAmount').textContent = finalTotal.toLocaleString() + ' XAF';
+        }
+
+        async function removeItem(pid) {
+            const el = document.getElementById('item-' + pid);
+            if (el) el.style.opacity = '0.5';
+
+            try {
+                var r = await fetch('/api/cart/remove/' + pid, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var d = await r.json();
+                if (d.success) loadCart();
+            } catch (e) { if(el) el.style.opacity = '1'; }
+        }
+
+        async function checkout() {
+            var btn = document.getElementById('checkoutBtn');
+            var msg = document.getElementById('message');
+            btn.disabled = true;
+            btn.textContent = '⏳ Creating Order...';
+            msg.className = 'message';
+            
+            try {
+                var r = await fetch('/api/orders/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ 
+                        paymentMethod: 'MTN_MONEY',
+                        couponCode: appliedCoupon ? appliedCoupon.code : null 
+                    })
+                });
+                var d = await r.json();
+                if (d.success) {
+                    localStorage.setItem('lastOrder', JSON.stringify(d.data));
+                    window.location.href = '/payment';
+                } else {
+                    msg.textContent = '❌ ' + (d.message || 'Checkout failed');
+                    msg.className = 'message error';
+                    btn.disabled = false;
+                    btn.textContent = '⚡ Buy Now — ' + document.getElementById('checkoutAmount').textContent;
+                }
+            } catch (e) {
+                msg.textContent = '❌ Connection Error';
+                msg.className = 'message error';
+                btn.disabled = false;
+                btn.textContent = '⚡ Buy Now — ' + document.getElementById('checkoutAmount').textContent;
+            }
+        }
+
         loadCart();
     </script>
 </body>

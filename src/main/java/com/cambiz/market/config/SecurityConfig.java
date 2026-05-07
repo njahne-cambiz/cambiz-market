@@ -104,6 +104,7 @@ public class SecurityConfig {
                 .requestMatchers("/wishlist").permitAll()
                 .requestMatchers("/orders").permitAll()
                 .requestMatchers("/cart").permitAll()
+                .requestMatchers("/payment").permitAll()
                 .requestMatchers("/upload-images").permitAll()
                 .requestMatchers("/create-product").permitAll()
                 .requestMatchers("/njangi").permitAll()
