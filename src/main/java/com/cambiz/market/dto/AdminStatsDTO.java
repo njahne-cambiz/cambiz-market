@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class AdminStatusDTO {
+public class AdminStatsDTO {
     private long totalUsers;
     private long totalSellers;
     private long totalBuyers;
