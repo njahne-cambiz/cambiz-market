@@ -112,7 +112,7 @@ public class SecurityConfig {
                 .requestMatchers("/create-flash-sale").permitAll()
                 .requestMatchers("/create-coupon").permitAll()
                 .requestMatchers("/transactions").permitAll()
-                .requestMatchers("/admin").authenticated()
+                .requestMatchers("/admin").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 
