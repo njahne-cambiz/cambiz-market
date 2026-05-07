@@ -96,4 +96,24 @@ public class DatabaseController {
         }
         return ResponseEntity.ok(Map.of("success", true, "results", results));
     }
+
+    @PostMapping("/create-orders-table")
+    public ResponseEntity<Map<String, Object>> createOrdersTable() {
+        List<String> results = new ArrayList<>();
+        try {
+            jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS persisted_orders (
+                    order_id BIGINT PRIMARY KEY,
+                    order_number VARCHAR(50) UNIQUE,
+                    order_data TEXT,
+                    status VARCHAR(20),
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            """);
+            results.add("persisted_orders table created");
+        } catch (Exception e) {
+            results.add("persisted_orders: " + e.getMessage());
+        }
+        return ResponseEntity.ok(Map.of("success", true, "results", results));
+    }
 }

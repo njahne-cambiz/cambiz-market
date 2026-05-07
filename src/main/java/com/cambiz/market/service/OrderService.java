@@ -3,6 +3,7 @@ package com.cambiz.market.service;
 import com.cambiz.market.dto.*;
 import com.cambiz.market.model.*;
 import com.cambiz.market.repository.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,11 @@ public class OrderService {
     
     @Autowired
     private TransactionService transactionService;
+    
+    @Autowired
+    private PersistedOrderRepository persistedOrderRepository;
+    
+    private final ObjectMapper objectMapper = new ObjectMapper();
     
     private final ConcurrentHashMap<Long, OrderResponse> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, String> orderPaymentStatus = new ConcurrentHashMap<>();
@@ -125,6 +131,16 @@ public class OrderService {
         orderStorage.put(orderId, orderResponse);
         orderPaymentStatus.put(orderId, "PENDING");
         
+        // Persist to database
+        try {
+            String orderJson = objectMapper.writeValueAsString(orderResponse);
+            PersistedOrder po = new PersistedOrder(orderId, orderNumber, orderJson, "PENDING", LocalDateTime.now());
+            persistedOrderRepository.save(po);
+            log.info("Order {} persisted to database", orderNumber);
+        } catch (Exception e) {
+            log.error("Failed to persist order {}: {}", orderNumber, e.getMessage());
+        }
+        
         // Record transactions for each seller order
         for (SellerOrderResponse so : sellerOrderResponses) {
             transactionService.createPurchaseTransaction(
@@ -140,12 +156,38 @@ public class OrderService {
     
     public List<OrderResponse> getBuyerOrders(Long buyerId) {
         log.debug("Fetching orders for buyer: {}", buyerId);
+        // First try in-memory, fall back to database
+        if (!orderStorage.isEmpty()) {
+            return new ArrayList<>(orderStorage.values());
+        }
+        // Load from database
+        List<PersistedOrder> pos = persistedOrderRepository.findAllByOrderByCreatedAtDesc();
+        for (PersistedOrder po : pos) {
+            try {
+                OrderResponse order = objectMapper.readValue(po.getOrderData(), OrderResponse.class);
+                orderStorage.putIfAbsent(po.getOrderId(), order);
+            } catch (Exception e) {
+                log.error("Failed to deserialize order {}: {}", po.getOrderId(), e.getMessage());
+            }
+        }
         return new ArrayList<>(orderStorage.values());
     }
     
     public OrderResponse getOrder(Long orderId, Long userId) {
         log.debug("User {} fetching order: {}", userId, orderId);
         OrderResponse order = orderStorage.get(orderId);
+        if (order == null) {
+            // Try database
+            PersistedOrder po = persistedOrderRepository.findByOrderId(orderId).orElse(null);
+            if (po != null) {
+                try {
+                    order = objectMapper.readValue(po.getOrderData(), OrderResponse.class);
+                    orderStorage.put(orderId, order);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to load order: " + orderId);
+                }
+            }
+        }
         if (order == null) {
             throw new RuntimeException("Order not found with ID: " + orderId);
         }
@@ -198,6 +240,20 @@ public class OrderService {
             .paymentMethod(order.getPaymentMethod()).sellerOrders(updatedSellerOrders)
             .createdAt(order.getCreatedAt()).build();
         orderStorage.put(orderId, updatedOrder);
+        
+        // Update persisted order
+        try {
+            PersistedOrder po = persistedOrderRepository.findByOrderId(orderId).orElse(null);
+            if (po != null) {
+                po.setStatus(newStatus);
+                String orderJson = objectMapper.writeValueAsString(updatedOrder);
+                po.setOrderData(orderJson);
+                persistedOrderRepository.save(po);
+            }
+        } catch (Exception e) {
+            log.error("Failed to update persisted order {}: {}", orderId, e.getMessage());
+        }
+        
         log.info("Order {} status updated to {}", orderId, newStatus);
     }
     
