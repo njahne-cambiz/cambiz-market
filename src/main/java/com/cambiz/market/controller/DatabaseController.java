@@ -3,6 +3,7 @@ package com.cambiz.market.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -13,6 +14,8 @@ public class DatabaseController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @GetMapping("/columns/{table}")
     public ResponseEntity<Map<String, Object>> getColumns(@PathVariable String table) {
@@ -115,5 +118,28 @@ public class DatabaseController {
             results.add("persisted_orders: " + e.getMessage());
         }
         return ResponseEntity.ok(Map.of("success", true, "results", results));
+    }
+
+    @PostMapping("/create-admin")
+    public ResponseEntity<Map<String, Object>> createAdmin() {
+        List<String> results = new ArrayList<>();
+        try {
+            Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM users WHERE email = 'admin@cambiz.cm'", Integer.class);
+            if (count != null && count > 0) {
+                results.add("Admin user already exists");
+            } else {
+                String encodedPassword = passwordEncoder.encode("Admin@123");
+                jdbcTemplate.update(
+                    "INSERT INTO users (email, phone, password, first_name, last_name, user_type, status, " +
+                    "account_type, commission_rate, wallet_balance, total_earned, referral_code, created_at, updated_at) " +
+                    "VALUES ('admin@cambiz.cm', '670000000', ?, 'Admin', 'User', 'ADMIN', 'ACTIVE', " +
+                    "'REGULAR', 0, 0, 0, 'ADMIN1', NOW(), NOW())", encodedPassword);
+                results.add("Admin user created: admin@cambiz.cm / Admin@123");
+            }
+            return ResponseEntity.ok(Map.of("success", true, "results", results));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 }
