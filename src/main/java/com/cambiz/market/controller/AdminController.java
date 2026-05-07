@@ -1,6 +1,6 @@
 package com.cambiz.market.controller;
 
-import com.cambiz.market.dto.AdminStatusDTO;
+import com.cambiz.market.dto.AdminStatsDTO;
 import com.cambiz.market.model.Transaction;
 import com.cambiz.market.model.TransactionType;
 import com.cambiz.market.model.User;
