@@ -11,11 +11,16 @@
         .register-card .logo { text-align: center; font-size: 2rem; margin-bottom: 0.5rem; }
         .register-card h1 { text-align: center; color: #2d3436; margin-bottom: 0.3rem; font-size: 1.5rem; }
         .register-card p { text-align: center; color: #636e72; margin-bottom: 1.5rem; font-size: 0.9rem; }
-        .form-group { margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1rem; position: relative; }
         .form-group label { display: block; margin-bottom: 0.3rem; color: #2d3436; font-weight: 600; font-size: 0.9rem; }
         .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 14px; transition: border-color 0.2s; }
         .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .form-group input.error { border-color: #d00 !important; background: #fff5f5; }
+        .form-group input.valid { border-color: #10b981 !important; background: #f5fff5; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .field-error { color: #d00; font-size: 0.75rem; margin-top: 3px; display: none; }
+        .field-error.show { display: block; }
+        .field-hint { color: #636e72; font-size: 0.75rem; margin-top: 3px; }
         .referral-box { background: #f0f0ff; border: 2px dashed #667eea; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; text-align: center; }
         .referral-box p { color: #667eea; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; }
         .referral-box input { border-color: #667eea !important; background: white; }
@@ -23,7 +28,6 @@
         .password-strength.weak { background: #d00; width: 25%; }
         .password-strength.medium { background: #f59e0b; width: 60%; }
         .password-strength.strong { background: #10b981; width: 100%; }
-        .password-hint { font-size: 0.75rem; color: #636e72; margin-top: 3px; }
         .btn-register { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
         .btn-register:hover { transform: translateY(-2px); }
         .btn-register:disabled { background: #b2bec3; cursor: not-allowed; transform: none; }
@@ -45,16 +49,33 @@
             <h1>Create Your Account</h1>
             <p>Join Cameroon's #1 Marketplace</p>
             <div class="form-row">
-                <div class="form-group"><label>First Name</label><input type="text" id="firstName" placeholder="John"></div>
-                <div class="form-group"><label>Last Name</label><input type="text" id="lastName" placeholder="Doe"></div>
+                <div class="form-group">
+                    <label>First Name *</label>
+                    <input type="text" id="firstName" placeholder="John" oninput="validateField('firstName')">
+                    <div class="field-error" id="firstNameError">First name is required</div>
+                </div>
+                <div class="form-group">
+                    <label>Last Name *</label>
+                    <input type="text" id="lastName" placeholder="Doe" oninput="validateField('lastName')">
+                    <div class="field-error" id="lastNameError">Last name is required</div>
+                </div>
             </div>
-            <div class="form-group"><label>Email Address</label><input type="email" id="email" placeholder="you@example.com"></div>
-            <div class="form-group"><label>Phone Number</label><input type="tel" id="phone" placeholder="+237 6XX XXX XXX"></div>
             <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="Min. 8 characters, letters + numbers" oninput="checkPasswordStrength()">
+                <label>Email Address *</label>
+                <input type="email" id="email" placeholder="you@example.com" oninput="validateField('email')">
+                <div class="field-error" id="emailError">Please enter a valid email address</div>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone" placeholder="e.g. 677105536" oninput="validateField('phone')">
+                <div class="field-hint">Cameroon number — 9 digits only</div>
+                <div class="field-error" id="phoneError">Phone must be exactly 9 digits</div>
+            </div>
+            <div class="form-group">
+                <label>Password *</label>
+                <input type="password" id="password" placeholder="Min. 8 chars, letters + numbers" oninput="validatePassword()">
                 <div class="password-strength" id="passwordStrength"></div>
-                <p class="password-hint" id="passwordHint">Must be at least 8 characters with letters and numbers</p>
+                <div class="field-error" id="passwordError">Password must be at least 8 characters with letters and numbers</div>
             </div>
             <div class="form-group">
                 <label>I want to</label>
@@ -64,8 +85,9 @@
                 </select>
             </div>
             <div class="form-group" id="businessNameGroup">
-                <label>Business/Shop Name</label>
-                <input type="text" id="businessName" placeholder="Your shop name (e.g. Musa Tech Store)">
+                <label>Business/Shop Name *</label>
+                <input type="text" id="businessName" placeholder="Your shop name" oninput="validateField('businessName')">
+                <div class="field-error" id="businessNameError">Business name is required for sellers</div>
             </div>
             <div class="referral-box">
                 <p>🎁 Got a referral code?</p>
@@ -77,67 +99,116 @@
         </div>
     </div>
     <script>
-        function toggleBusinessName() { document.getElementById('businessNameGroup').style.display = document.getElementById('userType').value === 'SELLER' ? 'block' : 'none'; }
+        function toggleBusinessName() {
+            var isSeller = document.getElementById('userType').value === 'SELLER';
+            document.getElementById('businessNameGroup').style.display = isSeller ? 'block' : 'none';
+            if (isSeller) document.getElementById('businessName').setAttribute('required', 'required');
+            else document.getElementById('businessName').removeAttribute('required');
+        }
         
-        function checkPasswordStrength() {
+        function validateField(fieldId) {
+            var input = document.getElementById(fieldId);
+            var error = document.getElementById(fieldId + 'Error');
+            var value = input.value.trim();
+            
+            if (fieldId === 'email') {
+                if (!value) { showError(input, error, 'Email is required'); return false; }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) { showError(input, error, 'Please enter a valid email'); return false; }
+            } else if (fieldId === 'firstName' || fieldId === 'lastName') {
+                if (!value) { showError(input, error, 'This field is required'); return false; }
+            } else if (fieldId === 'phone') {
+                if (value && !/^[0-9]{9}$/.test(value)) { showError(input, error, 'Phone must be exactly 9 digits'); return false; }
+            } else if (fieldId === 'businessName') {
+                if (document.getElementById('userType').value === 'SELLER' && !value) { showError(input, error, 'Business name is required for sellers'); return false; }
+            }
+            
+            clearError(input);
+            return true;
+        }
+        
+        function showError(input, errorEl, msg) {
+            input.classList.add('error');
+            input.classList.remove('valid');
+            errorEl.textContent = msg;
+            errorEl.classList.add('show');
+        }
+        
+        function clearError(input) {
+            input.classList.remove('error');
+            input.classList.add('valid');
+            var errorEl = document.getElementById(input.id + 'Error');
+            if (errorEl) errorEl.classList.remove('show');
+        }
+        
+        function validatePassword() {
             var pw = document.getElementById('password').value;
             var bar = document.getElementById('passwordStrength');
-            var hint = document.getElementById('passwordHint');
+            var err = document.getElementById('passwordError');
+            var input = document.getElementById('password');
             bar.className = 'password-strength';
-            if (pw.length >= 8 && /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw)) {
+            
+            if (pw.length === 0) {
+                err.classList.remove('show');
+                input.classList.remove('error', 'valid');
+            } else if (pw.length >= 8 && /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw)) {
                 bar.classList.add('strong');
-                hint.textContent = '✅ Strong password';
-                hint.style.color = '#10b981';
-            } else if (pw.length >= 6 && /[a-zA-Z]/.test(pw)) {
+                err.classList.remove('show');
+                input.classList.remove('error');
+                input.classList.add('valid');
+            } else if (pw.length >= 6) {
                 bar.classList.add('medium');
-                hint.textContent = '⚠️ Add numbers to make it stronger';
-                hint.style.color = '#f59e0b';
-            } else if (pw.length > 0) {
-                bar.classList.add('weak');
-                hint.textContent = '❌ Too weak — use at least 8 characters with letters and numbers';
-                hint.style.color = '#d00';
+                err.textContent = '⚠️ Add numbers and make it 8+ characters';
+                err.classList.add('show');
+                input.classList.add('error');
+                input.classList.remove('valid');
             } else {
-                hint.textContent = 'Must be at least 8 characters with letters and numbers';
-                hint.style.color = '#636e72';
+                bar.classList.add('weak');
+                err.textContent = 'Password must be at least 8 characters with letters and numbers';
+                err.classList.add('show');
+                input.classList.add('error');
+                input.classList.remove('valid');
             }
         }
         
         async function register() {
+            var valid = true;
+            if (!validateField('firstName')) valid = false;
+            if (!validateField('lastName')) valid = false;
+            if (!validateField('email')) valid = false;
+            if (!validateField('phone')) valid = false;
+            
+            var pw = document.getElementById('password').value;
+            var pwErr = document.getElementById('passwordError');
+            var pwInput = document.getElementById('password');
+            if (!pw || pw.length < 8 || !/[a-zA-Z]/.test(pw) || !/[0-9]/.test(pw)) {
+                pwErr.textContent = 'Password must be at least 8 characters with letters and numbers';
+                pwErr.classList.add('show');
+                pwInput.classList.add('error');
+                valid = false;
+            }
+            
+            if (document.getElementById('userType').value === 'SELLER') {
+                if (!validateField('businessName')) valid = false;
+            }
+            
+            if (!valid) {
+                document.getElementById('message').textContent = '❌ Please fix the errors above.';
+                document.getElementById('message').className = 'message error';
+                return;
+            }
+            
             var firstName = document.getElementById('firstName').value.trim();
             var lastName = document.getElementById('lastName').value.trim();
             var email = document.getElementById('email').value.trim();
             var phone = document.getElementById('phone').value.trim();
-            var password = document.getElementById('password').value;
+            var password = pw;
             var userType = document.getElementById('userType').value;
             var businessName = document.getElementById('businessName').value.trim();
             var referralCode = document.getElementById('referralCode').value.trim();
             var msgEl = document.getElementById('message');
             var btn = document.getElementById('registerBtn');
             
-            if (!firstName || !lastName || !email || !password) {
-                msgEl.textContent = '❌ Please fill in all required fields.';
-                msgEl.className = 'message error';
-                return;
-            }
-            if (userType === 'SELLER' && !businessName) {
-                msgEl.textContent = '❌ Please enter your business/shop name.';
-                msgEl.className = 'message error';
-                return;
-            }
-            if (password.length < 8) {
-                msgEl.textContent = '❌ Password must be at least 8 characters.';
-                msgEl.className = 'message error';
-                return;
-            }
-            if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
-                msgEl.textContent = '❌ Password must contain both letters and numbers.';
-                msgEl.className = 'message error';
-                return;
-            }
-            
-            btn.disabled = true;
-            btn.textContent = '⏳ Creating account...';
-            msgEl.className = 'message';
+            btn.disabled = true; btn.textContent = '⏳ Creating account...'; msgEl.className = 'message';
             
             var body = { firstName: firstName, lastName: lastName, email: email, phone: phone, password: password, userType: userType, businessName: businessName };
             if (referralCode) body.referralCode = referralCode;
@@ -145,23 +216,19 @@
             try {
                 var res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 var data = await res.json();
-                
                 if (data.success) {
-                    var msg = '🎉 Account created!';
-                    if (referralCode) msg += ' Referral bonus applied!';
-                    msg += ' Redirecting...';
-                    msgEl.textContent = msg;
+                    msgEl.textContent = '🎉 Account created! Redirecting...';
                     msgEl.className = 'message success';
                     btn.textContent = '✅ Done!';
                     setTimeout(function() { window.location.href = '/dashboard'; }, 1500);
                 } else {
-                    msgEl.textContent = '❌ ' + (data.message || 'Registration failed. Please try again.');
+                    msgEl.textContent = '❌ ' + (data.message || 'Registration failed.');
                     msgEl.className = 'message error';
                     btn.disabled = false;
                     btn.textContent = '🚀 Create Account';
                 }
             } catch(e) {
-                msgEl.textContent = '❌ Network error. Please check your connection and try again.';
+                msgEl.textContent = '❌ Network error. Please try again.';
                 msgEl.className = 'message error';
                 btn.disabled = false;
                 btn.textContent = '🚀 Create Account';
