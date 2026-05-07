@@ -142,4 +142,20 @@ public class DatabaseController {
             return ResponseEntity.ok(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
+    @PostMapping("/create-admin-roles")
+    public ResponseEntity<Map<String, Object>> createAdminRoles() {
+        List<String> results = new ArrayList<>();
+        try {
+            jdbcTemplate.update("INSERT INTO roles (name, description) SELECT 'ROLE_ADMIN', 'Admin Role' WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name='ROLE_ADMIN')");
+            results.add("ROLE_ADMIN created/verified");
+            
+            jdbcTemplate.update("INSERT INTO user_roles (user_id, role_id) SELECT u.id, r.id FROM users u, roles r WHERE u.email='admin@cambiz.cm' AND r.name='ROLE_ADMIN' AND NOT EXISTS (SELECT 1 FROM user_roles ur WHERE ur.user_id=u.id AND ur.role_id=r.id)");
+            results.add("Admin role assigned to admin@cambiz.cm");
+            
+            return ResponseEntity.ok(Map.of("success", true, "results", results));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 }
