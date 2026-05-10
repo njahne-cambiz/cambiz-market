@@ -1,5 +1,20 @@
 package com.cambiz.market.controller;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.cambiz.market.dto.AdminStatsDTO;
 import com.cambiz.market.model.Transaction;
 import com.cambiz.market.model.TransactionType;
@@ -8,12 +23,6 @@ import com.cambiz.market.repository.ProductRepository;
 import com.cambiz.market.repository.UserRepository;
 import com.cambiz.market.service.OrderService;
 import com.cambiz.market.service.TransactionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -104,7 +113,6 @@ public class AdminController {
     @GetMapping("/transactions")
     public ResponseEntity<?> getAllTransactions() {
         var transactions = transactionService.getAllTransactions();
-        // Sort by newest first
         transactions.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
         return ResponseEntity.ok(Map.of("success", true, "data", transactions, "count", transactions.size()));
     }
@@ -121,6 +129,108 @@ public class AdminController {
             }
         }
         return ResponseEntity.ok(Map.of("success", true, "data", revenueByDay));
+    }
+
+    @GetMapping("/analytics/revenue")
+    public ResponseEntity<?> getRevenueAnalytics(@RequestParam(defaultValue = "daily") String period) {
+        List<Transaction> allTxns = transactionService.getAllTransactions();
+        
+        Map<String, Double> revenueData = new LinkedHashMap<>();
+        Map<String, Integer> orderCount = new LinkedHashMap<>();
+        double totalRevenue = 0;
+        int totalOrders = 0;
+        
+        java.time.format.DateTimeFormatter formatter;
+        if ("monthly".equals(period)) {
+            formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM");
+        } else {
+            formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        }
+        
+        for (Transaction t : allTxns) {
+            if (t.getType() == TransactionType.PURCHASE) {
+                String key = t.getCreatedAt().format(formatter);
+                revenueData.merge(key, t.getPlatformFee(), Double::sum);
+                orderCount.merge(key, 1, Integer::sum);
+                totalRevenue += t.getPlatformFee();
+                totalOrders++;
+            }
+        }
+        
+        Map<String, Object> analytics = new LinkedHashMap<>();
+        analytics.put("revenueByPeriod", revenueData);
+        analytics.put("ordersByPeriod", orderCount);
+        analytics.put("totalRevenue", totalRevenue);
+        analytics.put("totalOrders", totalOrders);
+        analytics.put("period", period);
+        
+        return ResponseEntity.ok(Map.of("success", true, "data", analytics));
+    }
+
+    @GetMapping("/analytics/top-products")
+    public ResponseEntity<?> getTopProducts() {
+        List<Transaction> allTxns = transactionService.getAllTransactions();
+        
+        Map<String, Double> productRevenue = new LinkedHashMap<>();
+        Map<String, Integer> productSales = new LinkedHashMap<>();
+        
+        for (Transaction t : allTxns) {
+            if (t.getType() == TransactionType.PURCHASE && t.getDescription() != null) {
+                String productName = t.getDescription().replace("Payment for Order #", "Order #");
+                productRevenue.merge(productName, t.getAmount(), Double::sum);
+                productSales.merge(productName, 1, Integer::sum);
+            }
+        }
+        
+        List<Map<String, Object>> topProducts = productRevenue.entrySet().stream()
+            .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+            .limit(10)
+            .map(e -> {
+                Map<String, Object> p = new LinkedHashMap<>();
+                p.put("name", e.getKey());
+                p.put("revenue", e.getValue());
+                p.put("sales", productSales.getOrDefault(e.getKey(), 0));
+                return p;
+            })
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(Map.of("success", true, "data", topProducts));
+    }
+
+    @GetMapping("/analytics/top-sellers")
+    public ResponseEntity<?> getTopSellers() {
+        List<Transaction> allTxns = transactionService.getAllTransactions();
+        
+        Map<Long, Double> sellerRevenue = new LinkedHashMap<>();
+        Map<Long, Integer> sellerSales = new LinkedHashMap<>();
+        Map<Long, String> sellerNames = new LinkedHashMap<>();
+        
+        for (Transaction t : allTxns) {
+            if (t.getType() == TransactionType.PURCHASE && t.getSellerId() != null) {
+                sellerRevenue.merge(t.getSellerId(), t.getNetAmount(), Double::sum);
+                sellerSales.merge(t.getSellerId(), 1, Integer::sum);
+                if (!sellerNames.containsKey(t.getSellerId())) {
+                    User seller = userRepository.findById(t.getSellerId()).orElse(null);
+                    sellerNames.put(t.getSellerId(), seller != null ? 
+                        (seller.getBusinessName() != null ? seller.getBusinessName() : seller.getFirstName()) : "Unknown");
+                }
+            }
+        }
+        
+        List<Map<String, Object>> topSellers = sellerRevenue.entrySet().stream()
+            .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+            .limit(10)
+            .map(e -> {
+                Map<String, Object> s = new LinkedHashMap<>();
+                s.put("id", e.getKey());
+                s.put("name", sellerNames.getOrDefault(e.getKey(), "Unknown"));
+                s.put("revenue", e.getValue());
+                s.put("sales", sellerSales.getOrDefault(e.getKey(), 0));
+                return s;
+            })
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(Map.of("success", true, "data", topSellers));
     }
 
     @PutMapping("/users/{userId}/status")
