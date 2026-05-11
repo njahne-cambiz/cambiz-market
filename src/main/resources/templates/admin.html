@@ -1,379 +1,1312 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | CamBiz Market</title>
+    <title>CamBiz Market - Admin Dashboard</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        .admin-container { display: flex; min-height: 100vh; background: #f4f7f6; }
+        :root {
+            --sidebar-width: 250px;
+            --primary-color: #2c3e50;
+            --accent-color: #e67e22;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
         
-        .sidebar { width: 260px; background: #232f3e; color: white; padding: 0; display: flex; flex-direction: column; }
-        .sidebar .logo { padding: 25px 20px; font-size: 1.3rem; font-weight: 700; border-bottom: 1px solid #37475a; }
-        .sidebar .logo span { color: #febd69; }
-        .sidebar ul { list-style: none; padding: 10px 0; }
-        .sidebar li { padding: 14px 20px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #ccc; }
-        .sidebar li:hover, .sidebar li.active { background: #37475a; border-left: 4px solid #febd69; color: white; }
-        .sidebar .badge { background: #d00; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; margin-left: auto; }
-        .sidebar .nav-icon { font-size: 1.1rem; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+        }
         
-        .content { flex: 1; padding: 30px; overflow-y: auto; }
-        .content header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .content header h1 { font-size: 1.5rem; color: #232f3e; }
-        .user-profile { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 600; color: #232f3e; }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--primary-color);
+            color: white;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
-        .card h3 { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .card .value { font-size: 1.8rem; font-weight: 700; color: #232f3e; }
-        .card.revenue .value { color: #10b981; }
-        .card.orders .value { color: #2563eb; }
-        .card.users .value { color: #6c5ce7; }
-        .card select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #d5d9d9; font-size: 0.9rem; }
+        .sidebar .logo {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
         
-        .section { display: none; }
-        .section.active { display: block; }
+        .sidebar .logo h4 {
+            margin: 0;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
         
-        .table-container { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        .table-container h2 { font-size: 1.1rem; color: #232f3e; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.85rem; }
-        th { background: #f8f9fa; color: #888; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
-        tr:hover { background: #f8f9fa; }
-        .badge-status { padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
-        .badge-ACTIVE { background: #d4edda; color: #155724; }
-        .badge-SUSPENDED { background: #f8d7da; color: #721c24; }
-        .badge-SELLER { background: #d1ecf1; color: #0c5460; }
-        .badge-BUYER { background: #d4edda; color: #155724; }
-        .badge-ADMIN { background: #f8d7da; color: #721c24; }
-        .badge-PREMIUM { background: #febd69; color: #0f1111; }
-        .badge-PURCHASE { background: #d4edda; color: #155724; }
-        .btn-sm { padding: 4px 12px; font-size: 0.7rem; border-radius: 4px; border: none; cursor: pointer; font-weight: 600; }
-        .btn-suspend { background: #d00; color: white; }
-        .btn-activate { background: #10b981; color: white; }
-        .btn-verify { background: #febd69; color: #0f1111; }
-        .loading { text-align: center; padding: 30px; color: #888; }
-        .footer { text-align: center; padding: 20px; color: #888; font-size: 0.8rem; margin-top: 30px; }
-        .health-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-        .health-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
-        .health-card .label { color: #888; font-size: 0.8rem; }
-        .health-card .val { font-size: 1.2rem; font-weight: 700; color: #232f3e; }
-        .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
-        .status-dot.green { background: #10b981; }
-        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .bar-chart { height: 24px; background: #febd69; border-radius: 4px; min-width: 4px; transition: width 0.3s; }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
         
-        @media(max-width:768px){ .admin-container { flex-direction: column; } .sidebar { width: 100%; } .sidebar ul { display: flex; flex-wrap: wrap; } .sidebar li { flex: 1; text-align: center; justify-content: center; } .analytics-grid { grid-template-columns: 1fr; } }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border-left-color: var(--accent-color);
+        }
+        
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .stat-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .stat-card .icon {
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+        
+        .badge-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .pending-row {
+            background: #fff9e6 !important;
+        }
+        
+        .approved-row {
+            background: #e8f5e9 !important;
+        }
+        
+        .rejected-row {
+            background: #ffebee !important;
+        }
+        
+        .product-thumb {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                overflow: hidden;
+            }
+            .sidebar.mobile-open {
+                width: var(--sidebar-width);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <nav class="sidebar">
-            <div class="logo">CAMBIZ <span>ADMIN</span></div>
-            <ul>
-                <li class="active" onclick="showSection('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</li>
-                <li onclick="showSection('analytics', this)"><span class="nav-icon">📈</span> Analytics</li>
-                <li onclick="showSection('sellers', this)"><span class="nav-icon">👥</span> Manage Sellers</li>
-                <li onclick="showSection('orders', this)"><span class="nav-icon">📦</span> Orders</li>
-                <li onclick="showSection('transactions', this)"><span class="nav-icon">💰</span> Transactions</li>
-                <li onclick="showSection('health', this)"><span class="nav-icon">⚙️</span> System Health</li>
-                <li onclick="showSection('disputes', this)"><span class="nav-icon">🛡️</span> Disputes <span class="badge">0</span></li>
-                <li onclick="window.location.href='/store'"><span class="nav-icon">🛒</span> View Store</li>
-                <li onclick="logout()"><span class="nav-icon">🚪</span> Logout</li>
+    
+    <!-- ========== SIDEBAR ========== -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <h4><i class="fas fa-store"></i> CamBiz Market</h4>
+            <small class="text-muted">Admin Panel</small>
+        </div>
+        
+        <ul class="nav flex-column mt-3">
+            <li class="nav-item">
+                <a class="nav-link active" href="#dashboard" onclick="showTab('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#analytics" onclick="showTab('analytics')">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#approval" onclick="showTab('approval'); loadProductApproval();">
+                    <i class="fas fa-clipboard-check"></i> Product Approval
+                    <span class="badge bg-warning ms-2 badge-pulse" id="sidebarPendingBadge" style="display:none;">0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#users" onclick="showTab('users'); loadUsers();">
+                    <i class="fas fa-users"></i> Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#sellers" onclick="showTab('sellers'); loadSellers();">
+                    <i class="fas fa-store-alt"></i> Sellers
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#orders" onclick="showTab('orders'); loadOrders();">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#transactions" onclick="showTab('transactions'); loadTransactions();">
+                    <i class="fas fa-money-bill-wave"></i> Transactions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#products" onclick="showTab('products'); loadAllProducts();">
+                    <i class="fas fa-box"></i> All Products
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#health" onclick="showTab('health'); loadHealth();">
+                    <i class="fas fa-heartbeat"></i> System Health
+                </a>
+            </li>
+        </ul>
+        
+        <div class="mt-auto p-3" style="position: absolute; bottom: 0; width: 100%;">
+            <hr style="border-color: rgba(255,255,255,0.2);">
+            <a href="/logout" class="btn btn-outline-light btn-sm w-100">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+    
+    <!-- ========== MOBILE TOGGLE ========== -->
+    <button class="btn btn-dark d-md-none position-fixed" style="top: 10px; left: 10px; z-index: 1001;" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main-content" id="mainContent">
+        
+        <!-- ========== DASHBOARD TAB ========== -->
+        <div id="tab-dashboard" class="tab-content active">
+            <h3 class="mb-4"><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h3>
+            
+            <div class="row mb-4" id="statsRow">
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title mb-0" id="statRevenue">0 XAF</h5>
+                                    <small>Total Revenue</small>
+                                </div>
+                                <i class="fas fa-dollar-sign icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title mb-0" id="statUsers">0</h5>
+                                    <small>Total Users</small>
+                                </div>
+                                <i class="fas fa-users icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title mb-0" id="statProducts">0</h5>
+                                    <small>Products</small>
+                                </div>
+                                <i class="fas fa-box icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card bg-warning text-dark">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title mb-0" id="statOrders">0</h5>
+                                    <small>Orders</small>
+                                </div>
+                                <i class="fas fa-shopping-cart icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Revenue Trend</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenueChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Pending Approvals</h6>
+                        </div>
+                        <div class="card-body text-center" id="pendingAlert">
+                            <div class="spinner-border text-warning" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========== ANALYTICS TAB ========== -->
+        <div id="tab-analytics" class="tab-content" style="display:none;">
+            <h3 class="mb-4"><i class="fas fa-chart-line"></i> Analytics</h3>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card stat-card">
+                        <div class="card-header bg-white d-flex justify-content-between">
+                            <h6 class="mb-0">Revenue Analytics</h6>
+                            <select class="form-select form-select-sm w-auto" id="revenuePeriod" onchange="loadRevenueAnalytics()">
+                                <option value="daily">Daily</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenueAnalyticsChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card stat-card">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0">Top Sellers</h6>
+                        </div>
+                        <div class="card-body" id="topSellersList">
+                            <p class="text-muted text-center">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="card stat-card">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0">Top Products</h6>
+                        </div>
+                        <div class="card-body" id="topProductsList">
+                            <p class="text-muted text-center">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========== PRODUCT APPROVAL TAB ========== -->
+        <div id="tab-approval" class="tab-content" style="display:none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="fas fa-clipboard-check"></i> Product Approval</h3>
+                <button class="btn btn-outline-primary btn-sm" onclick="loadProductApproval()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card stat-card bg-warning text-dark">
+                        <div class="card-body text-center">
+                            <h3 id="pendingCount">0</h3>
+                            <small>Pending Approval</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h3 id="approvedCount">0</h3>
+                            <small>Approved</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <h3 id="rejectedCount">0</h3>
+                            <small>Rejected</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filter Tabs -->
+            <ul class="nav nav-tabs mb-3" id="approvalTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" onclick="filterApproval('pending'); return false;">
+                        ⏳ Pending <span class="badge bg-warning ms-1" id="tabPendingCount">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="filterApproval('approved'); return false;">
+                        ✅ Approved <span class="badge bg-success ms-1" id="tabApprovedCount">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="filterApproval('rejected'); return false;">
+                        ❌ Rejected <span class="badge bg-danger ms-1" id="tabRejectedCount">0</span>
+                    </a>
+                </li>
             </ul>
-        </nav>
-
-        <main class="content">
-            <header>
-                <h1 id="sectionTitle">📊 Executive Summary</h1>
-                <div class="user-profile">🔒 Admin User</div>
-            </header>
-
-            <!-- Dashboard Section -->
-            <div class="section active" id="sec-dashboard">
-                <div class="stats-grid">
-                    <div class="card revenue"><h3>Total Revenue</h3><div class="value" id="totalRevenue">0 XAF</div></div>
-                    <div class="card orders"><h3>Total Orders</h3><div class="value" id="totalOrders">0</div></div>
-                    <div class="card users"><h3>Total Users</h3><div class="value" id="totalUsers">0</div></div>
-                    <div class="card"><h3>Sellers</h3><div class="value" id="totalSellers">0</div></div>
-                    <div class="card"><h3>Products</h3><div class="value" id="totalProducts">0</div></div>
-                    <div class="card"><h3>Premium</h3><div class="value" id="premiumSellers">0</div></div>
-                </div>
-                <div class="table-container">
-                    <h2>👥 All Users</h2>
-                    <table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
-                    <tbody id="userTable"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table>
-                </div>
+            
+            <!-- Batch Actions -->
+            <div id="batchActions" class="mb-3">
+                <button class="btn btn-success btn-sm" onclick="batchApproveProducts()">
+                    <i class="fas fa-check-double"></i> Approve Selected
+                </button>
+                <span class="ms-2 text-muted" id="selectedCount">0 selected</span>
             </div>
-
-            <!-- Analytics Section -->
-            <div class="section" id="sec-analytics">
-                <div class="stats-grid">
-                    <div class="card revenue"><h3>Total Revenue</h3><div class="value" id="aTotalRevenue">0 XAF</div></div>
-                    <div class="card orders"><h3>Total Orders</h3><div class="value" id="aTotalOrders">0</div></div>
-                    <div class="card"><h3>View By</h3>
-                        <select onchange="loadAnalytics(this.value)" style="padding:8px;border-radius:4px;border:1px solid #d5d9d9;width:100%;">
-                            <option value="daily">Daily</option>
-                            <option value="monthly">Monthly</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="table-container">
-                    <h2>📈 Revenue Trend</h2>
-                    <table><thead><tr><th>Period</th><th>Orders</th><th>Revenue</th><th>Trend</th></tr></thead>
-                    <tbody id="revenueTableBody"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody></table>
-                </div>
-                
-                <div class="analytics-grid">
-                    <div class="table-container">
-                        <h2>🏆 Top Products</h2>
-                        <table><thead><tr><th>Product</th><th>Sales</th><th>Revenue</th></tr></thead>
-                        <tbody id="topProductsTable"><tr><td colspan="3" class="loading">Loading...</td></tr></tbody></table>
-                    </div>
-                    <div class="table-container">
-                        <h2>👑 Top Sellers</h2>
-                        <table><thead><tr><th>Seller</th><th>Sales</th><th>Revenue</th></tr></thead>
-                        <tbody id="topSellersTable"><tr><td colspan="3" class="loading">Loading...</td></tr></tbody></table>
+            
+            <!-- Products Table -->
+            <div class="card stat-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="40"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                                    <th>Product</th>
+                                    <th>Seller</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th width="180">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approvalTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                        <p class="mt-2 text-muted">Loading products...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            <!-- Sellers Section -->
-            <div class="section" id="sec-sellers">
-                <div class="table-container">
-                    <h2>🏪 Manage Sellers</h2>
-                    <table><thead><tr><th>ID</th><th>Business</th><th>Email</th><th>Account</th><th>Status</th><th>Action</th></tr></thead>
-                    <tbody id="sellerTable"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table>
+        </div>
+        
+        <!-- ========== USERS TAB ========== -->
+        <div id="tab-users" class="tab-content" style="display:none;">
+            <h3 class="mb-4"><i class="fas fa-users"></i> User Management</h3>
+            <div class="card stat-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr><td colspan="7" class="text-center py-4">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
-            <!-- Orders Section -->
-            <div class="section" id="sec-orders">
-                <div class="table-container">
-                    <h2>📦 All Orders</h2>
-                    <table><thead><tr><th>Order #</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
-                    <tbody id="orderTable"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody></table>
+        </div>
+        
+        <!-- ========== SELLERS TAB ========== -->
+        <div id="tab-sellers" class="tab-content" style="display:none;">
+            <h3 class="mb-4"><i class="fas fa-store-alt"></i> Seller Management</h3>
+            <div class="card stat-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Business Name</th>
+                                    <th>Owner</th>
+                                    <th>Email</th>
+                                    <th>Account Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sellersTableBody">
+                                <tr><td colspan="7" class="text-center py-4">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
-            <!-- Transactions Section -->
-            <div class="section" id="sec-transactions">
-                <div class="table-container">
-                    <h2>💰 All Transactions</h2>
-                    <table><thead><tr><th>Ref</th><th>Order</th><th>Amount</th><th>Fee</th><th>Type</th><th>Date</th></tr></thead>
-                    <tbody id="txnTable"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody></table>
+        </div>
+        
+        <!-- ========== ORDERS TAB ========== -->
+        <div id="tab-orders" class="tab-content" style="display:none;">
+            <h3 class="mb-4"><i class="fas fa-shopping-cart"></i> Orders</h3>
+            <div class="card stat-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <tr><td colspan="5" class="text-center py-4">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
-            <!-- Health Section -->
-            <div class="section" id="sec-health">
-                <div class="health-grid" id="healthGrid">
-                    <div class="health-card"><div class="label">API Status</div><div class="val"><span class="status-dot green"></span> RUNNING</div></div>
-                    <div class="health-card"><div class="label">Database</div><div class="val"><span class="status-dot green"></span> CONNECTED</div></div>
-                    <div class="health-card"><div class="label">Memory Usage</div><div class="val" id="memUsage">- MB</div></div>
-                    <div class="health-card"><div class="label">Free Memory</div><div class="val" id="freeMem">- MB</div></div>
+        </div>
+        
+        <!-- ========== TRANSACTIONS TAB ========== -->
+        <div id="tab-transactions" class="tab-content" style="display:none;">
+            <h3 class="mb-4"><i class="fas fa-money-bill-wave"></i> Transactions</h3>
+            <div class="card stat-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ref</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Fee</th>
+                                    <th>Net</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTableBody">
+                                <tr><td colspan="7" class="text-center py-4">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
-            <!-- Disputes Section -->
-            <div class="section" id="sec-disputes">
-                <div class="table-container">
-                    <h2>🛡️ Disputes</h2>
-                    <p class="loading">No active disputes. System is healthy.</p>
+        </div>
+        
+        <!-- ========== ALL PRODUCTS TAB ========== -->
+        <div id="tab-products" class="tab-content" style="display:none;">
+            <h3 class="mb-4"><i class="fas fa-box"></i> All Products</h3>
+            <div class="card stat-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Product</th>
+                                    <th>Seller</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allProductsTableBody">
+                                <tr><td colspan="6" class="text-center py-4">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
-            <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
-        </main>
+        </div>
+        
+        <!-- ========== HEALTH TAB ========== -->
+        <div id="tab-health" class="tab-content" style="display:none;">
+            <h3 class="mb-4"><i class="fas fa-heartbeat"></i> System Health</h3>
+            <div class="row" id="healthCards">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Checking system health...</p>
+                </div>
+            </div>
+        </div>
+        
     </div>
-
+    
+    <!-- ========== REJECTION MODAL ========== -->
+    <div class="modal fade" id="rejectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-times-circle"></i> Reject Product</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted" id="rejectProductInfo"></p>
+                    <label class="form-label fw-bold">Reason for Rejection:</label>
+                    <textarea class="form-control" id="rejectionReason" rows="3" 
+                              placeholder="Explain why this product is being rejected..."></textarea>
+                    <div class="form-text">This reason will be shown to the seller.</div>
+                    <input type="hidden" id="rejectProductId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmReject()">
+                        <i class="fas fa-times"></i> Reject Product
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (!token) { window.location.href = '/dashboard'; }
-
-        function showSection(name, el) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.sidebar li').forEach(l => l.classList.remove('active'));
-            document.getElementById('sec-' + name).classList.add('active');
-            if (el) el.classList.add('active');
-            var titles = {dashboard:'📊 Executive Summary',analytics:'📈 Revenue Analytics',sellers:'🏪 Manage Sellers',orders:'📦 Orders',transactions:'💰 Transactions',health:'⚙️ System Health',disputes:'🛡️ Disputes'};
-            document.getElementById('sectionTitle').textContent = titles[name] || 'Admin Dashboard';
-            if (name === 'sellers') loadSellers();
-            if (name === 'orders') loadOrders();
-            if (name === 'transactions') loadTransactions();
-            if (name === 'health') loadHealth();
-            if (name === 'analytics') loadAnalytics('daily');
+        // ========== GLOBAL STATE ==========
+        let currentApprovalFilter = 'pending';
+        let approvalData = { pending: [], approved: [], rejected: [] };
+        let revenueChartInstance = null;
+        let revenueAnalyticsChartInstance = null;
+        
+        // ========== NAVIGATION ==========
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            
+            document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelector(`a[href="#${tabName}"]`).classList.add('active');
+            
+            if (tabName === 'dashboard') loadDashboard();
+            if (tabName === 'analytics') loadAnalytics();
+            if (tabName === 'approval') loadProductApproval();
         }
-
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+        
+        // ========== DASHBOARD ==========
         async function loadDashboard() {
             try {
-                var [statsRes, usersRes] = await Promise.all([
-                    fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } }),
-                    fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } })
-                ]);
-                var statsData = await statsRes.json();
-                var usersData = await usersRes.json();
-
-                if (statsData.success && statsData.data) {
-                    var s = statsData.data;
-                    document.getElementById('totalRevenue').textContent = (s.totalRevenue || 0).toLocaleString() + ' XAF';
-                    document.getElementById('totalOrders').textContent = s.totalOrders || 0;
-                    document.getElementById('totalUsers').textContent = s.totalUsers || 0;
-                    document.getElementById('totalSellers').textContent = s.totalSellers || 0;
-                    document.getElementById('totalProducts').textContent = s.totalProducts || 0;
-                    document.getElementById('premiumSellers').textContent = s.premiumSellers || 0;
-                }
-
-                if (usersData.success && usersData.data) {
-                    var html = '';
-                    for (var i = 0; i < usersData.data.length; i++) {
-                        var u = usersData.data[i];
-                        html += '<tr><td>' + u.id + '</td><td>' + (u.firstName || '') + ' ' + (u.lastName || '') + '</td><td>' + u.email + '</td>' +
-                            '<td><span class="badge-status badge-' + u.userType + '">' + u.userType + '</span></td>' +
-                            '<td><span class="badge-status badge-' + u.status + '">' + u.status + '</span></td>' +
-                            '<td>' + (u.status === 'ACTIVE' ? '<button class="btn-sm btn-suspend" onclick="updateUserStatus(' + u.id + ',\'SUSPENDED\')">Suspend</button>' : '<button class="btn-sm btn-activate" onclick="updateUserStatus(' + u.id + ',\'ACTIVE\')">Activate</button>') + '</td></tr>';
+                const response = await fetch('/api/admin/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.data;
+                    document.getElementById('statRevenue').textContent = formatCurrency(stats.totalRevenue);
+                    document.getElementById('statUsers').textContent = stats.totalUsers;
+                    document.getElementById('statProducts').textContent = stats.totalProducts;
+                    document.getElementById('statOrders').textContent = stats.totalOrders;
+                    
+                    // Pending alert
+                    if (stats.pendingDisputes > 0) {
+                        document.getElementById('pendingAlert').innerHTML = `
+                            <i class="fas fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                            <h4>${stats.pendingDisputes} Products Pending</h4>
+                            <p class="text-muted">Products waiting for your approval</p>
+                            <button class="btn btn-warning" onclick="showTab('approval')">
+                                <i class="fas fa-clipboard-check"></i> Review Now
+                            </button>
+                        `;
+                    } else {
+                        document.getElementById('pendingAlert').innerHTML = `
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h4>All Clear!</h4>
+                            <p class="text-muted">No pending approvals</p>
+                        `;
                     }
-                    document.getElementById('userTable').innerHTML = html;
+                    
+                    loadRevenueChart();
                 }
-            } catch(e) {}
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
         }
-
-        async function loadAnalytics(period) {
-            period = period || 'daily';
+        
+        async function loadRevenueChart() {
             try {
-                var [revRes, prodRes, sellerRes] = await Promise.all([
-                    fetch('/api/admin/analytics/revenue?period=' + period, { headers: { 'Authorization': 'Bearer ' + token } }),
-                    fetch('/api/admin/analytics/top-products', { headers: { 'Authorization': 'Bearer ' + token } }),
-                    fetch('/api/admin/analytics/top-sellers', { headers: { 'Authorization': 'Bearer ' + token } })
+                const response = await fetch('/api/admin/revenue-chart');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const labels = Object.keys(data.data);
+                    const values = Object.values(data.data);
+                    
+                    const ctx = document.getElementById('revenueChart').getContext('2d');
+                    if (revenueChartInstance) revenueChartInstance.destroy();
+                    
+                    revenueChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Revenue (XAF)',
+                                data: values,
+                                borderColor: '#27ae60',
+                                backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading revenue chart:', error);
+            }
+        }
+        
+        // ========== ANALYTICS ==========
+        async function loadAnalytics() {
+            loadRevenueAnalytics();
+            loadTopSellers();
+            loadTopProducts();
+        }
+        
+        async function loadRevenueAnalytics() {
+            const period = document.getElementById('revenuePeriod')?.value || 'daily';
+            try {
+                const response = await fetch(`/api/admin/analytics/revenue?period=${period}`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const labels = Object.keys(data.data.revenueByPeriod);
+                    const revenues = Object.values(data.data.revenueByPeriod);
+                    const orders = Object.values(data.data.ordersByPeriod);
+                    
+                    const ctx = document.getElementById('revenueAnalyticsChart').getContext('2d');
+                    if (revenueAnalyticsChartInstance) revenueAnalyticsChartInstance.destroy();
+                    
+                    revenueAnalyticsChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Revenue (XAF)',
+                                    data: revenues,
+                                    backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Orders',
+                                    data: orders,
+                                    type: 'line',
+                                    borderColor: '#e74c3c',
+                                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { position: 'left', title: { display: true, text: 'Revenue (XAF)' } },
+                                y1: { position: 'right', title: { display: true, text: 'Orders' }, grid: { drawOnChartArea: false } }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading revenue analytics:', error);
+            }
+        }
+        
+        async function loadTopSellers() {
+            try {
+                const response = await fetch('/api/admin/analytics/top-sellers');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('topSellersList').innerHTML = data.data.map((s, i) => `
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                            <div>
+                                <strong>#${i + 1}</strong> ${s.name}
+                            </div>
+                            <div>
+                                <span class="badge bg-success">${formatCurrency(s.revenue)}</span>
+                                <small class="text-muted ms-1">${s.sales} sales</small>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading top sellers:', error);
+            }
+        }
+        
+        async function loadTopProducts() {
+            try {
+                const response = await fetch('/api/admin/analytics/top-products');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('topProductsList').innerHTML = data.data.map((p, i) => `
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                            <div>
+                                <strong>#${i + 1}</strong> ${p.name}
+                            </div>
+                            <div>
+                                <span class="badge bg-info">${formatCurrency(p.revenue)}</span>
+                                <small class="text-muted ms-1">${p.sales} sold</small>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading top products:', error);
+            }
+        }
+        
+        // ========== PRODUCT APPROVAL ==========
+        async function loadProductApproval() {
+            try {
+                const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
+                    fetch('/api/admin/products/pending').then(r => r.json()),
+                    fetch('/api/admin/products/approved').then(r => r.json()),
+                    fetch('/api/admin/products/rejected').then(r => r.json())
                 ]);
                 
-                var revData = await revRes.json();
-                var prodData = await prodRes.json();
-                var sellerData = await sellerRes.json();
+                approvalData.pending = pendingRes.success ? pendingRes.data : [];
+                approvalData.approved = approvedRes.success ? approvedRes.data : [];
+                approvalData.rejected = rejectedRes.success ? rejectedRes.data : [];
                 
-                if (revData.success && revData.data) {
-                    var d = revData.data;
-                    document.getElementById('aTotalRevenue').textContent = (d.totalRevenue || 0).toLocaleString() + ' XAF';
-                    document.getElementById('aTotalOrders').textContent = d.totalOrders || 0;
-                    
-                    var revMap = d.revenueByPeriod || {};
-                    var ordMap = d.ordersByPeriod || {};
-                    var html = '';
-                    var maxRevenue = 1;
-                    var values = Object.values(revMap);
-                    if (values.length > 0) maxRevenue = Math.max.apply(null, values);
-                    
-                    var keys = Object.keys(revMap).sort();
-                    for (var i = 0; i < keys.length; i++) {
-                        var key = keys[i];
-                        var barWidth = Math.round((revMap[key] / maxRevenue) * 100);
-                        html += '<tr><td>' + key + '</td><td>' + (ordMap[key] || 0) + '</td><td>' + revMap[key].toLocaleString() + ' XAF</td>' +
-                            '<td><div class="bar-chart" style="width:' + barWidth + '%"></div></td></tr>';
-                    }
-                    document.getElementById('revenueTableBody').innerHTML = html || '<tr><td colspan="4" class="loading">No data</td></tr>';
+                // Update counts
+                document.getElementById('pendingCount').textContent = approvalData.pending.length;
+                document.getElementById('approvedCount').textContent = approvalData.approved.length;
+                document.getElementById('rejectedCount').textContent = approvalData.rejected.length;
+                document.getElementById('tabPendingCount').textContent = approvalData.pending.length;
+                document.getElementById('tabApprovedCount').textContent = approvalData.approved.length;
+                document.getElementById('tabRejectedCount').textContent = approvalData.rejected.length;
+                
+                // Sidebar badge
+                const badge = document.getElementById('sidebarPendingBadge');
+                if (approvalData.pending.length > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = approvalData.pending.length;
+                } else {
+                    badge.style.display = 'none';
                 }
                 
-                if (prodData.success && prodData.data) {
-                    var html = '';
-                    for (var i = 0; i < prodData.data.length; i++) {
-                        var p = prodData.data[i];
-                        html += '<tr><td>' + p.name + '</td><td>' + p.sales + '</td><td>' + p.revenue.toLocaleString() + ' XAF</td></tr>';
-                    }
-                    document.getElementById('topProductsTable').innerHTML = html || '<tr><td colspan="3" class="loading">No data</td></tr>';
-                }
-                
-                if (sellerData.success && sellerData.data) {
-                    var html = '';
-                    for (var i = 0; i < sellerData.data.length; i++) {
-                        var s = sellerData.data[i];
-                        html += '<tr><td>' + s.name + '</td><td>' + s.sales + '</td><td>' + s.revenue.toLocaleString() + ' XAF</td></tr>';
-                    }
-                    document.getElementById('topSellersTable').innerHTML = html || '<tr><td colspan="3" class="loading">No data</td></tr>';
-                }
-            } catch(e) {}
+                filterApproval(currentApprovalFilter);
+            } catch (error) {
+                console.error('Error loading approval data:', error);
+            }
         }
-
+        
+        function filterApproval(status) {
+            currentApprovalFilter = status;
+            
+            // Update tabs
+            document.querySelectorAll('#approvalTabs .nav-link').forEach(t => t.classList.remove('active'));
+            document.querySelector(`#approvalTabs .nav-link:nth-child(${status === 'pending' ? 1 : status === 'approved' ? 2 : 3})`).classList.add('active');
+            
+            // Show/hide batch actions
+            document.getElementById('batchActions').style.display = status === 'pending' ? 'block' : 'none';
+            
+            renderApprovalTable(approvalData[status] || [], status);
+        }
+        
+        function renderApprovalTable(products, status) {
+            const tbody = document.getElementById('approvalTableBody');
+            
+            if (!products || products.length === 0) {
+                const messages = {
+                    pending: '🎉 No pending products! All caught up.',
+                    approved: 'No approved products found.',
+                    rejected: 'No rejected products.'
+                };
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${messages[status]}</td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = products.map(p => {
+                const priceFormatted = formatCurrency(p.price || 0);
+                const statusBadge = status === 'pending' ? '<span class="badge bg-warning text-dark">⏳ Pending</span>' :
+                                   status === 'approved' ? '<span class="badge bg-success">✅ Approved</span>' :
+                                   '<span class="badge bg-danger">❌ Rejected</span>';
+                
+                const dateField = status === 'approved' ? p.approvedAt : 
+                                 status === 'rejected' ? p.rejectedAt : p.createdAt;
+                const dateText = dateField ? new Date(dateField).toLocaleDateString() : 'N/A';
+                
+                const firstImage = p.imageUrls && p.imageUrls.length > 0 ? p.imageUrls[0] : null;
+                
+                const actions = status === 'pending' ? `
+                    <button class="btn btn-success btn-sm" onclick="approveProduct(${p.id})" title="Approve">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="showRejectModal(${p.id}, '${escapeHtml(p.name || '')}')" title="Reject">
+                        <i class="fas fa-times"></i>
+                    </button>
+                ` : status === 'rejected' ? `
+                    <button class="btn btn-outline-success btn-sm" onclick="approveProduct(${p.id})" title="Approve Anyway">
+                        <i class="fas fa-redo"></i> Approve
+                    </button>
+                    <br><small class="text-danger">${escapeHtml(p.rejectionReason || '')}</small>
+                ` : `
+                    <small class="text-muted">By: ${escapeHtml(p.approvedBy || 'Admin')}</small><br>
+                    <small class="text-muted">${dateText}</small>
+                `;
+                
+                return `
+                    <tr class="${status}-row">
+                        <td>${status === 'pending' ? `<input type="checkbox" class="product-checkbox" value="${p.id}" onchange="updateSelectedCount()">` : ''}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                ${firstImage ? `<img src="${firstImage}" class="product-thumb me-2">` : '<div class="product-thumb bg-light d-flex align-items-center justify-content-center me-2">📦</div>'}
+                                <div>
+                                    <strong>${escapeHtml(p.name || 'Unnamed')}</strong><br>
+                                    <small class="text-muted">${escapeHtml((p.description || '').substring(0, 60))}${p.description && p.description.length > 60 ? '...' : ''}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td><small>${escapeHtml(p.sellerBusinessName || p.sellerName || 'Unknown')}</small></td>
+                        <td><strong>${priceFormatted}</strong></td>
+                        <td>${statusBadge}</td>
+                        <td><small>${dateText}</small></td>
+                        <td>${actions}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll').checked;
+            document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = selectAll);
+            updateSelectedCount();
+        }
+        
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('.product-checkbox:checked').length;
+            document.getElementById('selectedCount').textContent = count + ' selected';
+        }
+        
+        async function approveProduct(id) {
+            if (!confirm('Approve this product? It will appear on the store.')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/products/${id}/approve`, { method: 'PUT' });
+                const data = await response.json();
+                alert(data.message);
+                loadProductApproval();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function showRejectModal(productId, productName) {
+            document.getElementById('rejectProductId').value = productId;
+            document.getElementById('rejectProductInfo').textContent = 'Rejecting: ' + productName;
+            document.getElementById('rejectionReason').value = '';
+            new bootstrap.Modal(document.getElementById('rejectModal')).show();
+        }
+        
+        async function confirmReject() {
+            const productId = document.getElementById('rejectProductId').value;
+            const reason = document.getElementById('rejectionReason').value.trim();
+            
+            if (!reason) {
+                alert('Please provide a rejection reason.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/products/${productId}/reject?reason=${encodeURIComponent(reason)}`, { method: 'PUT' });
+                const data = await response.json();
+                alert(data.message);
+                bootstrap.Modal.getInstance(document.getElementById('rejectModal')).hide();
+                loadProductApproval();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        async function batchApproveProducts() {
+            const selected = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => parseInt(cb.value));
+            
+            if (selected.length === 0) {
+                alert('Select at least one product to approve.');
+                return;
+            }
+            
+            if (!confirm(`Approve ${selected.length} selected product(s)?`)) return;
+            
+            try {
+                const response = await fetch('/api/admin/products/batch-approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(selected)
+                });
+                const data = await response.json();
+                alert(data.message);
+                document.getElementById('selectAll').checked = false;
+                updateSelectedCount();
+                loadProductApproval();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // ========== USERS ==========
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('usersTableBody').innerHTML = data.data.map(u => `
+                        <tr>
+                            <td>#${u.id}</td>
+                            <td>${u.firstName} ${u.lastName}</td>
+                            <td>${u.email}</td>
+                            <td>${u.phone || 'N/A'}</td>
+                            <td><span class="badge bg-info">${u.userType}</span></td>
+                            <td><span class="badge ${u.status === 'ACTIVE' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
+                            <td>
+                                ${u.status === 'ACTIVE' ? 
+                                    `<button class="btn btn-danger btn-sm" onclick="updateUserStatus(${u.id}, 'SUSPENDED')">Suspend</button>` :
+                                    `<button class="btn btn-success btn-sm" onclick="updateUserStatus(${u.id}, 'ACTIVE')">Activate</button>`
+                                }
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+        
+        async function updateUserStatus(userId, status) {
+            if (!confirm(`Set user #${userId} to ${status}?`)) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/status?status=${status}`, { method: 'PUT' });
+                const data = await response.json();
+                alert(data.message);
+                loadUsers();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // ========== SELLERS ==========
         async function loadSellers() {
             try {
-                var r = await fetch('/api/admin/sellers', { headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                if (d.success && d.data) {
-                    var html = '';
-                    for (var i = 0; i < d.data.length; i++) {
-                        var s = d.data[i];
-                        html += '<tr><td>' + s.id + '</td><td>' + (s.businessName || s.firstName + ' ' + s.lastName) + '</td><td>' + s.email + '</td>' +
-                            '<td><span class="badge-status badge-' + s.accountType + '">' + s.accountType + '</span></td>' +
-                            '<td><span class="badge-status badge-' + s.status + '">' + s.status + '</span></td>' +
-                            '<td>' + (s.accountType !== 'PREMIUM' ? '<button class="btn-sm btn-verify" onclick="verifySeller(' + s.id + ')">Verify Premium</button>' : '<span style="color:#10b981;">✅ Verified</span>') + '</td></tr>';
-                    }
-                    document.getElementById('sellerTable').innerHTML = html || '<tr><td colspan="6" class="loading">No sellers</td></tr>';
+                const response = await fetch('/api/admin/sellers');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('sellersTableBody').innerHTML = data.data.map(s => `
+                        <tr>
+                            <td>#${s.id}</td>
+                            <td><strong>${s.businessName || 'N/A'}</strong></td>
+                            <td>${s.firstName} ${s.lastName}</td>
+                            <td>${s.email}</td>
+                            <td><span class="badge ${s.accountType === 'PREMIUM' ? 'bg-warning text-dark' : 'bg-secondary'}">${s.accountType}</span></td>
+                            <td><span class="badge ${s.status === 'ACTIVE' ? 'bg-success' : 'bg-danger'}">${s.status}</span></td>
+                            <td>
+                                ${s.accountType !== 'PREMIUM' ? 
+                                    `<button class="btn btn-warning btn-sm" onclick="verifySeller(${s.id})"><i class="fas fa-check"></i> Verify Premium</button>` :
+                                    `<button class="btn btn-outline-danger btn-sm" onclick="revokeSellerPremium(${s.id})">Revoke Premium</button>`
+                                }
+                            </td>
+                        </tr>
+                    `).join('');
                 }
-            } catch(e) {}
+            } catch (error) {
+                console.error('Error loading sellers:', error);
+            }
         }
-
+        
+        async function verifySeller(sellerId) {
+            if (!confirm('Verify this seller as Premium?')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/sellers/${sellerId}/verify`, { method: 'PUT' });
+                const data = await response.json();
+                alert(data.message);
+                loadSellers();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        async function revokeSellerPremium(sellerId) {
+            if (!confirm('Revoke Premium status from this seller?')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/sellers/${sellerId}/revoke-premium`, { method: 'PUT' });
+                const data = await response.json();
+                alert(data.message);
+                loadSellers();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // ========== ORDERS ==========
         async function loadOrders() {
             try {
-                var r = await fetch('/api/admin/orders', { headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                if (d.success && d.data) {
-                    var html = '';
-                    for (var j = 0; j < Math.min(d.data.length, 30); j++) {
-                        var o = d.data[j];
-                        html += '<tr><td>' + o.orderNumber + '</td><td>' + o.totalAmount.toLocaleString() + ' XAF</td><td>' + o.status + '</td><td>' + new Date(o.createdAt).toLocaleDateString() + '</td></tr>';
-                    }
-                    document.getElementById('orderTable').innerHTML = html || '<tr><td colspan="4" class="loading">No orders</td></tr>';
+                const response = await fetch('/api/admin/orders');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('ordersTableBody').innerHTML = data.data.map(o => `
+                        <tr>
+                            <td>#${o.id || o.orderId || 'N/A'}</td>
+                            <td>${o.customerName || o.buyerEmail || 'N/A'}</td>
+                            <td>${formatCurrency(o.totalAmount || o.amount || 0)}</td>
+                            <td><span class="badge bg-info">${o.status || 'PENDING'}</span></td>
+                            <td>${o.createdAt ? new Date(o.createdAt).toLocaleDateString() : 'N/A'}</td>
+                        </tr>
+                    `).join('');
                 }
-            } catch(e) {}
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
         }
-
+        
+        // ========== TRANSACTIONS ==========
         async function loadTransactions() {
             try {
-                var r = await fetch('/api/admin/transactions', { headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                if (d.success && d.data) {
-                    var html = '';
-                    for (var i = 0; i < d.data.length; i++) {
-                        var t = d.data[i];
-                        html += '<tr><td>' + t.transactionRef + '</td><td>#' + t.orderId.toString().slice(-8) + '</td><td>' + t.amount.toLocaleString() + ' XAF</td><td>' + t.platformFee.toLocaleString() + ' XAF</td><td><span class="badge-status badge-' + t.type + '">' + t.type + '</span></td><td>' + new Date(t.createdAt).toLocaleDateString() + '</td></tr>';
-                    }
-                    document.getElementById('txnTable').innerHTML = html || '<tr><td colspan="6" class="loading">No transactions</td></tr>';
+                const response = await fetch('/api/admin/transactions');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('transactionsTableBody').innerHTML = data.data.map(t => `
+                        <tr>
+                            <td><small>${t.transactionRef || t.transaction_ref || 'N/A'}</small></td>
+                            <td><span class="badge bg-primary">${t.type || 'N/A'}</span></td>
+                            <td>${formatCurrency(t.amount || 0)}</td>
+                            <td>${formatCurrency(t.platformFee || t.platform_fee || 0)}</td>
+                            <td><strong>${formatCurrency(t.netAmount || t.net_amount || 0)}</strong></td>
+                            <td><span class="badge ${(t.status === 'COMPLETED' || t.status === 'SUCCESS') ? 'bg-success' : 'bg-warning'}">${t.status || 'N/A'}</span></td>
+                            <td><small>${t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'N/A'}</small></td>
+                        </tr>
+                    `).join('');
                 }
-            } catch(e) {}
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
         }
-
+        
+        // ========== ALL PRODUCTS ==========
+        async function loadAllProducts() {
+            try {
+                const response = await fetch('/api/admin/products/all');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('allProductsTableBody').innerHTML = data.data.map(p => `
+                        <tr>
+                            <td>#${p.id}</td>
+                            <td>${escapeHtml(p.name || 'N/A')}</td>
+                            <td>${escapeHtml(p.sellerName || 'N/A')}</td>
+                            <td>${formatCurrency(p.price || 0)}</td>
+                            <td>
+                                <span class="badge ${p.isApproved ? 'bg-success' : (p.status === 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark')}">
+                                    ${p.status || (p.isApproved ? 'APPROVED' : 'PENDING')}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="adminDeleteProduct(${p.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+        
+        async function adminDeleteProduct(productId) {
+            if (!confirm('Delete product #' + productId + '?')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/products/${productId}/delete`, { method: 'PUT' });
+                const data = await response.json();
+                alert(data.message);
+                loadAllProducts();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // ========== HEALTH ==========
         async function loadHealth() {
             try {
-                var r = await fetch('/api/admin/health', { headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                if (d.success && d.data) {
-                    document.getElementById('memUsage').textContent = d.data.memoryUsage || '-';
-                    document.getElementById('freeMem').textContent = d.data.freeMemory || '-';
+                const response = await fetch('/api/admin/health');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const h = data.data;
+                    document.getElementById('healthCards').innerHTML = `
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                    <h6>API Status</h6>
+                                    <h4>${h.apiStatus}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-database fa-2x mb-2"></i>
+                                    <h6>Database</h6>
+                                    <h5>${h.databaseStatus}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-memory fa-2x mb-2"></i>
+                                    <h6>Memory Usage</h6>
+                                    <h5>${h.memoryUsagePercent}%</h5>
+                                    <small>${h.usedMemory} / ${h.maxMemory}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card bg-secondary text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-clock fa-2x mb-2"></i>
+                                    <h6>Uptime</h6>
+                                    <h5>${h.uptime}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <h6>Java Version</h6>
+                                    <p>${h.javaVersion}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <h6>OS</h6>
+                                    <p>${h.osName}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <h6>Processors</h6>
+                                    <h4>${h.processors}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <h6>Last Checked</h6>
+                                    <small>${h.timestamp}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 }
-            } catch(e) {}
+            } catch (error) {
+                console.error('Error loading health:', error);
+            }
         }
-
-        async function updateUserStatus(userId, status) {
-            try {
-                var r = await fetch('/api/admin/users/' + userId + '/status?status=' + status, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                if (d.success) { alert('✅ User ' + status); loadDashboard(); }
-                else { alert('❌ ' + d.message); }
-            } catch(e) { alert('Network error'); }
+        
+        // ========== HELPERS ==========
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('fr-FR', { 
+                style: 'currency', 
+                currency: 'XAF',
+                maximumFractionDigits: 0 
+            }).format(amount || 0);
         }
-
-        async function verifySeller(sellerId) {
-            try {
-                var r = await fetch('/api/admin/sellers/' + sellerId + '/verify', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
-                var d = await r.json();
-                if (d.success) { alert('✅ Seller verified as Premium!'); loadSellers(); }
-                else { alert('❌ ' + d.message); }
-            } catch(e) { alert('Network error'); }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-
-        function logout() { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; }
-
-        loadDashboard();
+        
+        // ========== INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            // Refresh pending count every 30 seconds
+            setInterval(async () => {
+                try {
+                    const response = await fetch('/api/admin/products/pending-count');
+                    const data = await response.json();
+                    if (data.success) {
+                        const badge = document.getElementById('sidebarPendingBadge');
+                        if (data.count > 0) {
+                            badge.style.display = 'inline-block';
+                            badge.textContent = data.count;
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                } catch (e) { /* Silently fail */ }
+            }, 30000);
+        });
     </script>
 </body>
 </html>

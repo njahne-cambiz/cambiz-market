@@ -158,4 +158,90 @@ public class DatabaseController {
             return ResponseEntity.ok(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
+    // ✅ UPDATED: Enhanced product approval migration
+    @PostMapping("/add-approval-columns")
+    public ResponseEntity<Map<String, Object>> addApprovalColumns() {
+        List<String> results = new ArrayList<>();
+        try {
+            // Add status column (replaces boolean is_approved for more flexibility)
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'PENDING_APPROVAL'");
+            results.add("status column added (PENDING_APPROVAL, APPROVED, REJECTED)");
+        } catch (Exception e) { 
+            results.add("status: " + e.getMessage()); 
+        }
+        
+        try {
+            // Sync existing is_approved to new status
+            jdbcTemplate.execute("UPDATE products SET status = 'APPROVED' WHERE is_approved = true AND status = 'PENDING_APPROVAL'");
+            results.add("Synced existing approved products to APPROVED status");
+        } catch (Exception e) { 
+            results.add("status sync: " + e.getMessage()); 
+        }
+        
+        try {
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT FALSE");
+            results.add("is_approved column added");
+        } catch (Exception e) { 
+            results.add("is_approved: " + e.getMessage()); 
+        }
+        
+        try {
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS approved_by VARCHAR(255)");
+            results.add("approved_by column added (stores admin email)");
+        } catch (Exception e) { 
+            results.add("approved_by: " + e.getMessage()); 
+        }
+        
+        try {
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP");
+            results.add("approved_at column added");
+        } catch (Exception e) { 
+            results.add("approved_at: " + e.getMessage()); 
+        }
+        
+        try {
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS rejection_reason TEXT");
+            results.add("rejection_reason column added");
+        } catch (Exception e) { 
+            results.add("rejection_reason: " + e.getMessage()); 
+        }
+        
+        try {
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS rejected_at TIMESTAMP");
+            results.add("rejected_at column added");
+        } catch (Exception e) { 
+            results.add("rejected_at: " + e.getMessage()); 
+        }
+        
+        try {
+            // Add constraint for valid status values
+            jdbcTemplate.execute("ALTER TABLE products DROP CONSTRAINT IF EXISTS chk_product_status");
+            jdbcTemplate.execute("ALTER TABLE products ADD CONSTRAINT chk_product_status CHECK (status IN ('PENDING_APPROVAL', 'APPROVED', 'REJECTED'))");
+            results.add("Product status constraint added");
+        } catch (Exception e) { 
+            results.add("constraint: " + e.getMessage()); 
+        }
+        
+        return ResponseEntity.ok(Map.of("success", true, "results", results));
+    }
+
+    // ✅ NEW: Get pending approval products count
+    @GetMapping("/pending-approval-count")
+    public ResponseEntity<Map<String, Object>> getPendingApprovalCount() {
+        try {
+            Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM products WHERE status = 'PENDING_APPROVAL'", Integer.class);
+            return ResponseEntity.ok(Map.of("success", true, "count", count != null ? count : 0));
+        } catch (Exception e) {
+            // Fallback to is_approved if status column doesn't exist
+            try {
+                Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM products WHERE is_approved = false OR is_approved IS NULL", Integer.class);
+                return ResponseEntity.ok(Map.of("success", true, "count", count != null ? count : 0));
+            } catch (Exception e2) {
+                return ResponseEntity.ok(Map.of("success", false, "error", e2.getMessage()));
+            }
+        }
+    }
 }

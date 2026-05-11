@@ -26,6 +26,16 @@ public class ProductResponse {
     private Integer viewCount;
     private LocalDateTime createdAt;
     
+    // ========== PRODUCT APPROVAL FIELDS ==========
+    private Boolean isApproved;
+    private String status;
+    private String approvedBy;
+    private LocalDateTime approvedAt;
+    private String rejectionReason;
+    private LocalDateTime rejectedAt;
+    private Double minAcceptablePrice;
+    private Boolean isActive;
+    
     public static ProductResponse fromProduct(Product product) {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
@@ -37,11 +47,10 @@ public class ProductResponse {
         response.setCondition(product.getProductCondition());
         response.setImageUrls(product.getImageUrls());
         
-        // Handle seller info - FIXED: Check for null values
+        // Handle seller info
         User seller = product.getSeller();
         if (seller != null) {
             response.setSellerId(seller.getId());
-            // Build seller name safely
             StringBuilder nameBuilder = new StringBuilder();
             if (seller.getFirstName() != null && !seller.getFirstName().isEmpty()) {
                 nameBuilder.append(seller.getFirstName());
@@ -59,7 +68,7 @@ public class ProductResponse {
             response.setSellerName("Unknown Seller");
         }
         
-        // Handle category - SET BOTH ID AND NAME
+        // Handle category
         if (product.getCategory() != null) {
             response.setCategoryId(product.getCategory().getId());
             response.setCategoryName(product.getCategory().getNameEn());
@@ -68,6 +77,17 @@ public class ProductResponse {
         response.setIsFeatured(product.getIsFeatured());
         response.setViewCount(product.getViewCount());
         response.setCreatedAt(product.getCreatedAt());
+        
+        // ========== APPROVAL FIELDS ==========
+        response.setIsApproved(product.getIsApproved());
+        response.setStatus(product.getStatus() != null ? product.getStatus().name() : "PENDING_APPROVAL");
+        response.setApprovedBy(product.getApprovedBy());
+        response.setApprovedAt(product.getApprovedAt());
+        response.setRejectionReason(product.getRejectionReason());
+        response.setRejectedAt(product.getRejectedAt());
+        response.setMinAcceptablePrice(product.getMinAcceptablePrice());
+        response.setIsActive(product.getIsActive());
+        
         return response;
     }
     

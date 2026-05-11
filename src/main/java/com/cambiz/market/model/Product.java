@@ -15,6 +15,13 @@ import java.util.List;
 @AllArgsConstructor
 public class Product {
     
+    // ========== PRODUCT STATUS ENUM ==========
+    public enum ProductStatus {
+        PENDING_APPROVAL,
+        APPROVED,
+        REJECTED
+    }
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -61,6 +68,25 @@ public class Product {
     
     private Boolean isActive = true;
     
+    @Column(name = "is_approved")
+    private Boolean isApproved = false;  // Changed to false - requires admin approval
+    
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status = ProductStatus.PENDING_APPROVAL;  // NEW: Status tracking
+    
+    @Column(name = "approved_by")
+    private String approvedBy;  // Changed from Long to String - stores admin email
+    
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+    
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+    
+    @Column(name = "rejected_at")
+    private LocalDateTime rejectedAt;  // NEW: When product was rejected
+    
     private Integer viewCount = 0;
     
     @Column(name = "created_at", updatable = false)
@@ -84,6 +110,8 @@ public class Product {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (isApproved == null) isApproved = false;
+        if (status == null) status = ProductStatus.PENDING_APPROVAL;
     }
     
     @PreUpdate

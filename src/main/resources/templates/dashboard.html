@@ -17,13 +17,13 @@
         .hero h1 { font-size: 2.4rem; font-weight: 800; color: #0f1111; }
         .hero p { color: #565959; font-size: 1.15rem; }
         .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
-        .about-card { background: white; border-radius: 12px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .about-card { background: white; border-radius: 12px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; }
         .about-card:hover { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
         .about-card .icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
         .about-card h3 { color: #0f1111; font-size: 1rem; font-weight: 700; }
         .about-card p { color: #565959; font-size: 0.85rem; }
         .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; border-radius: 12px; padding: 1.4rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .stat-card { background: white; border-radius: 12px; padding: 1.4rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; }
         .stat-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .stat-card .value { font-size: 1.8rem; font-weight: 800; color: #131921; }
         .stat-card .label { color: #565959; font-size: 0.75rem; margin-top: 0.3rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -31,7 +31,7 @@
         .login-card::before { content: ''; display: block; height: 4px; background: linear-gradient(90deg,#febd69,#ffd814); margin: -2.5rem -2.5rem 1.5rem -2.5rem; }
         .login-card h2 { font-size: 1.5rem; font-weight: 700; color: #0f1111; }
         .login-card p { color: #565959; margin-bottom: 1.5rem; }
-        .btn { padding: 12px 34px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 6px; min-width: 200px; }
+        .btn { padding: 12px 34px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; margin: 6px; min-width: 200px; transition: transform 0.2s; }
         .btn:hover { transform: translateY(-1px); }
         .btn-primary { background: #ffd814; color: #0f1111; }
         .btn-success { background: white; color: #0f1111; border: 1px solid #d5d9d9; }
@@ -44,15 +44,18 @@
         .welcome-banner h1 { font-size: 1.7rem; font-weight: 700; }
         .welcome-banner .subtitle { opacity: 0.9; font-size: 0.9rem; margin-top: 0.3rem; }
         .welcome-banner .badge { background: #febd69; color: #0f1111; padding: 6px 18px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; }
-        .welcome-banner .badge-admin { background: #d00; color: white; padding: 6px 18px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; }
+        .welcome-banner .badge-admin { background: #d00; color: white; padding: 6px 18px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:0.7;} }
         .section-title { font-size: 1.1rem; font-weight: 700; color: #0f1111; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; }
         .section-title::after { content: ''; flex: 1; height: 1px; background: #d5d9d9; }
         .quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
-        .action-card { background: white; border-radius: 12px; padding: 1.5rem 0.8rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #0f1111; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; border-bottom: 3px solid transparent; }
+        .action-card { background: white; border-radius: 12px; padding: 1.5rem 0.8rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #0f1111; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; border-bottom: 3px solid transparent; position: relative; }
         .action-card:hover { border-bottom-color: #febd69; transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
         .action-card .icon { font-size: 2rem; }
         .action-card .title { font-weight: 700; font-size: 0.85rem; }
         .action-card .sub { font-size: 0.7rem; color: #565959; }
+        .action-card.highlight { border: 2px solid #febd69; background: #fffdf5; }
+        .action-card .pending-badge { position: absolute; top: 8px; right: 8px; background: #d00; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; animation: pulse 1.5s infinite; }
         .panel-box { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
         .panel-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; flex-wrap: wrap; gap: 8px; }
         .panel-total { font-weight: 700; font-size: 1.1rem; margin-top: 10px; text-align: right; }
@@ -122,7 +125,61 @@
             document.getElementById('userTypeDisplay').textContent=userType==='ADMIN'?'🛡️ Admin Dashboard':userType==='SELLER'?'🏪 Seller Dashboard':'🛒 Buyer Dashboard';
             if(userType==='ADMIN'){
                 document.getElementById('roleBadgeEl').innerHTML='<span class="badge badge-admin">🔒 Admin</span>';
-                document.getElementById('userActions').innerHTML='<a href="/admin" class="action-card"><div class="icon">🛡️</div><div class="title">Admin Panel</div><div class="sub">Manage platform</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">View all</div></a><a href="/transactions" class="action-card"><div class="icon">💰</div><div class="title">Transactions</div><div class="sub">History</div></a>';
+                
+                // Fetch pending approval count for badge
+                var pendingBadge='';
+                var pendingCount=0;
+                try{
+                    var pendingRes=await fetch('/api/admin/products/pending-count');
+                    var pendingData=await pendingRes.json();
+                    if(pendingData.success&&pendingData.count>0){
+                        pendingCount=pendingData.count;
+                        pendingBadge='<span class="pending-badge">'+pendingCount+'</span>';
+                    }
+                }catch(e){}
+                
+                document.getElementById('userActions').innerHTML=
+                    '<a href="/admin/dashboard" class="action-card highlight">'+
+                        '<div class="icon">🛡️</div>'+
+                        '<div class="title">Admin Panel</div>'+
+                        '<div class="sub">Full dashboard</div>'+
+                    '</a>'+
+                    '<a href="/admin/dashboard#approval" class="action-card highlight" style="border-color:#d00;">'+
+                        (pendingBadge)+
+                        '<div class="icon">📋</div>'+
+                        '<div class="title">Product Approval</div>'+
+                        '<div class="sub">'+(pendingCount>0?pendingCount+' pending':'All clear')+'</div>'+
+                    '</a>'+
+                    '<a href="/store" class="action-card">'+
+                        '<div class="icon">🛍️</div>'+
+                        '<div class="title">Browse Store</div>'+
+                        '<div class="sub">View all products</div>'+
+                    '</a>'+
+                    '<a href="/admin/dashboard#transactions" class="action-card">'+
+                        '<div class="icon">💰</div>'+
+                        '<div class="title">Transactions</div>'+
+                        '<div class="sub">View history</div>'+
+                    '</a>'+
+                    '<a href="/admin/dashboard#users" class="action-card">'+
+                        '<div class="icon">👥</div>'+
+                        '<div class="title">Manage Users</div>'+
+                        '<div class="sub">Suspend/Activate</div>'+
+                    '</a>'+
+                    '<a href="/admin/dashboard#sellers" class="action-card">'+
+                        '<div class="icon">🏪</div>'+
+                        '<div class="title">Manage Sellers</div>'+
+                        '<div class="sub">Verify Premium</div>'+
+                    '</a>'+
+                    '<a href="/admin/dashboard#orders" class="action-card">'+
+                        '<div class="icon">📦</div>'+
+                        '<div class="title">All Orders</div>'+
+                        '<div class="sub">View orders</div>'+
+                    '</a>'+
+                    '<a href="/admin/dashboard#health" class="action-card">'+
+                        '<div class="icon">❤️</div>'+
+                        '<div class="title">System Health</div>'+
+                        '<div class="sub">Check status</div>'+
+                    '</a>';
             }else if(userType==='SELLER'){loadSellerView();}else{loadBuyerView();}
         }
         async function loadBuyerView(){
