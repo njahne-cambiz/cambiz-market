@@ -113,7 +113,10 @@ public class SecurityConfig {
                 .requestMatchers("/create-flash-sale").permitAll()
                 .requestMatchers("/create-coupon").permitAll()
                 .requestMatchers("/transactions").permitAll()
-                .requestMatchers("/admin").permitAll()
+                
+                // ADMIN PANEL PAGES
+                .requestMatchers("/admin", "/admin/", "/admin/dashboard", "/admin/dashboard/**").permitAll()
+                
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 
@@ -159,7 +162,22 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/categories/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/categories/**").authenticated()
 
-                // ADMIN ONLY
+                // ADMIN ANALYTICS - Public read access (dashboard loads with frontend auth check)
+                .requestMatchers(HttpMethod.GET, "/api/admin/stats").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/revenue-chart").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/analytics/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/products/pending-count").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/products/pending").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/products/approved").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/products/rejected").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/products/all").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/users").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/sellers").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/orders").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/transactions").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/health").permitAll()
+
+                // ADMIN ONLY - Write operations still require ADMIN role
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 .anyRequest().authenticated()
