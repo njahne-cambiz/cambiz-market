@@ -19,8 +19,9 @@ public class AdminPageController {
         return "admin/dashboard";
     }
     
-    @GetMapping("/admin")
-    public String adminRedirect() {
-        return "redirect:/admin/dashboard";
-    }
+    // ❌ REMOVE THIS METHOD - conflicts with StoreController
+    // @GetMapping("/admin")
+    // public String adminRedirect() {
+    //     return "redirect:/admin/dashboard";
+    // }
 }
