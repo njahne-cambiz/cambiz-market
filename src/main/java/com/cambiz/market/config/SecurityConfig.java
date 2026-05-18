@@ -114,9 +114,10 @@ public class SecurityConfig {
                 .requestMatchers("/create-coupon").permitAll()
                 .requestMatchers("/transactions").permitAll()
                 
-                // ADMIN PANEL PAGES
-                .requestMatchers("/admin", "/admin/", "/admin/dashboard", "/admin/dashboard/**").permitAll()
+                // ADMIN PANEL PAGES - Permit ALL
+                .requestMatchers("/admin", "/admin/", "/admin/**").permitAll()
                 
+                // STATIC RESOURCES
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
 
@@ -162,7 +163,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/categories/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/categories/**").authenticated()
 
-                // ADMIN ANALYTICS - Public read access (dashboard loads with frontend auth check)
+                // ADMIN ANALYTICS - Public read access
                 .requestMatchers(HttpMethod.GET, "/api/admin/stats").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/admin/revenue-chart").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/admin/analytics/**").permitAll()
@@ -177,7 +178,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/admin/transactions").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/admin/health").permitAll()
 
-                // ADMIN ONLY - Write operations still require ADMIN role
+                // ADMIN ONLY - Write operations
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 .anyRequest().authenticated()
