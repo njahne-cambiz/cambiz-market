@@ -205,20 +205,29 @@ async function loadUsers() {
         var r = await fetch('/api/admin/users');
         var d = (await r.json()).data;
         document.getElementById('usersTable').innerHTML = d.map(function(u) {
-            return '<tr><td><strong>#' + u.id + '</strong></td><td>' + u.firstName + ' ' + u.lastName + '</td><td>' + u.email + '</td><td><span class="badge bg-info">' + u.userType + '</span></td><td><span class="badge ' + (u.status === 'ACTIVE' ? 'bg-success' : 'bg-danger') + '"><span class="status-dot ' + (u.status === 'ACTIVE' ? 'status-active' : 'status-suspended') + '"></span>' + u.status + '</span></td><td>' + D(u.createdAt) + '</td><td>' + (u.status === 'ACTIVE' ? '<button class="btn btn-outline-danger btn-sm" onclick="toggleUser(' + u.id + ',\'SUSPENDED\',\'' + u.firstName + '\')"><i class="fas fa-ban"></i> Suspend</button>' : '<button class="btn btn-outline-success btn-sm" onclick="toggleUser(' + u.id + ',\'ACTIVE\',\'' + u.firstName + '\')"><i class="fas fa-check"></i> Activate</button>') + '</td></tr>';
+            var actions = '';
+            if (u.status === 'ACTIVE') {
+                actions += '<button class="btn btn-outline-danger btn-sm me-1" onclick="toggleUser(' + u.id + ',\'SUSPENDED\',\'' + u.firstName + '\')"><i class="fas fa-ban"></i> Suspend</button>';
+            } else {
+                actions += '<button class="btn btn-outline-success btn-sm me-1" onclick="toggleUser(' + u.id + ',\'ACTIVE\',\'' + u.firstName + '\')"><i class="fas fa-check"></i> Activate</button>';
+            }
+            actions += '<button class="btn btn-outline-dark btn-sm" onclick="deleteUser(' + u.id + ',\'' + u.firstName + ' ' + u.lastName + '\')"><i class="fas fa-trash"></i> Delete</button>';
+            return '<tr><td><strong>#' + u.id + '</strong></td><td>' + u.firstName + ' ' + u.lastName + '</td><td>' + u.email + '</td><td><span class="badge bg-info">' + u.userType + '</span></td><td><span class="badge ' + (u.status === 'ACTIVE' ? 'bg-success' : 'bg-danger') + '"><span class="status-dot ' + (u.status === 'ACTIVE' ? 'status-active' : 'status-suspended') + '"></span>' + u.status + '</span></td><td>' + D(u.createdAt) + '</td><td>' + actions + '</td></tr>';
         }).join('');
     } catch(e) {}
 }
 
-async function toggleUser(id, status, name) {
-    var action = status === 'SUSPENDED' ? 'Suspend' : 'Activate';
-    var icon = status === 'SUSPENDED' ? 'warning' : 'success';
-    var color = status === 'SUSPENDED' ? '#ef4444' : '#10b981';
-    var result = await showConfirm(action + ' User?', 'Are you sure you want to ' + action.toLowerCase() + ' <strong>' + name + '</strong>?', icon, action + ' User', color);
+async function deleteUser(id, name) {
+    var result = await showConfirm('Delete User?', 'Permanently delete <strong>' + name + '</strong>? This action cannot be undone!', 'error', 'Delete Permanently', '#dc2626');
     if(result.isConfirmed) {
-        await fetch('/api/admin/users/' + id + '/status?status=' + status, {method:'PUT'});
-        showToast('User ' + action.toLowerCase() + 'd successfully!', 'success');
-        loadUsers();
+        var r = await fetch('/api/admin/users/' + id, {method:'DELETE'});
+        var d = await r.json();
+        if(d.success) {
+            showToast('🗑️ User deleted permanently', 'success');
+            loadUsers();
+        } else {
+            showToast('❌ ' + (d.message || 'Failed to delete'), 'error');
+        }
     }
 }
 

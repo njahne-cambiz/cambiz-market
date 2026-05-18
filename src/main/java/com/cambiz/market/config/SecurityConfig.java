@@ -120,10 +120,10 @@ public class SecurityConfig {
                 // Order tracking pages - public
                 .requestMatchers("/order-tracking", "/track").permitAll()
 
-                // ========== ALL ADMIN API - PUBLIC FOR NOW ==========
+                // ALL ADMIN API - Public for now
                 .requestMatchers("/api/admin/**").permitAll()
 
-                // ========== EVERYTHING ELSE AUTHENTICATED ==========
+                // AUTHENTICATED ENDPOINTS
                 .requestMatchers("/api/cart/**").authenticated()
                 .requestMatchers("/api/orders/**").authenticated()
                 .requestMatchers("/api/makola/**").authenticated()
