@@ -42,7 +42,6 @@
         .welcome-banner h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
         .welcome-banner .subtitle { color: #9ca3af; font-size: 1rem; }
         .welcome-banner .badge { background: #febd69; color: #0f1111; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
-        .welcome-banner .badge-admin { background: #ef4444; color: white; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
         .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
         .action-card { background: white; border-radius: 12px; padding: 1.8rem 1rem; border: 1px solid #e5e7eb; text-align: center; text-decoration: none; color: #111827; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
         .action-card:hover { border-color: #febd69; transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
@@ -156,14 +155,14 @@
             document.getElementById('userView').style.display = 'block';
             var userType = 'BUYER';
             try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if(Array.isArray(roles) && roles.indexOf('ROLE_ADMIN') !== -1) userType = 'ADMIN'; else if(Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if(payload.userType === 'SELLER') userType = 'SELLER'; else if(payload.userType === 'ADMIN') userType = 'ADMIN'; } catch(e) {}
-            document.getElementById('userTypeDisplay').textContent = userType === 'ADMIN' ? '🛡️ Admin Dashboard' : userType === 'SELLER' ? '🏪 Seller Dashboard' : '🛒 Buyer Dashboard';
+            document.getElementById('userTypeDisplay').textContent = userType === 'ADMIN' ? '🛡️ Admin' : userType === 'SELLER' ? '🏪 Seller' : '🛒 Buyer';
             
             if(userType === 'ADMIN') {
-                document.getElementById('roleBadgeEl').innerHTML = '<span class="badge badge-admin">🔒 Admin</span>';
+                document.getElementById('roleBadgeEl').innerHTML = '<span class="badge" style="background:#ef4444;color:white;">🔒 Admin</span>';
                 document.getElementById('userActions').innerHTML =
-                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">View all products</div></a>' +
+                    '<a href="/admin/dashboard" class="action-card"><div class="icon">🛡️</div><div class="title">Admin Panel</div><div class="sub">Manage platform</div></a>' +
+                    '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">View products</div></a>' +
                     '<a href="/transactions" class="action-card"><div class="icon">💰</div><div class="title">Transactions</div><div class="sub">View history</div></a>' +
-                    '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">Add Product</div><div class="sub">List new item</div></a>' +
                     '<a href="/orders" class="action-card"><div class="icon">📦</div><div class="title">Orders</div><div class="sub">Manage orders</div></a>';
             } else if(userType === 'SELLER') { loadSellerView(); } else { loadBuyerView(); }
         }

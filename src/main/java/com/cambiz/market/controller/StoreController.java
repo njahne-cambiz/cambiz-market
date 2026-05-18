@@ -61,9 +61,14 @@ public class StoreController {
     @GetMapping("/transactions")
     public String transactions() { return "transactions"; }
 
-    @GetMapping("/admin")
-    public String admin() { return "redirect:/admin/dashboard"; }
-
     @GetMapping("/payment")
     public String payment() { return "payment"; }
+
+    // ========== ADMIN ROUTES ==========
+    
+    @GetMapping("/admin")
+    public String admin() { return "redirect:/admin/dashboard"; }
+    
+    @GetMapping("/admin/dashboard")
+    public String adminDashboard() { return "admin/dashboard"; }
 }
