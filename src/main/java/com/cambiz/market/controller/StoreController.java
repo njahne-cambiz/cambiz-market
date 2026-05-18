@@ -62,7 +62,7 @@ public class StoreController {
     public String transactions() { return "transactions"; }
 
     @GetMapping("/admin")
-    public String admin() { return "admin"; }
+    public String admin() { return "redirect:/admin/dashboard"; }
 
     @GetMapping("/payment")
     public String payment() { return "payment"; }
