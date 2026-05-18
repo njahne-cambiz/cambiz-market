@@ -75,15 +75,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/premium/benefits").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/premium/status/**").permitAll()
 
-                // Admin expiry endpoints - PUBLIC (for testing)
-                .requestMatchers(HttpMethod.POST, "/api/admin/expire-featured").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/admin/expire-premium").permitAll()
-
                 // Database migration - public
                 .requestMatchers("/api/admin/db/**").permitAll()
-
-                // Featured products - public to view
-                .requestMatchers(HttpMethod.GET, "/api/featured/**").permitAll()
 
                 // Uploaded images - public read access
                 .requestMatchers("/uploads/**").permitAll()
@@ -114,7 +107,7 @@ public class SecurityConfig {
                 .requestMatchers("/create-coupon").permitAll()
                 .requestMatchers("/transactions").permitAll()
                 
-                // ADMIN PANEL PAGES - Permit ALL
+                // ADMIN PANEL PAGES
                 .requestMatchers("/admin", "/admin/", "/admin/**").permitAll()
                 
                 // STATIC RESOURCES
@@ -127,15 +120,12 @@ public class SecurityConfig {
                 // Order tracking pages - public
                 .requestMatchers("/order-tracking", "/track").permitAll()
 
-                // ROLE-BASED DASHBOARDS
-                .requestMatchers("/api/dashboard/buyer").hasRole("BUYER")
-                .requestMatchers("/api/dashboard/seller").hasRole("SELLER")
-                .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
+                // ========== ALL ADMIN API - PUBLIC FOR NOW ==========
+                .requestMatchers("/api/admin/**").permitAll()
 
-                // AUTHENTICATED USERS
+                // ========== EVERYTHING ELSE AUTHENTICATED ==========
                 .requestMatchers("/api/cart/**").authenticated()
                 .requestMatchers("/api/orders/**").authenticated()
-                .requestMatchers("/api/store-tracking/**").authenticated()
                 .requestMatchers("/api/makola/**").authenticated()
                 .requestMatchers("/api/payments/**").authenticated()
                 .requestMatchers("/api/njangi/**").authenticated()
@@ -143,43 +133,15 @@ public class SecurityConfig {
                 .requestMatchers("/api/flash-sales/**").authenticated()
                 .requestMatchers("/api/coupons/**").authenticated()
                 .requestMatchers("/api/transactions/**").authenticated()
-
-                // Wishlist API
                 .requestMatchers("/api/wishlist/**").authenticated()
-
-                // Premium upgrade requires authentication
                 .requestMatchers(HttpMethod.POST, "/api/premium/**").authenticated()
-
-                // Featured POST requires authentication
                 .requestMatchers(HttpMethod.POST, "/api/featured/**").authenticated()
-
-                // Products - Write
                 .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
-
-                // Categories - Write
                 .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/categories/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/categories/**").authenticated()
-
-                // ADMIN ANALYTICS - Public read access
-                .requestMatchers(HttpMethod.GET, "/api/admin/stats").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/revenue-chart").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/analytics/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/products/pending-count").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/products/pending").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/products/approved").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/products/rejected").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/products/all").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/users").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/sellers").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/orders").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/transactions").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/admin/health").permitAll()
-
-                // ADMIN ONLY - Write operations
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 .anyRequest().authenticated()
             )
