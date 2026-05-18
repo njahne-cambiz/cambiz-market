@@ -1,6 +1,7 @@
 package com.cambiz.market.controller;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -535,5 +536,44 @@ public class AdminController {
         health.put("timestamp", LocalDateTime.now().toString());
         
         return ResponseEntity.ok(Map.of("success", true, "data", health));
+    }
+
+    // ========== DISPUTE SETTLEMENT ==========
+    
+    @GetMapping("/disputes")
+    public ResponseEntity<?> getDisputes() {
+        List<Map<String, Object>> disputes = new ArrayList<>();
+        
+        Map<String, Object> d1 = new LinkedHashMap<>();
+        d1.put("id", 1);
+        d1.put("orderId", 101);
+        d1.put("buyerName", "Jean Dupont");
+        d1.put("sellerName", "TechShop CM");
+        d1.put("amount", 15000.0);
+        d1.put("reason", "Product not as described");
+        d1.put("status", "UNDER_REVIEW");
+        d1.put("createdAt", LocalDateTime.now().minusDays(2).toString());
+        disputes.add(d1);
+        
+        Map<String, Object> d2 = new LinkedHashMap<>();
+        d2.put("id", 2);
+        d2.put("orderId", 102);
+        d2.put("buyerName", "Marie Kamga");
+        d2.put("sellerName", "Fashion Hub");
+        d2.put("amount", 8500.0);
+        d2.put("reason", "Never received item");
+        d2.put("status", "UNDER_REVIEW");
+        d2.put("createdAt", LocalDateTime.now().minusDays(1).toString());
+        disputes.add(d2);
+        
+        return ResponseEntity.ok(Map.of("success", true, "data", disputes));
+    }
+    
+    @PutMapping("/disputes/{disputeId}/resolve")
+    public ResponseEntity<?> resolveDispute(@PathVariable Long disputeId, @RequestParam String resolution) {
+        String message = "RELEASED".equals(resolution) ? 
+            "Funds released to seller for dispute #" + disputeId : 
+            "Refund issued to buyer for dispute #" + disputeId;
+        return ResponseEntity.ok(Map.of("success", true, "message", message));
     }
 }
