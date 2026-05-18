@@ -5,78 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | CamBiz Market</title>
     <style>
-        /* Base & Reset */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f3f4f6; min-height: 100vh; color: #333; }
-        
-        /* Header */
         .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: center; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .header .logo { font-size: 1.5rem; font-weight: 800; color: white; text-decoration: none; letter-spacing: -0.5px; }
         .header .logo span { color: #febd69; }
-        
-        /* Layout */
         .container { max-width: 1100px; margin: 2.5rem auto; padding: 0 1.5rem; }
-        
-        /* Typography & Titles */
         .section-title { font-size: 1.2rem; font-weight: 700; color: #0f1111; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.8rem; margin-top: 2rem; }
         .section-title::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
-        
-        /* Hero Section (Public) */
         .hero { text-align: center; margin-bottom: 3rem; padding: 2rem 0; }
         .hero .icon { font-size: 4.5rem; margin-bottom: 1rem; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .hero h1 { font-size: 2.6rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem; }
         .hero p { color: #4b5563; font-size: 1.2rem; }
-        
-        /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-bottom: 2.5rem; }
         .stat-card { background: white; border-radius: 12px; padding: 1.5rem; text-align: center; border: 1px solid #e5e7eb; transition: transform 0.2s, box-shadow 0.2s; }
         .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
         .stat-card .value { font-size: 2rem; font-weight: 800; color: #111827; }
         .stat-card .label { color: #6b7280; font-size: 0.8rem; margin-top: 0.4rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        /* Auth / Login Card */
         .login-card { background: white; border-radius: 12px; padding: 3rem 2.5rem; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; max-width: 440px; margin: 0 auto 3rem auto; position: relative; overflow: hidden; }
         .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #febd69, #ffd814); }
         .login-card h2 { font-size: 1.6rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem; }
         .login-card p { color: #6b7280; margin-bottom: 2rem; }
-        
-        /* Buttons */
         .btn { padding: 12px 34px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; font-size: 14px; margin: 6px; min-width: 200px; transition: all 0.2s; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .btn-primary { background: #ffd814; color: #0f1111; }
         .btn-primary:hover { background: #f7ca00; }
         .btn-success { background: white; color: #0f1111; border: 1px solid #d5d9d9; }
         .btn-success:hover { background: #f3f4f6; }
-        
-        /* Forms */
         .login-form { display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8fafc; border-radius: 8px; text-align: left; border: 1px solid #e2e8f0; }
         .login-form input { display: block; width: 100%; padding: 12px 14px; margin-bottom: 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; transition: border-color 0.2s; }
         .login-form input:focus { border-color: #febd69; outline: none; box-shadow: 0 0 0 3px rgba(254, 189, 105, 0.2); }
         .login-form button { width: 100%; margin: 0; }
-        
-        /* Views */
         .user-view { display: none; }
-        
-        /* User Banner */
         .welcome-banner { background: linear-gradient(135deg, #1f2937, #111827); color: white; border-radius: 12px; padding: 2.5rem; margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .welcome-banner h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
         .welcome-banner .subtitle { color: #9ca3af; font-size: 1rem; }
         .welcome-banner .badge { background: #febd69; color: #0f1111; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
-        .welcome-banner .badge-admin { background: #ef4444; color: white; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
-        
-        /* Quick Actions */
+        .welcome-banner .badge-admin { background: #ef4444; color: white; padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
         .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
-        .action-card { background: white; border-radius: 12px; padding: 1.8rem 1rem; border: 1px solid #e5e7eb; text-align: center; text-decoration: none; color: #111827; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; }
+        .action-card { background: white; border-radius: 12px; padding: 1.8rem 1rem; border: 1px solid #e5e7eb; text-align: center; text-decoration: none; color: #111827; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
         .action-card:hover { border-color: #febd69; transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
         .action-card .icon { font-size: 2.2rem; }
         .action-card .title { font-weight: 700; font-size: 0.95rem; }
         .action-card .sub { font-size: 0.8rem; color: #6b7280; }
-        .action-card.highlight { background: #fffbeb; border-color: #fde68a; }
-        .action-card .pending-badge { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        
-        /* Panels & Tables */
         .panel-box { background: white; border-radius: 12px; padding: 1.8rem; border: 1px solid #e5e7eb; margin-bottom: 2rem; }
         .panel-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.95rem; flex-wrap: wrap; gap: 10px; }
         .panel-row:last-child { border-bottom: none; }
@@ -85,23 +57,17 @@
         .order-row { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr; gap: 15px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; align-items: center; font-size: 0.9rem; }
         .order-row.header-row { background: #f9fafb; font-weight: 700; color: #6b7280; font-size: 0.85rem; text-transform: uppercase; }
         .order-row:last-child { border-bottom: none; }
-        
-        /* Status Colors */
         .status { font-weight: 700; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; display: inline-block; text-align: center; }
         .status-PENDING { background: #fef3c7; color: #d97706; }
         .status-CONFIRMED { background: #dbeafe; color: #2563eb; }
         .status-SHIPPED { background: #f3e8ff; color: #7e22ce; }
         .status-DELIVERED { background: #d1fae5; color: #059669; }
-        
-        /* Small Buttons */
         .btn-sm { padding: 8px 16px; font-size: 0.85rem; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: transform 0.1s; }
         .btn-sm:hover { transform: translateY(-1px); }
         .btn-confirm { background: #ffd814; color: #0f1111; }
         .btn-ship { background: #1f2937; color: white; }
         .btn-reject { background: #fee2e2; color: #ef4444; }
         .btn-add-cart { background: #10b981; color: white; }
-        
-        /* Universal Shared Elements */
         .shared-about-section { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e5e7eb; }
         .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
         .about-card { background: white; border-radius: 12px; padding: 2rem; text-align: center; border: 1px solid #e5e7eb; transition: transform 0.2s, box-shadow 0.2s; }
@@ -109,26 +75,13 @@
         .about-card .icon { font-size: 2.8rem; margin-bottom: 1rem; }
         .about-card h3 { color: #111827; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
         .about-card p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; }
-        
         .logout-btn { text-align: center; margin: 3rem 0; }
         .logout-btn a { color: #6b7280; font-weight: 600; text-decoration: none; padding: 10px 24px; border-radius: 6px; font-size: 0.95rem; border: 1px solid #e5e7eb; transition: all 0.2s; }
         .logout-btn a:hover { background: #fee2e2; color: #ef4444; border-color: #fecaca; }
-        
         .footer { text-align: center; padding: 2rem; color: #6b7280; font-size: 0.9rem; margin-top: 2rem; }
         .empty-state { text-align: center; padding: 3rem; color: #6b7280; font-style: italic; }
-        
-        /* Media Queries */
-        @media(max-width: 768px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .hero h1 { font-size: 2rem; }
-            .quick-actions { grid-template-columns: repeat(2, 1fr); }
-            .order-row { grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem; padding: 12px; }
-            .order-row.header-row { display: none; } /* Hide headers on mobile for cleaner stack */
-        }
-        @media(max-width: 500px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .quick-actions { grid-template-columns: 1fr; }
-        }
+        @media(max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 2rem; } .quick-actions { grid-template-columns: repeat(2, 1fr); } .order-row { grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem; padding: 12px; } .order-row.header-row { display: none; } }
+        @media(max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -137,76 +90,41 @@
     </header>
 
     <div class="container">
-        
-        <!-- ================= PUBLIC VIEW ================= -->
         <div id="publicView">
-            <div class="hero">
-                <div class="icon">🚀</div>
-                <h1>Welcome to CamBiz Market</h1>
-                <p>Cameroon's Premier E-Commerce Platform</p>
-            </div>
-            
+            <div class="hero"><div class="icon">🚀</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform</p></div>
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="value" id="pubProductCount">-</div>
-                    <div class="label">Products</div>
-                </div>
-                <div class="stat-card">
-                    <div class="value">2k+</div>
-                    <div class="label">Users</div>
-                </div>
-                <div class="stat-card">
-                    <div class="value">20</div>
-                    <div class="label">Categories</div>
-                </div>
-                <div class="stat-card">
-                    <div class="value">24/7</div>
-                    <div class="label">Available</div>
-                </div>
+                <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
+                <div class="stat-card"><div class="value">2k+</div><div class="label">Users</div></div>
+                <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
+                <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
             </div>
-
             <div class="login-card">
-                <h2>Sign In</h2>
-                <p>Access your CamBiz Market account</p>
+                <h2>Sign In</h2><p>Access your CamBiz Market account</p>
                 <button class="btn btn-primary" onclick="showLogin()">Sign In</button>
                 <a href="/register" class="btn btn-success">Create Account</a>
-                
                 <div class="login-form" id="loginForm">
                     <input type="email" id="loginEmail" placeholder="Email Address">
                     <input type="password" id="loginPassword" placeholder="Password">
                     <button class="btn btn-primary" onclick="doLogin()">Log In Securely</button>
-                    <p id="loginError" style="color: #ef4444; margin-top: 12px; display: none; font-size: 0.9rem; font-weight: 600;"></p>
+                    <p id="loginError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;font-weight:600;"></p>
                 </div>
             </div>
         </div>
 
-        <!-- ================= USER VIEW ================= -->
         <div id="userView" class="user-view">
             <div class="welcome-banner">
-                <div>
-                    <h1>👋 Welcome back!</h1>
-                    <p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p>
-                </div>
+                <div><h1>👋 Welcome back!</h1><p class="subtitle"><span id="premiumStatus"></span><span id="userTypeDisplay"></span></p></div>
                 <span id="roleBadgeEl"></span>
             </div>
-
             <div class="stats-grid" id="userStats"></div>
-            
             <div id="buyerCartPanel" style="display:none;"></div>
             <div id="buyerOffersPanel" style="display:none;"></div>
-            
             <div class="section-title">⚡ Quick Actions</div>
             <div class="quick-actions" id="userActions"></div>
-            
             <div id="sellerPanel" style="display:none;"></div>
-            
-            <div class="logout-btn">
-                <a href="#" onclick="logout()">Sign Out of CamBiz</a>
-            </div>
+            <div class="logout-btn"><a href="#" onclick="logout()">Sign Out of CamBiz</a></div>
         </div>
 
-        <!-- ================= SHARED ABOUT SECTION ================= -->
-        <!-- Moved outside to be visible across public, admin, seller, and buyer views -->
         <div class="shared-about-section">
             <div class="section-title">💡 Why Choose CamBiz Market?</div>
             <div class="about-grid">
@@ -215,89 +133,39 @@
                 <div class="about-card"><div class="icon">📈</div><h3>Boost Business</h3><p>Access premium seller tools to expand your customer reach.</p></div>
                 <div class="about-card"><div class="icon">🤖</div><h3>AI Negotiation</h3><p>Utilize Makola AI pricing for fair and automated bargaining.</p></div>
                 <div class="about-card"><div class="icon">🤝</div><h3>Njangi Groups</h3><p>Buy together with friends and community members to save.</p></div>
-                <div class="about-card"><div class="icon">⚡</div><h3>Flash Sales</h3><p>Score massive discounts during our exclusive limited-time deals.</p></div>
+                <div class="about-card"><div class="icon">⚡</div><h3>Flash Sales</h3><p>Score massive discounts during exclusive limited-time deals.</p></div>
             </div>
         </div>
-
-        <!-- ================= SHARED FOOTER ================= -->
-        <div class="footer">
-            <p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p>
-        </div>
-
+        <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
     </div>
 
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        
-        if(token) {
-            loadUserDashboard();
-            checkPremiumStatus();
-        } else {
-            init();
-        }
+        if(token) { loadUserDashboard(); checkPremiumStatus(); } else { init(); }
 
         async function init() {
-            try {
-                var r = await fetch('/api/products?page=0&size=200');
-                var d = await r.json();
-                if(d.data) document.getElementById('pubProductCount').textContent = d.data.length;
-            } catch(e) {}
+            try { var r = await fetch('/api/products?page=0&size=200'); var d = await r.json(); if(d.data) document.getElementById('pubProductCount').textContent = d.data.length; } catch(e) {}
         }
 
         async function checkPremiumStatus() {
-            try {
-                var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token }});
-                var d = await r.json();
-                if(d.success && d.data && d.data.isPremium) {
-                    document.getElementById('premiumStatus').textContent = '🏆 Premium | ';
-                }
-            } catch(e) {}
+            try { var r = await fetch('/api/premium/my-status', { headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success && d.data && d.data.isPremium) document.getElementById('premiumStatus').textContent = '🏆 Premium | '; } catch(e) {}
         }
 
         async function loadUserDashboard() {
             document.getElementById('publicView').style.display = 'none';
             document.getElementById('userView').style.display = 'block';
-            
             var userType = 'BUYER';
-            try {
-                var payload = JSON.parse(atob(token.split('.')[1]));
-                var roles = payload.roles || [];
-                if(Array.isArray(roles) && roles.indexOf('ROLE_ADMIN') !== -1) userType = 'ADMIN';
-                else if(Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER';
-                else if(payload.userType === 'SELLER') userType = 'SELLER';
-                else if(payload.userType === 'ADMIN') userType = 'ADMIN';
-            } catch(e) {}
-            
+            try { var payload = JSON.parse(atob(token.split('.')[1])); var roles = payload.roles || []; if(Array.isArray(roles) && roles.indexOf('ROLE_ADMIN') !== -1) userType = 'ADMIN'; else if(Array.isArray(roles) && roles.indexOf('ROLE_SELLER') !== -1) userType = 'SELLER'; else if(payload.userType === 'SELLER') userType = 'SELLER'; else if(payload.userType === 'ADMIN') userType = 'ADMIN'; } catch(e) {}
             document.getElementById('userTypeDisplay').textContent = userType === 'ADMIN' ? '🛡️ Admin Dashboard' : userType === 'SELLER' ? '🏪 Seller Dashboard' : '🛒 Buyer Dashboard';
             
             if(userType === 'ADMIN') {
                 document.getElementById('roleBadgeEl').innerHTML = '<span class="badge badge-admin">🔒 Admin</span>';
-                
-                var pendingBadge = '';
-                var pendingCount = 0;
-                try {
-                    var pendingRes = await fetch('/api/admin/products/pending-count');
-                    var pendingData = await pendingRes.json();
-                    if(pendingData.success && pendingData.count > 0) {
-                        pendingCount = pendingData.count;
-                        pendingBadge = '<span class="pending-badge">' + pendingCount + '</span>';
-                    }
-                } catch(e) {}
-                
                 document.getElementById('userActions').innerHTML =
-                    '<a href="/admin/dashboard" class="action-card highlight"><div class="icon">🛡️</div><div class="title">Admin Panel</div><div class="sub">Full dashboard</div></a>' +
-                    '<a href="/admin/dashboard#approval" class="action-card highlight" style="border-color:#d00;">' + pendingBadge + '<div class="icon">📋</div><div class="title">Product Approval</div><div class="sub">' + (pendingCount > 0 ? pendingCount + ' pending' : 'All clear') + '</div></a>' +
                     '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">View all products</div></a>' +
-                    '<a href="/admin/dashboard#transactions" class="action-card"><div class="icon">💰</div><div class="title">Transactions</div><div class="sub">View history</div></a>' +
-                    '<a href="/admin/dashboard#users" class="action-card"><div class="icon">👥</div><div class="title">Manage Users</div><div class="sub">Suspend/Activate</div></a>' +
-                    '<a href="/admin/dashboard#sellers" class="action-card"><div class="icon">🏪</div><div class="title">Manage Sellers</div><div class="sub">Verify Premium</div></a>' +
-                    '<a href="/admin/dashboard#orders" class="action-card"><div class="icon">📦</div><div class="title">All Orders</div><div class="sub">View orders</div></a>' +
-                    '<a href="/admin/dashboard#health" class="action-card"><div class="icon">❤️</div><div class="title">System Health</div><div class="sub">Check status</div></a>';
-            } else if(userType === 'SELLER') {
-                loadSellerView();
-            } else {
-                loadBuyerView();
-            }
+                    '<a href="/transactions" class="action-card"><div class="icon">💰</div><div class="title">Transactions</div><div class="sub">View history</div></a>' +
+                    '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">Add Product</div><div class="sub">List new item</div></a>' +
+                    '<a href="/orders" class="action-card"><div class="icon">📦</div><div class="title">Orders</div><div class="sub">Manage orders</div></a>';
+            } else if(userType === 'SELLER') { loadSellerView(); } else { loadBuyerView(); }
         }
 
         async function loadBuyerView() {
@@ -309,9 +177,7 @@
                 '<a href="/njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi</div><div class="sub">Groups</div></a>' +
                 '<a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer</div><div class="sub">Earn</div></a>';
             document.getElementById('roleBadgeEl').innerHTML = '<span class="badge">Buyer</span>';
-            loadBuyerStats();
-            loadBuyerCart();
-            loadBuyerOffers();
+            loadBuyerStats(); loadBuyerCart(); loadBuyerOffers();
         }
 
         async function loadBuyerStats() {
@@ -319,8 +185,7 @@
                 '<div class="stat-card"><div class="value" id="cartCount">-</div><div class="label">Cart Items</div></div>' +
                 '<div class="stat-card"><div class="value" id="wishlistCount">-</div><div class="label">Wishlist</div></div>' +
                 '<div class="stat-card"><div class="value" id="orderCount">-</div><div class="label">Orders</div></div>' +
-                '<div class="stat-card"><div class="value" id="cartTotal" style="font-size: 1.5rem;">-</div><div class="label">Cart Total</div></div>';
-            
+                '<div class="stat-card"><div class="value" id="cartTotal" style="font-size:1.5rem;">-</div><div class="label">Cart Total</div></div>';
             try { var cr = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token }}); var cd = await cr.json(); if(cd.success && cd.data && cd.data.items) { document.getElementById('cartCount').textContent = cd.data.items.length; document.getElementById('cartTotal').textContent = cd.data.total.toLocaleString() + ' XAF'; } } catch(e) { document.getElementById('cartCount').textContent = '0'; }
             try { var wr = await fetch('/api/wishlist/count', { headers: { 'Authorization': 'Bearer ' + token }}); var wd = await wr.json(); if(wd.success) document.getElementById('wishlistCount').textContent = wd.count; } catch(e) { document.getElementById('wishlistCount').textContent = '0'; }
             try { var o = await fetch('/api/orders/my-orders', { headers: { 'Authorization': 'Bearer ' + token }}); var od = await o.json(); if(od.success && od.data) document.getElementById('orderCount').textContent = od.data.length; } catch(e) { document.getElementById('orderCount').textContent = '0'; }
@@ -328,49 +193,21 @@
 
         async function loadBuyerCart() {
             var panel = document.getElementById('buyerCartPanel');
-            try {
-                var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token }});
-                var d = await r.json();
-                if(d.success && d.data && d.data.items && d.data.items.length > 0) {
-                    panel.style.display = 'block';
-                    var html = '<div class="panel-box"><div class="section-title" style="margin-top:0;">🛒 Your Cart</div>';
-                    for(var i = 0; i < d.data.items.length; i++) {
-                        var item = d.data.items[i];
-                        html += '<div class="panel-row"><span><strong>' + item.productName + '</strong> x' + item.quantity + '</span><span>' + item.effectivePrice.toLocaleString() + ' XAF</span></div>';
-                    }
-                    html += '<div class="panel-total">Total: ' + d.data.total.toLocaleString() + ' XAF</div>';
-                    html += '<a href="/cart" class="btn btn-primary" style="margin-top:1rem; width:100%;">⚡ Proceed to Checkout</a></div>';
-                    panel.innerHTML = html;
-                } else {
-                    panel.style.display = 'none';
-                    panel.innerHTML = '';
-                }
+            try { var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json();
+                if(d.success && d.data && d.data.items && d.data.items.length > 0) { panel.style.display = 'block'; var html = '<div class="panel-box"><div class="section-title" style="margin-top:0;">🛒 Your Cart</div>';
+                    for(var i = 0; i < d.data.items.length; i++) { var item = d.data.items[i]; html += '<div class="panel-row"><span><strong>' + item.productName + '</strong> x' + item.quantity + '</span><span>' + item.effectivePrice.toLocaleString() + ' XAF</span></div>'; }
+                    html += '<div class="panel-total">Total: ' + d.data.total.toLocaleString() + ' XAF</div>'; html += '<a href="/cart" class="btn btn-primary" style="margin-top:1rem;width:100%;">⚡ Proceed to Checkout</a></div>'; panel.innerHTML = html;
+                } else { panel.style.display = 'none'; panel.innerHTML = ''; }
             } catch(e) { panel.style.display = 'none'; }
         }
 
         async function loadBuyerOffers() {
             var panel = document.getElementById('buyerOffersPanel');
-            try {
-                var r = await fetch('/api/makola/my-offers', { headers: { 'Authorization': 'Bearer ' + token }});
-                var d = await r.json();
-                if(d.success && d.data && d.data.length > 0) {
-                    panel.style.display = 'block';
-                    var html = '<div class="panel-box"><div class="section-title" style="margin-top:0;">💬 Makola AI Offers</div>';
-                    for(var i = 0; i < d.data.length; i++) {
-                        var o = d.data[i];
-                        var sc = o.status === 'ACCEPTED' ? '#10b981' : o.status === 'REJECTED' ? '#ef4444' : '#d97706';
-                        var action = '';
-                        if(o.status === 'ACCEPTED') { action = '<button class="btn-sm btn-add-cart" onclick="addNegotiatedToCart(' + o.negotiationId + ')">🛒 Add to Cart</button>'; }
-                        else if(o.status === 'REJECTED') { action = '<button class="btn-sm btn-reject" onclick="dismissOffer(' + o.negotiationId + ')">✕ Dismiss</button>'; }
-                        else { action = '<span style="color:#d97706; font-weight:600;">⏳ Waiting</span>'; }
-                        html += '<div class="panel-row" id="offer-row-' + o.negotiationId + '"><span><strong>' + o.productName + '</strong></span><span class="status" style="background-color: transparent; color:' + sc + ';">' + o.status + '</span><span>' + o.buyerOffer.toLocaleString() + ' XAF</span><span>' + action + '</span></div>';
-                    }
-                    html += '</div>';
-                    panel.innerHTML = html;
-                } else {
-                    panel.style.display = 'none';
-                    panel.innerHTML = '';
-                }
+            try { var r = await fetch('/api/makola/my-offers', { headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json();
+                if(d.success && d.data && d.data.length > 0) { panel.style.display = 'block'; var html = '<div class="panel-box"><div class="section-title" style="margin-top:0;">💬 Makola AI Offers</div>';
+                    for(var i = 0; i < d.data.length; i++) { var o = d.data[i]; var sc = o.status === 'ACCEPTED' ? '#10b981' : o.status === 'REJECTED' ? '#ef4444' : '#d97706'; var action = ''; if(o.status === 'ACCEPTED') { action = '<button class="btn-sm btn-add-cart" onclick="addNegotiatedToCart(' + o.negotiationId + ')">🛒 Add to Cart</button>'; } else if(o.status === 'REJECTED') { action = '<button class="btn-sm btn-reject" onclick="dismissOffer(' + o.negotiationId + ')">✕ Dismiss</button>'; } else { action = '<span style="color:#d97706;font-weight:600;">⏳ Waiting</span>'; }
+                        html += '<div class="panel-row" id="offer-row-' + o.negotiationId + '"><span><strong>' + o.productName + '</strong></span><span class="status" style="background-color:transparent;color:' + sc + ';">' + o.status + '</span><span>' + o.buyerOffer.toLocaleString() + ' XAF</span><span>' + action + '</span></div>'; }
+                    html += '</div>'; panel.innerHTML = html; } else { panel.style.display = 'none'; panel.innerHTML = ''; }
             } catch(e) { panel.style.display = 'none'; }
         }
 
@@ -390,52 +227,20 @@
                 '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Browse Store</div><div class="sub">View all</div></a>' +
                 '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Go Premium</div><div class="sub">Upgrade</div></a>';
             document.getElementById('sellerPanel').style.display = 'block';
-            await loadSellerOrders();
-            await loadSellerOffers();
+            await loadSellerOrders(); await loadSellerOffers();
         }
 
         async function loadSellerOrders() {
-            try {
-                var r = await fetch('/api/orders/seller-orders', { headers: { 'Authorization': 'Bearer ' + token }});
-                var d = await r.json();
-                var pc = 0; try { var pr = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token }}); var pd = await pr.json(); if(pd.success && pd.data) pc = pd.data.length; } catch(e) {}
-                var oc = d.success && d.data ? d.data.length : 0;
-                var rev = 0; if(d.success && d.data) { for(var i = 0; i < d.data.length; i++) { rev += d.data[i].sellerPayout || 0; } }
-                
-                document.getElementById('userStats').innerHTML = 
-                    '<div class="stat-card"><div class="value">' + pc + '</div><div class="label">My Products</div></div>' +
-                    '<div class="stat-card"><div class="value">' + oc + '</div><div class="label">Orders</div></div>' +
-                    '<div class="stat-card"><div class="value" style="font-size: 1.5rem;">' + rev.toLocaleString() + ' XAF</div><div class="label">Total Revenue</div></div>';
-                
-                var panel = document.getElementById('sellerPanel');
-                var html = '<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="order-row header-row"><span>Order #</span><span>Product</span><span>Qty</span><span>Status</span><span>Action</span></div>';
-                if(d.success && d.data && d.data.length > 0) {
-                    for(var j = 0; j < d.data.length; j++) {
-                        var o = d.data[j];
-                        var items = o.items ? o.items.map(function(i) { return i.productName; }).join(', ') : 'Product';
-                        var qty = o.items ? o.items.reduce(function(s, i) { return s + i.quantity; }, 0) : 0;
-                        html += '<div class="order-row"><span><strong>#' + o.sellerOrderId.toString().slice(-6) + '</strong></span><span>' + items + '</span><span>' + qty + '</span><span class="status status-' + o.status + '">' + o.status + '</span><span>' + (o.status === 'PENDING' ? '<button class="btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'CONFIRMED\')">Confirm</button>' : o.status === 'CONFIRMED' ? '<button class="btn-sm btn-ship" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'SHIPPED\')">Ship</button>' : o.status === 'SHIPPED' ? '<button class="btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'DELIVERED\')">Deliver</button>' : '<span style="color:#059669; font-weight: 700;">✅ Done</span>') + '</span></div>';
-                    }
-                } else { html += '<div class="empty-state">You have no new orders yet.</div>'; }
-                html += '</div>';
-                panel.innerHTML = html;
+            try { var r = await fetch('/api/orders/seller-orders', { headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); var pc = 0; try { var pr = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token }}); var pd = await pr.json(); if(pd.success && pd.data) pc = pd.data.length; } catch(e) {} var oc = d.success && d.data ? d.data.length : 0; var rev = 0; if(d.success && d.data) { for(var i = 0; i < d.data.length; i++) { rev += d.data[i].sellerPayout || 0; } }
+                document.getElementById('userStats').innerHTML = '<div class="stat-card"><div class="value">' + pc + '</div><div class="label">My Products</div></div><div class="stat-card"><div class="value">' + oc + '</div><div class="label">Orders</div></div><div class="stat-card"><div class="value" style="font-size:1.5rem;">' + rev.toLocaleString() + ' XAF</div><div class="label">Total Revenue</div></div>';
+                var panel = document.getElementById('sellerPanel'); var html = '<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="order-row header-row"><span>Order #</span><span>Product</span><span>Qty</span><span>Status</span><span>Action</span></div>';
+                if(d.success && d.data && d.data.length > 0) { for(var j = 0; j < d.data.length; j++) { var o = d.data[j]; var items = o.items ? o.items.map(function(i) { return i.productName; }).join(', ') : 'Product'; var qty = o.items ? o.items.reduce(function(s, i) { return s + i.quantity; }, 0) : 0; html += '<div class="order-row"><span><strong>#' + o.sellerOrderId.toString().slice(-6) + '</strong></span><span>' + items + '</span><span>' + qty + '</span><span class="status status-' + o.status + '">' + o.status + '</span><span>' + (o.status === 'PENDING' ? '<button class="btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'CONFIRMED\')">Confirm</button>' : o.status === 'CONFIRMED' ? '<button class="btn-sm btn-ship" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'SHIPPED\')">Ship</button>' : o.status === 'SHIPPED' ? '<button class="btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'DELIVERED\')">Deliver</button>' : '<span style="color:#059669;font-weight:700;">✅ Done</span>') + '</span></div>'; } } else { html += '<div class="empty-state">You have no new orders yet.</div>'; } html += '</div>'; panel.innerHTML = html;
             } catch(e) {}
         }
 
         async function loadSellerOffers() {
-            try {
-                var r = await fetch('/api/makola/seller/offers', { headers: { 'Authorization': 'Bearer ' + token }});
-                var d = await r.json();
-                var panel = document.getElementById('sellerPanel');
-                var html = '<div class="section-title" style="margin-top:2rem;">💰 Active Customer Offers</div><div class="order-table"><div class="order-row header-row"><span>Product</span><span>Offer</span><span>Status</span><span>Action</span></div>';
-                if(d.success && d.data && d.data.length > 0) {
-                    for(var i = 0; i < d.data.length; i++) {
-                        var o = d.data[i];
-                        html += '<div class="order-row"><span><strong>' + o.productName + '</strong></span><span>' + o.buyerOffer.toLocaleString() + ' XAF</span><span class="status status-PENDING">' + o.status + '</span><span style="display:flex; gap: 8px;"><button class="btn-sm btn-confirm" onclick="acceptOffer(' + o.negotiationId + ')">Accept</button><button class="btn-sm btn-reject" onclick="rejectOffer(' + o.negotiationId + ')">Reject</button></span></div>';
-                    }
-                } else { html += '<div class="empty-state">No active offers at the moment.</div>'; }
-                html += '</div>';
-                panel.innerHTML += html;
+            try { var r = await fetch('/api/makola/seller/offers', { headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); var panel = document.getElementById('sellerPanel'); var html = '<div class="section-title" style="margin-top:2rem;">💰 Active Customer Offers</div><div class="order-table"><div class="order-row header-row"><span>Product</span><span>Offer</span><span>Status</span><span>Action</span></div>';
+                if(d.success && d.data && d.data.length > 0) { for(var i = 0; i < d.data.length; i++) { var o = d.data[i]; html += '<div class="order-row"><span><strong>' + o.productName + '</strong></span><span>' + o.buyerOffer.toLocaleString() + ' XAF</span><span class="status status-PENDING">' + o.status + '</span><span style="display:flex;gap:8px;"><button class="btn-sm btn-confirm" onclick="acceptOffer(' + o.negotiationId + ')">Accept</button><button class="btn-sm btn-reject" onclick="rejectOffer(' + o.negotiationId + ')">Reject</button></span></div>'; } } else { html += '<div class="empty-state">No active offers at the moment.</div>'; } html += '</div>'; panel.innerHTML += html;
             } catch(e) {}
         }
 
@@ -444,32 +249,14 @@
         async function rejectOffer(nid) { var reason = prompt('Reason (optional):'); try { var url = '/api/makola/reject/' + nid; if(reason) url += '?reason=' + encodeURIComponent(reason); var r = await fetch(url, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success) { alert('Offer rejected'); loadSellerView(); } else { alert('❌ ' + (d.message || 'Failed')); } } catch(e) { alert('Network error'); } }
 
         function showLogin() { document.getElementById('loginForm').style.display = 'block'; }
-        
         async function doLogin() {
-            var email = document.getElementById('loginEmail').value;
-            var password = document.getElementById('loginPassword').value;
-            var errorEl = document.getElementById('loginError');
-            try {
-                var r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) });
-                var d = await r.json();
-                if(d.success && d.data && d.data.token) {
-                    localStorage.setItem('token', d.data.token);
-                    location.reload();
-                } else {
-                    errorEl.textContent = d.message || 'Login failed. Please check your credentials.';
-                    errorEl.style.display = 'block';
-                }
-            } catch(e) {
-                errorEl.textContent = 'Network error. Please try again later.';
-                errorEl.style.display = 'block';
-            }
+            var email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value, errorEl = document.getElementById('loginError');
+            try { var r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) }); var d = await r.json();
+                if(d.success && d.data && d.data.token) { localStorage.setItem('token', d.data.token); location.reload(); } else { errorEl.textContent = d.message || 'Login failed.'; errorEl.style.display = 'block'; }
+            } catch(e) { errorEl.textContent = 'Network error.'; errorEl.style.display = 'block'; }
         }
 
-        function logout() {
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            location.href = '/dashboard';
-        }
+        function logout() { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; }
     </script>
 </body>
 </html>

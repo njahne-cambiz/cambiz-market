@@ -31,7 +31,6 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
     
-    // Create product (only for SELLERS)
     @Transactional
     public ProductResponse createProduct(ProductRequest request, Long sellerId) {
         User seller = userRepository.findById(sellerId)
@@ -51,8 +50,6 @@ public class ProductService {
         product.setImageUrls(request.getImageUrls());
         product.setSeller(seller);
         product.setIsFeatured(request.getIsFeatured() != null ? request.getIsFeatured() : false);
-        
-        // Set approval status - new products need admin approval
         product.setIsApproved(false);
         product.setStatus(Product.ProductStatus.PENDING_APPROVAL);
         
@@ -66,7 +63,6 @@ public class ProductService {
         return ProductResponse.fromProduct(product);
     }
     
-    // Get product by ID
     @Transactional
     public ProductResponse getProduct(Long id) {
         Product product = productRepository.findById(id)
@@ -77,16 +73,14 @@ public class ProductService {
         return ProductResponse.fromProduct(product);
     }
     
-    // Get all products for public store - ONLY APPROVED & ACTIVE
     @Transactional(readOnly = true)
     public List<ProductResponse> getAllProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Product> products = productRepository.findActiveAndApproved(pageable);
+        Page<Product> products = productRepository.findByIsActiveTrue(pageable);
         products.getContent().forEach(p -> p.getImageUrls().size());
         return ProductResponse.fromProducts(products.getContent());
     }
     
-    // Get featured products - ONLY APPROVED
     @Transactional(readOnly = true)
     public List<ProductResponse> getFeaturedProducts() {
         List<Product> products = productRepository.findTop10ByIsFeaturedTrueAndApprovedOrderByCreatedAtDesc();
@@ -94,7 +88,6 @@ public class ProductService {
         return ProductResponse.fromProducts(products);
     }
     
-    // Get products by category - ONLY APPROVED
     @Transactional(readOnly = true)
     public List<ProductResponse> getProductsByCategory(Long categoryId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -103,7 +96,6 @@ public class ProductService {
         return ProductResponse.fromProducts(products.getContent());
     }
     
-    // Search products - ONLY APPROVED
     @Transactional(readOnly = true)
     public List<ProductResponse> searchProducts(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -112,7 +104,6 @@ public class ProductService {
         return ProductResponse.fromProducts(products.getContent());
     }
     
-    // Update product (only owner)
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request, Long sellerId) {
         Product product = productRepository.findById(id)
@@ -122,7 +113,6 @@ public class ProductService {
             throw new RuntimeException("You can only update your own products");
         }
         
-        // Only update fields that are provided (not null)
         if (request.getName() != null) product.setName(request.getName());
         if (request.getDescription() != null) product.setDescription(request.getDescription());
         if (request.getPrice() != null) product.setPrice(request.getPrice());
@@ -132,12 +122,10 @@ public class ProductService {
         if (request.getImageUrls() != null) product.setImageUrls(request.getImageUrls());
         if (request.getIsFeatured() != null) product.setIsFeatured(request.getIsFeatured());
         
-        // Reset to pending if product is updated (admin should re-review)
         product.setIsApproved(false);
         product.setStatus(Product.ProductStatus.PENDING_APPROVAL);
         product.setRejectionReason(null);
         
-        // Handle category assignment
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -148,7 +136,6 @@ public class ProductService {
         return ProductResponse.fromProduct(product);
     }
     
-    // Delete product (only owner)
     @Transactional
     public void deleteProduct(Long id, Long sellerId) {
         Product product = productRepository.findById(id)
@@ -162,7 +149,6 @@ public class ProductService {
         productRepository.save(product);
     }
     
-    // Get seller's products (all statuses for seller dashboard)
     @Transactional(readOnly = true)
     public List<ProductResponse> getSellerProducts(Long sellerId) {
         User seller = userRepository.findById(sellerId)
@@ -172,24 +158,19 @@ public class ProductService {
         return ProductResponse.fromProducts(products);
     }
     
-    // Get Product entity by ID (not DTO) — used for image upload operations
     @Transactional(readOnly = true)
     public Product getProductEntity(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-        product.getImageUrls().size(); // Initialize lazy collection
+        product.getImageUrls().size();
         return product;
     }
     
-    // Save/update a Product entity directly — used for image upload/deletion
     @Transactional
     public void updateProductEntity(Product product) {
         productRepository.save(product);
     }
     
-    // ========== PRODUCT APPROVAL METHODS ==========
-    
-    // Get pending approval products (for admin)
     @Transactional(readOnly = true)
     public List<ProductResponse> getPendingApprovalProducts() {
         List<Product> products = productRepository.findByIsApprovedFalseOrIsApprovedNull();
@@ -197,7 +178,6 @@ public class ProductService {
         return ProductResponse.fromProducts(products);
     }
     
-    // Get approved products (for admin)
     @Transactional(readOnly = true)
     public List<ProductResponse> getApprovedProducts() {
         List<Product> products = productRepository.findByIsApprovedTrue();
@@ -205,7 +185,6 @@ public class ProductService {
         return ProductResponse.fromProducts(products);
     }
     
-    // Get rejected products (for admin)
     @Transactional(readOnly = true)
     public List<ProductResponse> getRejectedProducts() {
         List<Product> products = productRepository.findByIsApprovedFalseAndRejectionReasonNotNull();
@@ -213,7 +192,6 @@ public class ProductService {
         return ProductResponse.fromProducts(products);
     }
     
-    // Get all products for admin (including pending/rejected)
     @Transactional(readOnly = true)
     public List<ProductResponse> getAllProductsAdmin() {
         List<Product> products = productRepository.findAll();
@@ -221,7 +199,6 @@ public class ProductService {
         return ProductResponse.fromProducts(products);
     }
     
-    // Admin delete product
     @Transactional
     public void adminDeleteProduct(Long id) {
         Product product = productRepository.findById(id)
@@ -230,7 +207,6 @@ public class ProductService {
         productRepository.save(product);
     }
     
-    // Approve a product
     @Transactional
     public ProductResponse approveProduct(Long productId, String adminEmail) {
         Product product = productRepository.findById(productId)
@@ -241,13 +217,12 @@ public class ProductService {
         product.setStatus(Product.ProductStatus.APPROVED);
         product.setApprovedBy(adminEmail);
         product.setApprovedAt(LocalDateTime.now());
-        product.setRejectionReason(null); // Clear any previous rejection
+        product.setRejectionReason(null);
         
         product = productRepository.save(product);
         return ProductResponse.fromProduct(product);
     }
     
-    // Reject a product
     @Transactional
     public ProductResponse rejectProduct(Long productId, String reason) {
         Product product = productRepository.findById(productId)
@@ -263,7 +238,6 @@ public class ProductService {
         return ProductResponse.fromProduct(product);
     }
     
-    // Batch approve products
     @Transactional
     public int batchApproveProducts(List<Long> productIds, String adminEmail) {
         int approvedCount = 0;
@@ -283,19 +257,16 @@ public class ProductService {
         return approvedCount;
     }
     
-    // Get pending approval count (for admin badge)
     @Transactional(readOnly = true)
     public long getPendingApprovalCount() {
         return productRepository.countByIsApprovedFalseOrIsApprovedNull();
     }
     
-    // Get total products count
     @Transactional(readOnly = true)
     public long getTotalProducts() {
         return productRepository.count();
     }
     
-    // Get top selling products (for analytics)
     @Transactional(readOnly = true)
     public List<ProductResponse> getTopSellingProducts() {
         List<Product> products = productRepository.findAll();
