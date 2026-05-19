@@ -8,7 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --sidebar-w: 240px; --bg: #0f172a; --accent: #f59e0b; --accent2: #3b82f6; }
+        :root { --sidebar-w: 240px; --bg: #0f172a; --accent: #f59e0b; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; min-height: 100vh; }
         .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--bg); color: #fff; overflow-y: auto; z-index: 100; box-shadow: 2px 0 15px rgba(0,0,0,0.1); }
@@ -46,7 +46,7 @@
         .status-active { background: #10b981; }
         .status-suspended { background: #ef4444; }
         .search-input { border-radius: 8px; border: 1px solid #e2e8f0; padding: 8px 14px; font-size: 0.85rem; width: 220px; }
-        .search-input:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .search-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
         @media (max-width: 768px) { .sidebar { width: 0; overflow: hidden; } .sidebar.open { width: var(--sidebar-w); } .main { margin-left: 0; padding: 15px; } .stat-row { grid-template-columns: repeat(2,1fr); } }
     </style>
 </head>
@@ -57,6 +57,7 @@
     <a class="nav-link active" onclick="showTab('dashboard')"><i class="fas fa-th-large"></i> Dashboard</a>
     <a class="nav-link" onclick="showTab('users')"><i class="fas fa-users"></i> Users</a>
     <a class="nav-link" onclick="showTab('sellers')"><i class="fas fa-store"></i> Sellers</a>
+    <a class="nav-link" onclick="showTab('categories')"><i class="fas fa-tags"></i> Categories</a>
     <a class="nav-link" onclick="showTab('products')"><i class="fas fa-box"></i> Products <span class="badge-count" id="pendingBadge">0</span></a>
     <a class="nav-link" onclick="showTab('orders')"><i class="fas fa-shopping-cart"></i> Orders</a>
     <a class="nav-link" onclick="showTab('transactions')"><i class="fas fa-exchange-alt"></i> Transactions</a>
@@ -70,68 +71,48 @@
         <button class="btn btn-outline-danger btn-logout" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
     </div>
 
-    <!-- DASHBOARD -->
     <div class="tab-panel active" id="tab-dashboard">
         <div class="stat-row" id="dashStats"></div>
         <div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div>
     </div>
 
-    <!-- USERS -->
     <div class="tab-panel" id="tab-users">
-        <div class="card">
-            <div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span><input type="text" class="search-input" placeholder="Search users..." oninput="filterTable('usersTable', this.value)"></div>
-            <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div>
-        </div>
+        <div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span><input type="text" class="search-input" placeholder="Search users..." oninput="filterTable('usersTable', this.value)"></div>
+        <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div>
     </div>
 
-    <!-- SELLERS -->
     <div class="tab-panel" id="tab-sellers">
-        <div class="card">
-            <div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div>
-            <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div>
-        </div>
+        <div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div>
+        <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div>
     </div>
 
-    <!-- PRODUCTS -->
+    <div class="tab-panel" id="tab-categories">
+        <div class="card"><div class="card-header"><span><i class="fas fa-tags text-info me-2"></i>Category Management</span><button class="btn btn-primary btn-sm" onclick="showCategoryModal()"><i class="fas fa-plus"></i> Add Category</button></div>
+        <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead><tbody id="categoriesTable"></tbody></table></div></div></div>
+    </div>
+
     <div class="tab-panel" id="tab-products">
-        <div class="stat-row">
-            <div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div>
-            <div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div>
-            <div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div>
-            <div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><span><i class="fas fa-box text-info me-2"></i>Product Listings</span>
-                <div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button>
-                <select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div>
-            </div>
-            <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div>
-        </div>
+        <div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div>
+        <div class="card"><div class="card-header"><span><i class="fas fa-box text-info me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div>
+        <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div>
     </div>
 
-    <!-- ORDERS -->
     <div class="tab-panel" id="tab-orders">
         <div class="card"><div class="card-header"><span><i class="fas fa-shopping-cart text-info me-2"></i>All Orders</span></div>
         <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="ordersTable"></tbody></table></div></div></div>
     </div>
 
-    <!-- TRANSACTIONS -->
     <div class="tab-panel" id="tab-transactions">
         <div class="card"><div class="card-header"><span><i class="fas fa-exchange-alt text-success me-2"></i>Transactions</span></div>
         <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Ref</th><th>Type</th><th>Amount</th><th>Fee</th><th>Net</th><th>Status</th><th>Date</th></tr></thead><tbody id="transactionsTable"></tbody></table></div></div></div>
     </div>
 
-    <!-- DISPUTES -->
     <div class="tab-panel" id="tab-disputes">
-        <div class="stat-row">
-            <div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div>
-            <div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div>
-        </div>
+        <div class="stat-row"><div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div><div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div></div>
         <div class="card"><div class="card-header"><span><i class="fas fa-gavel text-danger me-2"></i>Dispute Cases</span></div>
         <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Order</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead><tbody id="disputesTable"></tbody></table></div></div></div>
     </div>
 
-    <!-- HEALTH -->
     <div class="tab-panel" id="tab-health">
         <div class="stat-row" id="healthStats"></div>
     </div>
@@ -140,271 +121,150 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-var revenueChart = null;
-var currentProductFilter = 'pending';
-var F = function(v) { return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'XAF',maximumFractionDigits:0}).format(v||0); };
-var D = function(d) { return d ? new Date(d).toLocaleDateString('en-GB') : 'N/A'; };
-
-// SweetAlert Toast
-function showToast(title, icon) {
-    Swal.fire({ toast: true, position: 'top-end', icon: icon || 'success', title: title, showConfirmButton: false, timer: 3000, timerProgressBar: true });
+var revenueChart=null,currentProductFilter='pending';
+var F=function(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'XAF',maximumFractionDigits:0}).format(v||0)};
+var D=function(d){return d?new Date(d).toLocaleDateString('en-GB'):'N/A'};
+function showToast(t,i){Swal.fire({toast:true,position:'top-end',icon:i||'success',title:t,showConfirmButton:false,timer:3000,timerProgressBar:true})}
+function showConfirm(t,x,i,c,k){return Swal.fire({title:t,text:x,icon:i||'question',showCancelButton:true,confirmButtonText:c||'Confirm',cancelButtonText:'Cancel',confirmButtonColor:k||'#3b82f6',cancelButtonColor:'#64748b',reverseButtons:true})}
+function confirmLogout(){showConfirm('Sign Out?','You will be redirected to the main dashboard.','question','Sign Out','#ef4444').then(function(r){if(r.isConfirmed){localStorage.removeItem('token');window.location.href='/dashboard'}})}
+function showTab(t){
+    document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active')});
+    document.querySelectorAll('.sidebar .nav-link').forEach(function(l){l.classList.remove('active')});
+    document.getElementById('tab-'+t).classList.add('active');
+    var links=document.querySelectorAll('.sidebar .nav-link');
+    var titles={dashboard:'📊 Dashboard Overview',users:'👥 User Management',sellers:'🏪 Seller Management',categories:'📁 Category Management',products:'📦 Product Approval',orders:'📋 Orders',transactions:'💰 Transactions',disputes:'⚖️ Dispute Settlement',health:'❤️ System Health'};
+    links.forEach(function(l){if(l.getAttribute('onclick')&&l.getAttribute('onclick').indexOf("'"+t+"'")!==-1)l.classList.add('active')});
+    document.getElementById('pageTitle').innerHTML=titles[t]||t;
+    if(t==='dashboard')loadDashboard();
+    if(t==='users')loadUsers();
+    if(t==='sellers')loadSellers();
+    if(t==='categories')loadCategories();
+    if(t==='products')loadProducts('pending');
+    if(t==='orders')loadOrders();
+    if(t==='transactions')loadTransactions();
+    if(t==='disputes')loadDisputes();
+    if(t==='health')loadHealth();
 }
 
-// SweetAlert Confirm
-function showConfirm(title, text, icon, confirmText, confirmColor) {
-    return Swal.fire({ title: title, text: text, icon: icon || 'question', showCancelButton: true, confirmButtonText: confirmText || 'Confirm', cancelButtonText: 'Cancel', confirmButtonColor: confirmColor || '#3b82f6', cancelButtonColor: '#64748b', reverseButtons: true });
-}
-
-function confirmLogout() {
-    showConfirm('Sign Out?', 'You will be redirected to the main dashboard.', 'question', 'Sign Out', '#ef4444').then(function(result) {
-        if(result.isConfirmed) { localStorage.removeItem('token'); window.location.href = '/dashboard'; }
-    });
-}
-
-function showTab(t) {
-    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-    document.querySelectorAll('.sidebar .nav-link').forEach(function(l) { l.classList.remove('active'); });
-    document.getElementById('tab-' + t).classList.add('active');
-    var links = document.querySelectorAll('.sidebar .nav-link');
-    var titles = {dashboard:'📊 Dashboard Overview',users:'👥 User Management',sellers:'🏪 Seller Management',products:'📦 Product Approval',orders:'📋 Orders',transactions:'💰 Transactions',disputes:'⚖️ Dispute Settlement',health:'❤️ System Health'};
-    links.forEach(function(l) { if(l.getAttribute('onclick') && l.getAttribute('onclick').indexOf("'" + t + "'") !== -1) l.classList.add('active'); });
-    document.getElementById('pageTitle').innerHTML = titles[t] || t;
-    if(t === 'dashboard') loadDashboard();
-    if(t === 'users') loadUsers();
-    if(t === 'sellers') loadSellers();
-    if(t === 'products') loadProducts('pending');
-    if(t === 'orders') loadOrders();
-    if(t === 'transactions') loadTransactions();
-    if(t === 'disputes') loadDisputes();
-    if(t === 'health') loadHealth();
-}
-
-// ========== DASHBOARD ==========
-async function loadDashboard() {
-    try {
-        var r = await fetch('/api/admin/stats');
-        var d = (await r.json()).data;
-        document.getElementById('dashStats').innerHTML =
-            '<div class="stat-card"><h3>' + d.totalUsers + '</h3><small>👥 Users</small></div>' +
-            '<div class="stat-card"><h3>' + d.totalSellers + '</h3><small>🏪 Sellers</small></div>' +
-            '<div class="stat-card"><h3>' + d.totalProducts + '</h3><small>📦 Products</small></div>' +
-            '<div class="stat-card"><h3>' + F(d.totalRevenue) + '</h3><small>💰 Revenue</small></div>';
-        var cr = await fetch('/api/admin/revenue-chart');
-        var cd = (await cr.json()).data;
-        if(cd) {
-            var ctx = document.getElementById('revenueChart').getContext('2d');
-            if(revenueChart) revenueChart.destroy();
-            revenueChart = new Chart(ctx, {type:'line', data:{labels:Object.keys(cd), datasets:[{label:'Revenue', data:Object.values(cd), borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.08)', fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#10b981'}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:function(v){return F(v);}}}, x:{grid:{display:false}}}} });
+// DASHBOARD
+async function loadDashboard(){
+    try{
+        var r=await fetch('/api/admin/stats'),d=(await r.json()).data;
+        document.getElementById('dashStats').innerHTML='<div class="stat-card"><h3>'+d.totalUsers+'</h3><small>👥 Users</small></div><div class="stat-card"><h3>'+d.totalSellers+'</h3><small>🏪 Sellers</small></div><div class="stat-card"><h3>'+d.totalProducts+'</h3><small>📦 Products</small></div><div class="stat-card"><h3>'+F(d.totalRevenue)+'</h3><small>💰 Revenue</small></div>';
+        var cr=await fetch('/api/admin/revenue-chart'),cd=(await cr.json()).data;
+        if(cd){var ctx=document.getElementById('revenueChart').getContext('2d');if(revenueChart)revenueChart.destroy();
+            revenueChart=new Chart(ctx,{type:'line',data:{labels:Object.keys(cd),datasets:[{label:'Revenue',data:Object.values(cd),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#10b981'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return F(v)}}},x:{grid:{display:false}}}}});
         }
-    } catch(e) { console.error(e); }
+    }catch(e){}
 }
 
-// ========== USERS ==========
-async function loadUsers() {
-    try {
-        var r = await fetch('/api/admin/users');
-        var d = (await r.json()).data;
-        document.getElementById('usersTable').innerHTML = d.map(function(u) {
-            var actions = '';
-            if (u.status === 'ACTIVE') {
-                actions += '<button class="btn btn-outline-danger btn-sm me-1" onclick="toggleUser(' + u.id + ',\'SUSPENDED\',\'' + u.firstName + '\')"><i class="fas fa-ban"></i> Suspend</button>';
-            } else {
-                actions += '<button class="btn btn-outline-success btn-sm me-1" onclick="toggleUser(' + u.id + ',\'ACTIVE\',\'' + u.firstName + '\')"><i class="fas fa-check"></i> Activate</button>';
-            }
-            actions += '<button class="btn btn-outline-dark btn-sm" onclick="deleteUser(' + u.id + ',\'' + u.firstName + ' ' + u.lastName + '\')"><i class="fas fa-trash"></i> Delete</button>';
-            return '<tr><td><strong>#' + u.id + '</strong></td><td>' + u.firstName + ' ' + u.lastName + '</td><td>' + u.email + '</td><td><span class="badge bg-info">' + u.userType + '</span></td><td><span class="badge ' + (u.status === 'ACTIVE' ? 'bg-success' : 'bg-danger') + '"><span class="status-dot ' + (u.status === 'ACTIVE' ? 'status-active' : 'status-suspended') + '"></span>' + u.status + '</span></td><td>' + D(u.createdAt) + '</td><td>' + actions + '</td></tr>';
-        }).join('');
-    } catch(e) {}
+// USERS
+async function loadUsers(){
+    try{var r=await fetch('/api/admin/users'),d=(await r.json()).data;
+        document.getElementById('usersTable').innerHTML=d.map(function(u){
+            var a='';
+            if(u.status==='ACTIVE')a+='<button class="btn btn-outline-danger btn-sm me-1" onclick="toggleUser('+u.id+',\'SUSPENDED\',\''+u.firstName+'\')"><i class="fas fa-ban"></i> Suspend</button>';
+            else a+='<button class="btn btn-outline-success btn-sm me-1" onclick="toggleUser('+u.id+',\'ACTIVE\',\''+u.firstName+'\')"><i class="fas fa-check"></i> Activate</button>';
+            a+='<button class="btn btn-outline-dark btn-sm" onclick="deleteUser('+u.id+',\''+u.firstName+' '+u.lastName+'\')"><i class="fas fa-trash"></i> Delete</button>';
+            return '<tr><td><strong>#'+u.id+'</strong></td><td>'+u.firstName+' '+u.lastName+'</td><td>'+u.email+'</td><td><span class="badge bg-info">'+u.userType+'</span></td><td><span class="badge '+(u.status==='ACTIVE'?'bg-success':'bg-danger')+'"><span class="status-dot '+(u.status==='ACTIVE'?'status-active':'status-suspended')+'"></span>'+u.status+'</span></td><td>'+D(u.createdAt)+'</td><td>'+a+'</td></tr>';
+        }).join('')}catch(e){}
+}
+async function toggleUser(id,s,n){
+    var a=s==='SUSPENDED'?'Suspend':'Activate',i=s==='SUSPENDED'?'warning':'success',c=s==='SUSPENDED'?'#ef4444':'#10b981';
+    var r=await showConfirm(a+' User?','Are you sure you want to '+a.toLowerCase()+' <strong>'+n+'</strong>?',i,a+' User',c);
+    if(r.isConfirmed){await fetch('/api/admin/users/'+id+'/status?status='+s,{method:'PUT'});showToast('User '+a.toLowerCase()+'d!','success');loadUsers()}
+}
+async function deleteUser(id,n){
+    var r=await showConfirm('Delete User?','Permanently delete <strong>'+n+'</strong>? This cannot be undone!','error','Delete Permanently','#dc2626');
+    if(r.isConfirmed){var x=await fetch('/api/admin/users/'+id,{method:'DELETE'}),d=await x.json();if(d.success){showToast('🗑️ User deleted','success');loadUsers()}else{showToast('❌ '+(d.message||'Failed'),'error')}}
 }
 
-async function deleteUser(id, name) {
-    var result = await showConfirm('Delete User?', 'Permanently delete <strong>' + name + '</strong>? This action cannot be undone!', 'error', 'Delete Permanently', '#dc2626');
-    if(result.isConfirmed) {
-        var r = await fetch('/api/admin/users/' + id, {method:'DELETE'});
-        var d = await r.json();
-        if(d.success) {
-            showToast('🗑️ User deleted permanently', 'success');
-            loadUsers();
-        } else {
-            showToast('❌ ' + (d.message || 'Failed to delete'), 'error');
-        }
-    }
+// SELLERS
+async function loadSellers(){
+    try{var r=await fetch('/api/admin/sellers'),d=(await r.json()).data;
+        document.getElementById('sellersTable').innerHTML=d.map(function(s){
+            var p=s.accountType==='PREMIUM';
+            return '<tr><td><strong>#'+s.id+'</strong></td><td><strong>'+(s.businessName||'N/A')+'</strong></td><td>'+s.firstName+' '+s.lastName+'</td><td>'+s.email+'</td><td><span class="badge '+(p?'bg-warning text-dark':'bg-secondary')+'">'+(p?'🏆 ':'')+s.accountType+'</span></td><td>'+(!p?'<button class="btn btn-warning btn-sm" onclick="verifySeller('+s.id+',\''+(s.businessName||s.firstName)+'\')"><i class="fas fa-check-circle"></i> Verify Premium</button>':'<button class="btn btn-outline-danger btn-sm" onclick="revokeSeller('+s.id+',\''+(s.businessName||s.firstName)+'\')"><i class="fas fa-times-circle"></i> Revoke Premium</button>')+'</td></tr>';
+        }).join('')}catch(e){}
+}
+async function verifySeller(id,n){
+    var r=await showConfirm('Verify Premium?','Grant <strong>'+n+'</strong> premium status?','question','Verify','#f59e0b');
+    if(r.isConfirmed){var x=await fetch('/api/admin/sellers/'+id+'/verify',{method:'PUT'}),d=await x.json();showToast('🏆 '+d.message,'success');loadSellers()}
+}
+async function revokeSeller(id,n){
+    var r=await showConfirm('Revoke Premium?','Remove premium from <strong>'+n+'</strong>?','warning','Revoke','#ef4444');
+    if(r.isConfirmed){var x=await fetch('/api/admin/sellers/'+id+'/revoke-premium',{method:'PUT'}),d=await x.json();showToast(d.message,'info');loadSellers()}
 }
 
-// ========== SELLERS ==========
-async function loadSellers() {
-    try {
-        var r = await fetch('/api/admin/sellers');
-        var d = (await r.json()).data;
-        document.getElementById('sellersTable').innerHTML = d.map(function(s) {
-            var isPremium = s.accountType === 'PREMIUM';
-            return '<tr><td><strong>#' + s.id + '</strong></td><td><strong>' + (s.businessName || 'N/A') + '</strong></td><td>' + s.firstName + ' ' + s.lastName + '</td><td>' + s.email + '</td><td><span class="badge ' + (isPremium ? 'bg-warning text-dark' : 'bg-secondary') + '">' + (isPremium ? '🏆 ' : '') + s.accountType + '</span></td><td>' + (!isPremium ? '<button class="btn btn-warning btn-sm" onclick="verifySeller(' + s.id + ',\'' + (s.businessName || s.firstName) + '\')"><i class="fas fa-check-circle"></i> Verify Premium</button>' : '<button class="btn btn-outline-danger btn-sm" onclick="revokeSeller(' + s.id + ',\'' + (s.businessName || s.firstName) + '\')"><i class="fas fa-times-circle"></i> Revoke Premium</button>') + '</td></tr>';
-        }).join('');
-    } catch(e) {}
+// CATEGORIES
+async function loadCategories(){
+    try{var r=await fetch('/api/admin/categories'),d=(await r.json()).data;
+        document.getElementById('categoriesTable').innerHTML=(d||[]).map(function(c){
+            return '<tr><td><strong>#'+c.id+'</strong></td><td>'+(c.name||'N/A')+'</td><td>'+(c.productCount||0)+'</td><td><span class="badge '+(c.active?'bg-success':'bg-secondary')+'">'+(c.active?'Active':'Disabled')+'</span></td><td><button class="btn btn-outline-primary btn-sm me-1" onclick="editCategory('+c.id+',\''+(c.name||'')+'\','+c.active+')"><i class="fas fa-edit"></i></button><button class="btn btn-outline-danger btn-sm" onclick="deleteCategory('+c.id+',\''+(c.name||'')+'\')"><i class="fas fa-trash"></i></button></td></tr>';
+        }).join('')}catch(e){}
+}
+function showCategoryModal(id,name,active){
+    var isEdit=arguments.length>0&&!!id;
+    Swal.fire({title:isEdit?'Edit Category':'Add Category',html:'<input id="swalCatName" class="form-control" placeholder="Category name" value="'+(name||'')+'" style="border-radius:8px;">'+(isEdit?'<div class="form-check mt-3"><input id="swalCatActive" class="form-check-input" type="checkbox" '+(active?'checked':'')+'><label class="form-check-label">Active</label></div>':''),showCancelButton:true,confirmButtonText:isEdit?'Update':'Add',confirmButtonColor:'#3b82f6',preConfirm:function(){var n=document.getElementById('swalCatName').value.trim();if(!n){Swal.showValidationMessage('Name required');return false}return{name:n,active:isEdit?document.getElementById('swalCatActive').checked:true}}}).then(async function(r){if(r.isConfirmed){var u=isEdit?'/api/admin/categories/'+id:'/api/admin/categories',m=isEdit?'PUT':'POST',x=await fetch(u,{method:m,headers:{'Content-Type':'application/json'},body:JSON.stringify(r.value)}),d=await x.json();showToast(d.message,'success');loadCategories()}})
+}
+function editCategory(id,name,active){showCategoryModal(id,name,active)}
+async function deleteCategory(id,name){
+    var r=await showConfirm('Delete Category?','Delete <strong>'+name+'</strong>?','warning','Delete','#ef4444');
+    if(r.isConfirmed){var x=await fetch('/api/admin/categories/'+id,{method:'DELETE'}),d=await x.json();showToast(d.message,d.success?'success':'error');if(d.success)loadCategories()}
 }
 
-async function verifySeller(id, name) {
-    var result = await showConfirm('Verify Premium Seller?', 'Grant <strong>' + name + '</strong> premium status with lower fees and verified badge?', 'question', 'Verify Premium', '#f59e0b');
-    if(result.isConfirmed) {
-        var r = await fetch('/api/admin/sellers/' + id + '/verify', {method:'PUT'});
-        var d = await r.json();
-        showToast('🏆 ' + d.message, 'success');
-        loadSellers();
-    }
+// PRODUCTS
+async function loadProducts(f){
+    currentProductFilter=f||currentProductFilter;
+    try{
+        var p=await fetch('/api/admin/products/pending').then(function(r){return r.json()});
+        var a=await fetch('/api/admin/products/approved').then(function(r){return r.json()});
+        var rj=await fetch('/api/admin/products/rejected').then(function(r){return r.json()});
+        var all=await fetch('/api/admin/products/all').then(function(r){return r.json()});
+        document.getElementById('prodPending').textContent=(p.data||[]).length;
+        document.getElementById('prodApproved').textContent=(a.data||[]).length;
+        document.getElementById('prodRejected').textContent=(rj.data||[]).length;
+        document.getElementById('prodTotal').textContent=(all.data||[]).length;
+        document.getElementById('pendingBadge').textContent=(p.data||[]).length;
+        var data=currentProductFilter==='pending'?p.data:currentProductFilter==='approved'?a.data:currentProductFilter==='rejected'?rj.data:all.data;
+        document.getElementById('productsTable').innerHTML=(data||[]).map(function(pr){
+            var sb=currentProductFilter==='pending'?'bg-warning text-dark':currentProductFilter==='approved'?'bg-success':'bg-danger';
+            var ac=currentProductFilter==='pending'?'<button class="btn btn-success btn-sm me-1" onclick="approveProduct('+pr.id+',\''+(pr.name||'Product').replace(/'/g,"\\'")+'\')"><i class="fas fa-check"></i> Approve</button><button class="btn btn-danger btn-sm" onclick="showReject('+pr.id+',\''+(pr.name||'Product').replace(/'/g,"\\'")+'\')"><i class="fas fa-times"></i> Reject</button>':currentProductFilter==='rejected'?'<button class="btn btn-outline-success btn-sm" onclick="approveProduct('+pr.id+',\''+(pr.name||'Product').replace(/'/g,"\\'")+'\')"><i class="fas fa-redo"></i> Approve Anyway</button><br><small class="text-danger">'+(pr.rejectionReason||'')+'</small>':'<small class="text-muted"><i class="fas fa-check-circle text-success"></i> Approved</small>';
+            return '<tr><td>'+(currentProductFilter==='pending'?'<input type="checkbox" class="prodCheck" value="'+pr.id+'">':'')+'</td><td><strong>'+(pr.name||'N/A')+'</strong></td><td>'+(pr.sellerBusinessName||pr.sellerName||'N/A')+'</td><td><strong>'+F(pr.price)+'</strong></td><td><span class="badge '+sb+'">'+currentProductFilter+'</span></td><td>'+D(pr.createdAt)+'</td><td>'+ac+'</td></tr>';
+        }).join('')}catch(e){}
+}
+async function approveProduct(id,n){
+    var r=await showConfirm('Approve?','<strong>'+n+'</strong> will be visible on the marketplace.','question','Approve','#10b981');
+    if(r.isConfirmed){await fetch('/api/admin/products/'+id+'/approve',{method:'PUT'});showToast('✅ Approved!','success');loadProducts()}
+}
+function showReject(id,n){
+    Swal.fire({title:'Reject Product?',html:'<p class="mb-2">Rejecting: <strong>'+n+'</strong></p><textarea id="swalReason" class="form-control" rows="3" placeholder="Explain why..." style="border-radius:8px;"></textarea>',icon:'warning',showCancelButton:true,confirmButtonText:'Reject',confirmButtonColor:'#ef4444',cancelButtonText:'Cancel',preConfirm:function(){var r=document.getElementById('swalReason').value.trim();if(!r){Swal.showValidationMessage('Please provide a reason');return false}return r}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/products/'+id+'/reject?reason='+encodeURIComponent(r.value),{method:'PUT'});showToast('❌ Rejected','info');loadProducts()}})
+}
+function toggleAll(el){document.querySelectorAll('.prodCheck').forEach(function(c){c.checked=el.checked})}
+async function batchApprove(){
+    var ids=Array.from(document.querySelectorAll('.prodCheck:checked')).map(function(c){return parseInt(c.value)});
+    if(!ids.length){Swal.fire({icon:'info',title:'No Selection',text:'Select products to approve.'});return}
+    var r=await showConfirm('Batch Approve?','Approve <strong>'+ids.length+'</strong> products?','question','Approve All ('+ids.length+')','#10b981');
+    if(r.isConfirmed){var x=await fetch('/api/admin/products/batch-approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(ids)}),d=await x.json();showToast('✅ '+d.message,'success');loadProducts()}
 }
 
-async function revokeSeller(id, name) {
-    var result = await showConfirm('Revoke Premium Status?', 'Remove premium benefits from <strong>' + name + '</strong>? This action can be reversed.', 'warning', 'Revoke Premium', '#ef4444');
-    if(result.isConfirmed) {
-        var r = await fetch('/api/admin/sellers/' + id + '/revoke-premium', {method:'PUT'});
-        var d = await r.json();
-        showToast(d.message, 'info');
-        loadSellers();
-    }
-}
+// ORDERS
+async function loadOrders(){try{var r=await fetch('/api/admin/orders'),d=(await r.json()).data;document.getElementById('ordersTable').innerHTML=(d||[]).map(function(o){return '<tr><td><strong>#'+(o.id||o.orderId||'N/A')+'</strong></td><td>'+(o.customerName||o.buyerEmail||'N/A')+'</td><td><strong>'+F(o.totalAmount||o.amount)+'</strong></td><td><span class="badge bg-info">'+(o.status||'PENDING')+'</span></td><td>'+D(o.createdAt)+'</td></tr>'}).join('')}catch(e){}}
 
-// ========== PRODUCTS ==========
-async function loadProducts(filter) {
-    currentProductFilter = filter || currentProductFilter;
-    try {
-        var p = await fetch('/api/admin/products/pending').then(function(r) { return r.json(); });
-        var a = await fetch('/api/admin/products/approved').then(function(r) { return r.json(); });
-        var rj = await fetch('/api/admin/products/rejected').then(function(r) { return r.json(); });
-        var all = await fetch('/api/admin/products/all').then(function(r) { return r.json(); });
-        document.getElementById('prodPending').textContent = (p.data || []).length;
-        document.getElementById('prodApproved').textContent = (a.data || []).length;
-        document.getElementById('prodRejected').textContent = (rj.data || []).length;
-        document.getElementById('prodTotal').textContent = (all.data || []).length;
-        document.getElementById('pendingBadge').textContent = (p.data || []).length;
-        var data = currentProductFilter === 'pending' ? p.data : currentProductFilter === 'approved' ? a.data : currentProductFilter === 'rejected' ? rj.data : all.data;
-        document.getElementById('productsTable').innerHTML = (data || []).map(function(pr) {
-            var statusBadge = currentProductFilter === 'pending' ? 'bg-warning text-dark' : currentProductFilter === 'approved' ? 'bg-success' : 'bg-danger';
-            var actions = currentProductFilter === 'pending' ? '<button class="btn btn-success btn-sm me-1" onclick="approveProduct(' + pr.id + ',\'' + (pr.name || 'Product').replace(/'/g,"\\'") + '\')"><i class="fas fa-check"></i> Approve</button><button class="btn btn-danger btn-sm" onclick="showReject(' + pr.id + ',\'' + (pr.name || 'Product').replace(/'/g,"\\'") + '\')"><i class="fas fa-times"></i> Reject</button>' : currentProductFilter === 'rejected' ? '<button class="btn btn-outline-success btn-sm" onclick="approveProduct(' + pr.id + ',\'' + (pr.name || 'Product').replace(/'/g,"\\'") + '\')"><i class="fas fa-redo"></i> Approve Anyway</button><br><small class="text-danger">' + (pr.rejectionReason || '') + '</small>' : '<small class="text-muted"><i class="fas fa-check-circle text-success"></i> Approved</small>';
-            return '<tr><td>' + (currentProductFilter === 'pending' ? '<input type="checkbox" class="prodCheck" value="' + pr.id + '">' : '') + '</td><td><strong>' + (pr.name || 'N/A') + '</strong></td><td>' + (pr.sellerBusinessName || pr.sellerName || 'N/A') + '</td><td><strong>' + F(pr.price) + '</strong></td><td><span class="badge ' + statusBadge + '">' + currentProductFilter + '</span></td><td>' + D(pr.createdAt) + '</td><td>' + actions + '</td></tr>';
-        }).join('');
-    } catch(e) {}
-}
+// TRANSACTIONS
+async function loadTransactions(){try{var r=await fetch('/api/admin/transactions'),d=(await r.json()).data;document.getElementById('transactionsTable').innerHTML=(d||[]).map(function(t){return '<tr><td><small>'+(t.transactionRef||t.transaction_ref||'N/A')+'</small></td><td><span class="badge bg-primary">'+(t.type||'N/A')+'</span></td><td>'+F(t.amount)+'</td><td>'+F(t.platformFee||t.platform_fee)+'</td><td><strong>'+F(t.netAmount||t.net_amount)+'</strong></td><td><span class="badge '+(t.status==='COMPLETED'?'bg-success':'bg-warning')+'">'+(t.status||'N/A')+'</span></td><td><small>'+D(t.createdAt)+'</small></td></tr>'}).join('')}catch(e){}}
 
-async function approveProduct(id, name) {
-    var result = await showConfirm('Approve Product?', '<strong>' + name + '</strong> will be visible on the marketplace.', 'question', 'Approve', '#10b981');
-    if(result.isConfirmed) {
-        await fetch('/api/admin/products/' + id + '/approve', {method:'PUT'});
-        showToast('✅ Product approved!', 'success');
-        loadProducts();
-    }
-}
+// DISPUTES
+async function loadDisputes(){try{var r=await fetch('/api/admin/disputes'),d=(await r.json()).data;document.getElementById('dispOpen').textContent=(d||[]).filter(function(x){return x.status==='OPEN'||x.status==='UNDER_REVIEW'}).length;document.getElementById('dispResolved').textContent=(d||[]).filter(function(x){return x.status!=='OPEN'&&x.status!=='UNDER_REVIEW'}).length;document.getElementById('disputesTable').innerHTML=(d||[]).map(function(ds){var o=ds.status==='OPEN'||ds.status==='UNDER_REVIEW';return '<tr><td><strong>#'+ds.id+'</strong></td><td>#'+ds.orderId+'</td><td>'+ds.buyerName+'</td><td>'+ds.sellerName+'</td><td><strong>'+F(ds.amount)+'</strong></td><td>'+ds.reason+'</td><td><span class="badge '+(o?'bg-warning text-dark':'bg-success')+'">'+ds.status+'</span></td><td>'+(o?'<button class="btn btn-success btn-sm me-1" onclick="resolveDispute('+ds.id+',\'RELEASED\',\''+ds.sellerName+'\')"><i class="fas fa-check"></i> Release</button><button class="btn btn-danger btn-sm" onclick="resolveDispute('+ds.id+',\'REFUNDED\',\''+ds.buyerName+'\')"><i class="fas fa-undo"></i> Refund</button>':'<small class="text-muted">Resolved</small>')+'</td></tr>'}).join('')}catch(e){}}
+async function resolveDispute(id,res,n){var isR=res==='RELEASED',t=isR?'Release Funds to Seller?':'Refund Buyer?',x=isR?'Release escrow funds to <strong>'+n+'</strong>?':'Issue full refund to <strong>'+n+'</strong>?',i=isR?'question':'warning',c=isR?'#10b981':'#ef4444';var r=await showConfirm(t,x,i,isR?'Release Funds':'Refund Buyer',c);if(r.isConfirmed){var y=await fetch('/api/admin/disputes/'+id+'/resolve?resolution='+res,{method:'PUT'}),d=await y.json();showToast('⚖️ '+d.message,'success');loadDisputes()}}
 
-function showReject(id, name) {
-    Swal.fire({
-        title: 'Reject Product?',
-        html: '<p>Rejecting: <strong>' + name + '</strong></p><textarea id="swalReason" class="form-control" rows="3" placeholder="Explain why this product is being rejected..." style="border-radius:8px;"></textarea>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Reject',
-        confirmButtonColor: '#ef4444',
-        cancelButtonText: 'Cancel',
-        preConfirm: function() {
-            var reason = document.getElementById('swalReason').value.trim();
-            if(!reason) { Swal.showValidationMessage('Please provide a rejection reason'); return false; }
-            return reason;
-        }
-    }).then(async function(result) {
-        if(result.isConfirmed) {
-            await fetch('/api/admin/products/' + id + '/reject?reason=' + encodeURIComponent(result.value), {method:'PUT'});
-            showToast('❌ Product rejected', 'info');
-            loadProducts();
-        }
-    });
-}
+// HEALTH
+async function loadHealth(){try{var r=await fetch('/api/admin/health'),d=(await r.json()).data;document.getElementById('healthStats').innerHTML='<div class="stat-card"><h3 style="color:#10b981"><i class="fas fa-check-circle"></i> '+d.apiStatus+'</h3><small>API Status</small></div><div class="stat-card"><h3 style="color:#3b82f6"><i class="fas fa-database"></i> '+d.databaseStatus+'</h3><small>Database</small></div><div class="stat-card"><h3>'+d.memoryUsagePercent+'%</h3><small>Memory ('+d.usedMemory+' / '+d.maxMemory+')</small></div><div class="stat-card"><h3><i class="fas fa-clock"></i> '+d.uptime+'</h3><small>Uptime</small></div>'}catch(e){}}
 
-function toggleAll(el) { document.querySelectorAll('.prodCheck').forEach(function(c) { c.checked = el.checked; }); }
-
-async function batchApprove() {
-    var ids = Array.from(document.querySelectorAll('.prodCheck:checked')).map(function(c) { return parseInt(c.value); });
-    if(!ids.length) { Swal.fire({icon:'info', title:'No Selection', text:'Select at least one product to approve.'}); return; }
-    var result = await showConfirm('Batch Approve?', 'Approve <strong>' + ids.length + '</strong> selected products? They will appear on the marketplace.', 'question', 'Approve All (' + ids.length + ')', '#10b981');
-    if(result.isConfirmed) {
-        var r = await fetch('/api/admin/products/batch-approve', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(ids)});
-        var d = await r.json();
-        showToast('✅ ' + d.message, 'success');
-        loadProducts();
-    }
-}
-
-// ========== ORDERS ==========
-async function loadOrders() {
-    try {
-        var r = await fetch('/api/admin/orders');
-        var d = (await r.json()).data;
-        document.getElementById('ordersTable').innerHTML = (d || []).map(function(o) {
-            return '<tr><td><strong>#' + (o.id || o.orderId || 'N/A') + '</strong></td><td>' + (o.customerName || o.buyerEmail || 'N/A') + '</td><td><strong>' + F(o.totalAmount || o.amount) + '</strong></td><td><span class="badge bg-info">' + (o.status || 'PENDING') + '</span></td><td>' + D(o.createdAt) + '</td></tr>';
-        }).join('');
-    } catch(e) {}
-}
-
-// ========== TRANSACTIONS ==========
-async function loadTransactions() {
-    try {
-        var r = await fetch('/api/admin/transactions');
-        var d = (await r.json()).data;
-        document.getElementById('transactionsTable').innerHTML = (d || []).map(function(t) {
-            return '<tr><td><small>' + (t.transactionRef || t.transaction_ref || 'N/A') + '</small></td><td><span class="badge bg-primary">' + (t.type || 'N/A') + '</span></td><td>' + F(t.amount) + '</td><td>' + F(t.platformFee || t.platform_fee) + '</td><td><strong>' + F(t.netAmount || t.net_amount) + '</strong></td><td><span class="badge ' + (t.status === 'COMPLETED' ? 'bg-success' : 'bg-warning') + '">' + (t.status || 'N/A') + '</span></td><td><small>' + D(t.createdAt) + '</small></td></tr>';
-        }).join('');
-    } catch(e) {}
-}
-
-// ========== DISPUTES ==========
-async function loadDisputes() {
-    try {
-        var r = await fetch('/api/admin/disputes');
-        var d = (await r.json()).data;
-        document.getElementById('dispOpen').textContent = (d || []).filter(function(x) { return x.status === 'OPEN' || x.status === 'UNDER_REVIEW'; }).length;
-        document.getElementById('dispResolved').textContent = (d || []).filter(function(x) { return x.status !== 'OPEN' && x.status !== 'UNDER_REVIEW'; }).length;
-        document.getElementById('disputesTable').innerHTML = (d || []).map(function(ds) {
-            var isOpen = ds.status === 'OPEN' || ds.status === 'UNDER_REVIEW';
-            return '<tr><td><strong>#' + ds.id + '</strong></td><td>#' + ds.orderId + '</td><td>' + ds.buyerName + '</td><td>' + ds.sellerName + '</td><td><strong>' + F(ds.amount) + '</strong></td><td>' + ds.reason + '</td><td><span class="badge ' + (isOpen ? 'bg-warning text-dark' : 'bg-success') + '">' + ds.status + '</span></td><td>' + (isOpen ? '<button class="btn btn-success btn-sm me-1" onclick="resolveDispute(' + ds.id + ',\'RELEASED\',\'' + ds.sellerName + '\')"><i class="fas fa-check"></i> Release</button><button class="btn btn-danger btn-sm" onclick="resolveDispute(' + ds.id + ',\'REFUNDED\',\'' + ds.buyerName + '\')"><i class="fas fa-undo"></i> Refund</button>' : '<small class="text-muted">Resolved</small>') + '</td></tr>';
-        }).join('');
-    } catch(e) {}
-}
-
-async function resolveDispute(id, resolution, name) {
-    var isRelease = resolution === 'RELEASED';
-    var title = isRelease ? 'Release Funds to Seller?' : 'Refund Buyer?';
-    var text = isRelease ? 'Release escrow funds to <strong>' + name + '</strong>?' : 'Issue full refund to <strong>' + name + '</strong>?';
-    var icon = isRelease ? 'question' : 'warning';
-    var color = isRelease ? '#10b981' : '#ef4444';
-    var result = await showConfirm(title, text, icon, isRelease ? 'Release Funds' : 'Refund Buyer', color);
-    if(result.isConfirmed) {
-        var r = await fetch('/api/admin/disputes/' + id + '/resolve?resolution=' + resolution, {method:'PUT'});
-        var d = await r.json();
-        showToast('⚖️ ' + d.message, 'success');
-        loadDisputes();
-    }
-}
-
-// ========== HEALTH ==========
-async function loadHealth() {
-    try {
-        var r = await fetch('/api/admin/health');
-        var d = (await r.json()).data;
-        document.getElementById('healthStats').innerHTML =
-            '<div class="stat-card"><h3 style="color:#10b981"><i class="fas fa-check-circle"></i> ' + d.apiStatus + '</h3><small>API Status</small></div>' +
-            '<div class="stat-card"><h3 style="color:#3b82f6"><i class="fas fa-database"></i> ' + d.databaseStatus + '</h3><small>Database</small></div>' +
-            '<div class="stat-card"><h3>' + d.memoryUsagePercent + '%</h3><small>Memory (' + d.usedMemory + ' / ' + d.maxMemory + ')</small></div>' +
-            '<div class="stat-card"><h3><i class="fas fa-clock"></i> ' + d.uptime + '</h3><small>Uptime</small></div>';
-    } catch(e) {}
-}
-
-function filterTable(tbody, query) {
-    document.querySelectorAll('#' + tbody + ' tr').forEach(function(tr) {
-        tr.style.display = tr.textContent.toLowerCase().indexOf(query.toLowerCase()) !== -1 ? '' : 'none';
-    });
-}
+function filterTable(tbody,query){document.querySelectorAll('#'+tbody+' tr').forEach(function(tr){tr.style.display=tr.textContent.toLowerCase().indexOf(query.toLowerCase())!==-1?'':'none'})}
 
 loadDashboard();
-setInterval(async function() {
-    try { var r = await fetch('/api/admin/products/pending-count'); var d = await r.json(); if(d.success) document.getElementById('pendingBadge').textContent = d.count; } catch(e) {}
-}, 30000);
+setInterval(async function(){try{var r=await fetch('/api/admin/products/pending-count'),d=await r.json();if(d.success)document.getElementById('pendingBadge').textContent=d.count}catch(e){}},30000);
 </script>
 </body>
 </html>

@@ -21,10 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cambiz.market.dto.AdminStatsDTO;
+import com.cambiz.market.model.Category;
 import com.cambiz.market.model.Product;
 import com.cambiz.market.model.Transaction;
 import com.cambiz.market.model.TransactionType;
 import com.cambiz.market.model.User;
+import com.cambiz.market.repository.CategoryRepository;
 import com.cambiz.market.repository.ProductRepository;
 import com.cambiz.market.repository.UserRepository;
 import com.cambiz.market.service.OrderService;
@@ -42,6 +44,9 @@ public class AdminController {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private OrderService orderService;
@@ -169,6 +174,51 @@ public class AdminController {
         seller.setAccountType("REGULAR");
         userRepository.save(seller);
         return ResponseEntity.ok(Map.of("success", true, "message", "Premium status revoked"));
+    }
+
+    // ========== CATEGORY MANAGEMENT ==========
+    
+    @GetMapping("/categories")
+    public ResponseEntity<?> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        List<Map<String, Object>> list = categories.stream().map(c -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", c.getId());
+            map.put("name", c.getNameEn());
+            map.put("active", c.getIsActive());
+            map.put("productCount", productRepository.countByCategoryId(c.getId()));
+            return map;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(Map.of("success", true, "data", list));
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<?> addCategory(@RequestBody Map<String, String> body) {
+        Category cat = new Category();
+        cat.setNameEn(body.get("name"));
+        cat.setIsActive(true);
+        categoryRepository.save(cat);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Category added successfully"));
+    }
+
+    @PutMapping("/categories/{id}")
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        Category cat = categoryRepository.findById(id).orElse(null);
+        if (cat == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Category not found"));
+        if (body.containsKey("name")) cat.setNameEn(body.get("name"));
+        if (body.containsKey("active")) cat.setIsActive(Boolean.parseBoolean(body.get("active")));
+        categoryRepository.save(cat);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Category updated"));
+    }
+
+    @DeleteMapping("/categories/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
+        try {
+            categoryRepository.deleteById(id);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Category deleted"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Cannot delete: " + e.getMessage()));
+        }
     }
 
     // ========== ORDER MANAGEMENT ==========

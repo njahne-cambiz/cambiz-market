@@ -64,31 +64,16 @@ public class SecurityConfig {
                 .requestMatchers("/api/payments/callback/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/payments/methods").permitAll()
                 .requestMatchers("/api").permitAll()
-
-                // Reviews - public
                 .requestMatchers("/api/reviews/**").permitAll()
-
-                // Wallet - public for testing
                 .requestMatchers("/api/wallet/**").permitAll()
-
-                // Premium - benefits PUBLIC, status PUBLIC
                 .requestMatchers(HttpMethod.GET, "/api/premium/benefits").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/premium/status/**").permitAll()
-
-                // Database migration - public
                 .requestMatchers("/api/admin/db/**").permitAll()
-
-                // Uploaded images - public read access
                 .requestMatchers("/uploads/**").permitAll()
-                
-                // Njangi active deals - public
                 .requestMatchers(HttpMethod.GET, "/api/njangi/active").permitAll()
-                
-                // Flash sales active - public
                 .requestMatchers(HttpMethod.GET, "/api/flash-sales/active").permitAll()
-                
-                // Coupon validate - public
                 .requestMatchers(HttpMethod.GET, "/api/coupons/validate/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/featured/**").permitAll()
 
                 // STATIC & PAGES
                 .requestMatchers("/", "/dashboard/**", "/store/**", "/shop/**", "/product", "/home", "/index", "/about", "/contact").permitAll()
@@ -106,24 +91,16 @@ public class SecurityConfig {
                 .requestMatchers("/create-flash-sale").permitAll()
                 .requestMatchers("/create-coupon").permitAll()
                 .requestMatchers("/transactions").permitAll()
-                
-                // ADMIN PANEL PAGES
                 .requestMatchers("/admin", "/admin/", "/admin/**").permitAll()
-                
-                // STATIC RESOURCES
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/favicon.ico", "/error").permitAll()
-
-                // HEALTH
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-
-                // Order tracking pages - public
                 .requestMatchers("/order-tracking", "/track").permitAll()
 
-                // ALL ADMIN API - Public for now
+                // ALL ADMIN API
                 .requestMatchers("/api/admin/**").permitAll()
 
-                // AUTHENTICATED ENDPOINTS
+                // AUTHENTICATED
                 .requestMatchers("/api/cart/**").authenticated()
                 .requestMatchers("/api/orders/**").authenticated()
                 .requestMatchers("/api/makola/**").authenticated()

@@ -32,6 +32,9 @@ public class Category {
     
     private Integer sortOrder = 0;
     
+    @Column(name = "is_active")
+    private Boolean isActive = true;
+    
     @ManyToOne
     @JoinColumn(name = "parent_id")
     @JsonIgnoreProperties({"subCategories"})
@@ -51,10 +54,14 @@ public class Category {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (isActive == null) isActive = true;
     }
     
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }
