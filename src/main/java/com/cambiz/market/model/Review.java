@@ -37,6 +37,12 @@ public class Review {
     @Column(name = "is_flagged")
     private Boolean isFlagged = false;
 
+    @Column(name = "admin_reply", length = 1000)
+    private String adminReply;
+
+    @Column(name = "replied_at")
+    private LocalDateTime repliedAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
