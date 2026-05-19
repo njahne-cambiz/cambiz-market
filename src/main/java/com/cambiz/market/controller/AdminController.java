@@ -30,6 +30,7 @@ import com.cambiz.market.repository.CategoryRepository;
 import com.cambiz.market.repository.ProductRepository;
 import com.cambiz.market.repository.UserRepository;
 import com.cambiz.market.service.OrderService;
+import com.cambiz.market.service.PlatformSettingService;
 import com.cambiz.market.service.TransactionService;
 
 import jakarta.servlet.http.HttpSession;
@@ -53,6 +54,9 @@ public class AdminController {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private PlatformSettingService settingService;
 
     // ========== DASHBOARD STATS ==========
     
@@ -168,7 +172,8 @@ public class AdminController {
         List<Map<String, Object>> list = categories.stream().map(c -> {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("id", c.getId()); map.put("name", c.getNameEn());
-            map.put("active", c.getIsActive()); map.put("productCount", productRepository.countByCategoryId(c.getId()));
+            map.put("active", c.getIsActive() != null ? c.getIsActive() : true);
+            map.put("productCount", productRepository.countByCategoryId(c.getId()));
             return map;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(Map.of("success", true, "data", list));
@@ -204,9 +209,11 @@ public class AdminController {
         double totalRevenue = allTxns.stream().filter(t -> t.getType() == TransactionType.PURCHASE).mapToDouble(Transaction::getAmount).sum();
         double totalFees = allTxns.stream().filter(t -> t.getType() == TransactionType.PURCHASE).mapToDouble(Transaction::getPlatformFee).sum();
         double totalPayouts = totalRevenue - totalFees;
+        double commissionRate = settingService.getDouble("commission_rate", 5.0);
         Map<String, Object> revenue = new LinkedHashMap<>();
         revenue.put("totalRevenue", totalRevenue); revenue.put("totalFees", totalFees);
-        revenue.put("totalPayouts", totalPayouts); revenue.put("commissionRate", 5.0); revenue.put("transactionCount", allTxns.size());
+        revenue.put("totalPayouts", totalPayouts); revenue.put("commissionRate", commissionRate);
+        revenue.put("transactionCount", allTxns.size());
         return ResponseEntity.ok(Map.of("success", true, "data", revenue));
     }
 
@@ -215,15 +222,29 @@ public class AdminController {
     @GetMapping("/settings")
     public ResponseEntity<?> getSettings() {
         Map<String, Object> settings = new LinkedHashMap<>();
-        settings.put("siteName", "CamBiz Market"); settings.put("currency", "XAF"); settings.put("commissionRate", 5.0);
-        settings.put("maintenanceMode", false); settings.put("allowRegistration", true);
-        settings.put("maxProductsPerSeller", 100); settings.put("payoutThreshold", 10000.0);
+        settings.put("siteName", settingService.get("site_name", "CamBiz Market"));
+        settings.put("currency", settingService.get("currency", "XAF"));
+        settings.put("commissionRate", settingService.getDouble("commission_rate", 5.0));
+        settings.put("payoutThreshold", settingService.getDouble("payout_threshold", 10000.0));
+        settings.put("maxProductsRegular", settingService.getInt("max_products_regular", 50));
+        settings.put("maxProductsPremium", settingService.getInt("max_products_premium", 500));
+        settings.put("maintenanceMode", settingService.getBoolean("maintenance_mode", false));
+        settings.put("allowRegistration", settingService.getBoolean("allow_registration", true));
         return ResponseEntity.ok(Map.of("success", true, "data", settings));
     }
 
     @PutMapping("/settings")
     public ResponseEntity<?> updateSettings(@RequestBody Map<String, Object> body) {
-        return ResponseEntity.ok(Map.of("success", true, "message", "Settings updated successfully"));
+        if (body.containsKey("siteName")) settingService.set("site_name", String.valueOf(body.get("siteName")));
+        if (body.containsKey("currency")) settingService.set("currency", String.valueOf(body.get("currency")));
+        if (body.containsKey("commissionRate")) settingService.set("commission_rate", String.valueOf(body.get("commissionRate")));
+        if (body.containsKey("payoutThreshold")) settingService.set("payout_threshold", String.valueOf(body.get("payoutThreshold")));
+        if (body.containsKey("maxProductsRegular")) settingService.set("max_products_regular", String.valueOf(body.get("maxProductsRegular")));
+        if (body.containsKey("maxProductsPremium")) settingService.set("max_products_premium", String.valueOf(body.get("maxProductsPremium")));
+        if (body.containsKey("maintenanceMode")) settingService.set("maintenance_mode", String.valueOf(body.get("maintenanceMode")));
+        if (body.containsKey("allowRegistration")) settingService.set("allow_registration", String.valueOf(body.get("allowRegistration")));
+        settingService.loadCache();
+        return ResponseEntity.ok(Map.of("success", true, "message", "Settings saved successfully"));
     }
 
     // ========== ORDER MANAGEMENT ==========
