@@ -1,6 +1,7 @@
 package com.cambiz.market.controller;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cambiz.market.dto.AdminStatsDTO;
 import com.cambiz.market.model.Category;
 import com.cambiz.market.model.Dispute;
+import com.cambiz.market.model.DisputeComment;
 import com.cambiz.market.model.Product;
 import com.cambiz.market.model.Transaction;
 import com.cambiz.market.model.TransactionType;
 import com.cambiz.market.model.User;
 import com.cambiz.market.repository.CategoryRepository;
+import com.cambiz.market.repository.DisputeCommentRepository;
 import com.cambiz.market.repository.DisputeRepository;
 import com.cambiz.market.repository.ProductRepository;
 import com.cambiz.market.repository.UserRepository;
@@ -58,6 +61,12 @@ public class AdminController {
 
     @Autowired
     private PlatformSettingService settingService;
+
+    @Autowired
+    private DisputeRepository disputeRepository;
+
+    @Autowired
+    private DisputeCommentRepository commentRepository;
 
     // ========== DASHBOARD STATS ==========
     
@@ -380,10 +389,7 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("success", true, "data", h));
     }
 
- // ========== DISPUTE SETTLEMENT ==========
-
-    @Autowired
-    private DisputeRepository disputeRepository;
+    // ========== DISPUTE SETTLEMENT ==========
 
     @GetMapping("/disputes")
     public ResponseEntity<?> getDisputes() {
@@ -392,11 +398,11 @@ public class AdminController {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id", d.getId()); m.put("orderId", d.getOrderId());
             m.put("buyerId", d.getBuyerId()); m.put("sellerId", d.getSellerId());
-            // Get buyer and seller names
             User buyer = userRepository.findById(d.getBuyerId()).orElse(null);
             User seller = userRepository.findById(d.getSellerId()).orElse(null);
-            m.put("buyerName", buyer != null ? buyer.getFirstName() + " " + buyer.getLastName() : "Buyer #" + d.getBuyerId());
-            m.put("sellerName", seller != null ? (seller.getBusinessName() != null ? seller.getBusinessName() : seller.getFirstName()) : "Seller #" + d.getSellerId());
+            String buyerName = buyer != null ? (buyer.getFirstName() != null ? buyer.getFirstName() + " " + (buyer.getLastName() != null ? buyer.getLastName() : "") : buyer.getEmail()) : "User #" + d.getBuyerId();
+            String sellerName = seller != null ? (seller.getBusinessName() != null ? seller.getBusinessName() : (seller.getFirstName() != null ? seller.getFirstName() + " " + (seller.getLastName() != null ? seller.getLastName() : "") : seller.getEmail())) : "User #" + d.getSellerId();
+            m.put("buyerName", buyerName.trim()); m.put("sellerName", sellerName.trim());
             m.put("amount", d.getAmount()); m.put("reason", d.getReason());
             m.put("evidence", d.getEvidence()); m.put("status", d.getStatus().name());
             m.put("resolution", d.getResolution()); m.put("resolvedBy", d.getResolvedBy());
@@ -409,35 +415,25 @@ public class AdminController {
     }
 
     @PutMapping("/disputes/{id}/review")
-    public ResponseEntity<?> reviewDispute(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<?> reviewDispute(@PathVariable Long id) {
         Dispute d = disputeRepository.findById(id).orElse(null);
         if (d == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Dispute not found"));
-        d.setStatus(Dispute.DisputeStatus.UNDER_REVIEW);
-        disputeRepository.save(d);
+        d.setStatus(Dispute.DisputeStatus.UNDER_REVIEW); disputeRepository.save(d);
         return ResponseEntity.ok(Map.of("success", true, "message", "Dispute #" + id + " under review"));
     }
 
     @PutMapping("/disputes/{id}/resolve")
-    public ResponseEntity<?> resolveDispute(@PathVariable Long id, @RequestParam String resolution, @RequestParam(required = false) String notes, HttpSession session) {
+    public ResponseEntity<?> resolveDispute(@PathVariable Long id, @RequestParam String resolution, @RequestParam(required = false) String notes) {
         Dispute d = disputeRepository.findById(id).orElse(null);
         if (d == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Dispute not found"));
-        
-        User admin = (User) session.getAttribute("user");
-        String adminName = admin != null ? admin.getEmail() : "system@cambiz.cm";
-        
         d.setStatus("RELEASED".equals(resolution) ? Dispute.DisputeStatus.RESOLVED_RELEASED : Dispute.DisputeStatus.RESOLVED_REFUNDED);
         d.setResolution(notes != null ? notes : ("RELEASED".equals(resolution) ? "Funds released to seller" : "Refund issued to buyer"));
-        d.setResolvedBy(adminName);
-        d.setResolvedAt(LocalDateTime.now());
-        disputeRepository.save(d);
-        
-        String msg = "RELEASED".equals(resolution) ? "Funds released to seller for dispute #" + id : "Refund issued to buyer for dispute #" + id;
-        return ResponseEntity.ok(Map.of("success", true, "message", msg));
+        d.setResolvedBy("admin@cambiz.cm"); d.setResolvedAt(LocalDateTime.now()); disputeRepository.save(d);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Dispute #" + id + " resolved"));
     }
 
-    // Buyer files a dispute
     @PostMapping("/disputes")
-    public ResponseEntity<?> fileDispute(@RequestBody Map<String, Object> body, HttpSession session) {
+    public ResponseEntity<?> fileDispute(@RequestBody Map<String, Object> body) {
         Dispute d = new Dispute();
         d.setOrderId(Long.valueOf(body.get("orderId").toString()));
         d.setBuyerId(Long.valueOf(body.get("buyerId").toString()));
@@ -445,8 +441,25 @@ public class AdminController {
         d.setAmount(Double.valueOf(body.get("amount").toString()));
         d.setReason(body.get("reason").toString());
         if (body.containsKey("evidence")) d.setEvidence(body.get("evidence").toString());
-        d.setStatus(Dispute.DisputeStatus.OPEN);
-        disputeRepository.save(d);
-        return ResponseEntity.ok(Map.of("success", true, "message", "Dispute filed successfully. Admin will review."));
+        d.setStatus(Dispute.DisputeStatus.OPEN); disputeRepository.save(d);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Dispute filed successfully"));
+    }
+
+    @GetMapping("/disputes/{id}/comments")
+    public ResponseEntity<?> getDisputeComments(@PathVariable Long id) {
+        List<DisputeComment> comments = commentRepository.findByDisputeIdOrderByCreatedAtAsc(id);
+        return ResponseEntity.ok(Map.of("success", true, "data", comments));
+    }
+
+    @PostMapping("/disputes/{id}/comments")
+    public ResponseEntity<?> addDisputeComment(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        DisputeComment c = new DisputeComment();
+        c.setDisputeId(id);
+        c.setUserId(Long.valueOf(body.getOrDefault("userId", "0")));
+        c.setUserName(body.getOrDefault("userName", "User"));
+        c.setUserType(body.getOrDefault("userType", "BUYER"));
+        c.setMessage(body.get("message"));
+        commentRepository.save(c);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Comment added"));
     }
 }

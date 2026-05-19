@@ -97,7 +97,7 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 .requestMatchers("/order-tracking", "/track").permitAll()
 
-                // ALL ADMIN API
+                // ALL ADMIN API - PUBLIC
                 .requestMatchers("/api/admin/**").permitAll()
 
                 // AUTHENTICATED

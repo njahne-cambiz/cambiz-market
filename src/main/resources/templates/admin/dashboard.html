@@ -112,9 +112,60 @@ function toggleAll(el){document.querySelectorAll('.prodCheck').forEach(function(
 async function batchApprove(){var ids=Array.from(document.querySelectorAll('.prodCheck:checked')).map(function(c){return parseInt(c.value)});if(!ids.length){Swal.fire({icon:'info',title:'No Selection',text:'Select products to approve.'});return}var r=await showConfirm('Batch Approve?','Approve <strong>'+ids.length+'</strong> products?','question','Approve All ('+ids.length+')','#10b981');if(r.isConfirmed){var x=await fetch('/api/admin/products/batch-approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(ids)}),d=await x.json();showToast('✅ '+d.message,'success');loadProducts()}}
 async function loadOrders(){try{var r=await fetch('/api/admin/orders'),d=(await r.json()).data;document.getElementById('ordersTable').innerHTML=(d||[]).map(function(o){return '<tr><td><strong>#'+(o.id||o.orderId||'N/A')+'</strong></td><td>'+(o.customerName||o.buyerEmail||'N/A')+'</td><td><strong>'+F(o.totalAmount||o.amount)+'</strong></td><td><span class="badge bg-info">'+(o.status||'PENDING')+'</span></td><td>'+D(o.createdAt)+'</td></tr>'}).join('')}catch(e){}}
 async function loadTransactions(){try{var r=await fetch('/api/admin/transactions'),d=(await r.json()).data;document.getElementById('transactionsTable').innerHTML=(d||[]).map(function(t){return '<tr><td><small>'+(t.transactionRef||t.transaction_ref||'N/A')+'</small></td><td><span class="badge bg-primary">'+(t.type||'N/A')+'</span></td><td>'+F(t.amount)+'</td><td>'+F(t.platformFee||t.platform_fee)+'</td><td><strong>'+F(t.netAmount||t.net_amount)+'</strong></td><td><span class="badge '+(t.status==='COMPLETED'?'bg-success':'bg-warning')+'">'+(t.status||'N/A')+'</span></td><td><small>'+D(t.createdAt)+'</small></td></tr>'}).join('')}catch(e){}}
-async function loadDisputes(){try{var r=await fetch('/api/admin/disputes'),d=await r.json();document.getElementById('dispOpen').textContent=d.openCount||0;document.getElementById('dispResolved').textContent=d.resolvedCount||0;document.getElementById('disputesTable').innerHTML=(d.data||[]).map(function(ds){var isOpen=ds.status==='OPEN'||ds.status==='UNDER_REVIEW';var actions='';if(ds.status==='OPEN')actions='<button class="btn btn-info btn-sm me-1" onclick="reviewDispute('+ds.id+')"><i class="fas fa-search"></i> Review</button>';else if(ds.status==='UNDER_REVIEW')actions='<button class="btn btn-success btn-sm me-1" onclick="resolveDispute('+ds.id+',\'RELEASED\',\''+ds.sellerName+'\')"><i class="fas fa-check"></i> Release</button><button class="btn btn-danger btn-sm" onclick="resolveDispute('+ds.id+',\'REFUNDED\',\''+ds.buyerName+'\')"><i class="fas fa-undo"></i> Refund</button>';else actions='<small class="text-muted">'+ds.status+'</small>';return '<tr><td><strong>#'+ds.id+'</strong></td><td>#'+ds.orderId+'</td><td>'+ds.buyerName+'</td><td>'+ds.sellerName+'</td><td><strong>'+F(ds.amount)+'</strong></td><td>'+(ds.reason||'')+'</td><td><span class="badge '+(isOpen?'bg-warning text-dark':'bg-success')+'">'+ds.status+'</span></td><td>'+actions+'</td></tr>'}).join('')}catch(e){}}
+
+// ========== DISPUTES WITH CHAT ==========
+async function loadDisputes(){
+    try{
+        var r=await fetch('/api/admin/disputes'),d=await r.json();
+        document.getElementById('dispOpen').textContent=d.openCount||0;
+        document.getElementById('dispResolved').textContent=d.resolvedCount||0;
+        document.getElementById('disputesTable').innerHTML=(d.data||[]).map(function(ds){
+            var isOpen=ds.status==='OPEN'||ds.status==='UNDER_REVIEW';
+            var actions='';
+            if(ds.status==='OPEN')actions='<button class="btn btn-info btn-sm me-1" onclick="reviewDispute('+ds.id+')"><i class="fas fa-search"></i> Review</button>';
+            else if(ds.status==='UNDER_REVIEW')actions='<button class="btn btn-success btn-sm me-1" onclick="resolveDispute('+ds.id+',\'RELEASED\',\''+ds.sellerName+'\')"><i class="fas fa-check"></i> Release</button><button class="btn btn-danger btn-sm me-1" onclick="resolveDispute('+ds.id+',\'REFUNDED\',\''+ds.buyerName+'\')"><i class="fas fa-undo"></i> Refund</button>';
+            actions+='<button class="btn btn-outline-secondary btn-sm" onclick="viewDisputeChat('+ds.id+')"><i class="fas fa-comments"></i> Chat</button>';
+            return '<tr><td><strong>#'+ds.id+'</strong></td><td>#'+ds.orderId+'</td><td>'+ds.buyerName+'</td><td>'+ds.sellerName+'</td><td><strong>'+F(ds.amount)+'</strong></td><td>'+(ds.reason||'').substring(0,30)+'</td><td><span class="badge '+(isOpen?'bg-warning text-dark':'bg-success')+'">'+ds.status+'</span></td><td>'+actions+'</td></tr>';
+        }).join('')}catch(e){}
+}
+
+async function viewDisputeChat(id) {
+    var r = await fetch('/api/admin/disputes'), d = await r.json();
+    var dispute = (d.data||[]).find(function(ds){ return ds.id === id; });
+    if(!dispute) return;
+    var commentsR = await fetch('/api/admin/disputes/'+id+'/comments');
+    var commentsD = await commentsR.json();
+    var commentsHtml = (commentsD.data||[]).map(function(c){
+        var color = c.userType==='ADMIN'?'#e11d48':c.userType==='SELLER'?'#d97706':'#0d9488';
+        return '<div style="background:#f8fafc;padding:10px;border-radius:8px;margin-bottom:8px;text-align:left;"><strong style="color:'+color+'">'+c.userName+'</strong> <small class="text-muted">('+c.userType+')</small><br>'+c.message+'<br><small class="text-muted">'+new Date(c.createdAt).toLocaleString()+'</small></div>';
+    }).join('') || '<p class="text-muted text-center">No messages yet. Start the conversation.</p>';
+    
+    Swal.fire({
+        title: '💬 Dispute #'+id+' - Communication',
+        html: '<div style="text-align:left;"><p><strong>Buyer:</strong> '+dispute.buyerName+' | <strong>Seller:</strong> '+dispute.sellerName+'</p><p><strong>Amount:</strong> '+F(dispute.amount)+' | <strong>Status:</strong> '+dispute.status+'</p><hr><h6>Messages</h6><div style="max-height:200px;overflow-y:auto;margin-bottom:10px;">'+commentsHtml+'</div><textarea id="newComment" class="form-control" rows="2" placeholder="Type a message..."></textarea></div>',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-paper-plane"></i> Send',
+        confirmButtonColor: '#0d9488',
+        width: '650px',
+        preConfirm: function() {
+            var msg = document.getElementById('newComment').value.trim();
+            if(!msg) { Swal.showValidationMessage('Type a message'); return false; }
+            return msg;
+        }
+    }).then(async function(result) {
+        if(result.isConfirmed) {
+            await fetch('/api/admin/disputes/'+id+'/comments', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({userId:0, userName:'Admin', userType:'ADMIN', message:result.value})
+            });
+            showToast('Message sent','success');
+        }
+    });
+}
+
 async function reviewDispute(id){var r=await showConfirm('Review Dispute?','Start reviewing dispute <strong>#'+id+'</strong>?','question','Start Review','#3b82f6');if(r.isConfirmed){var x=await fetch('/api/admin/disputes/'+id+'/review',{method:'PUT'}),d=await x.json();showToast('🔍 '+d.message,'success');loadDisputes()}}
 async function resolveDispute(id,res,n){var isR=res==='RELEASED',t=isR?'Release Funds to Seller?':'Refund Buyer?',x=isR?'Release escrow funds to <strong>'+n+'</strong>?':'Issue full refund to <strong>'+n+'</strong>?',i=isR?'question':'warning',c=isR?'#10b981':'#ef4444';Swal.fire({title:t,html:x+'<br><textarea id="swalNotes" class="form-control mt-2" rows="2" placeholder="Resolution notes (optional)"></textarea>',icon:i,showCancelButton:true,confirmButtonText:isR?'Release Funds':'Refund Buyer',confirmButtonColor:c}).then(async function(r){if(r.isConfirmed){var notes=document.getElementById('swalNotes').value;var y=await fetch('/api/admin/disputes/'+id+'/resolve?resolution='+res+(notes?'&notes='+encodeURIComponent(notes):''),{method:'PUT'}),d=await y.json();showToast('⚖️ '+d.message,'success');loadDisputes()}})}
+
 async function loadSettings(){try{var r=await fetch('/api/admin/settings'),d=(await r.json()).data;document.getElementById('settingsForm').innerHTML='<div class="row"><div class="col-md-6 mb-3"><label class="fw-bold">Site Name</label><input class="form-control" id="setSiteName" value="'+d.siteName+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Currency</label><input class="form-control" id="setCurrency" value="'+d.currency+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Commission Rate (%)</label><input type="number" step="0.1" class="form-control" id="setCommission" value="'+d.commissionRate+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Payout Threshold (XAF)</label><input type="number" class="form-control" id="setPayout" value="'+d.payoutThreshold+'"><small class="text-muted">Minimum amount before sellers can withdraw</small></div><div class="col-md-6 mb-3"><label class="fw-bold">Max Products - Regular</label><input type="number" class="form-control" id="setMaxRegular" value="'+d.maxProductsRegular+'"><small class="text-muted">Limit for regular sellers</small></div><div class="col-md-6 mb-3"><label class="fw-bold">Max Products - Premium 🏆</label><input type="number" class="form-control" id="setMaxPremium" value="'+d.maxProductsPremium+'"><small class="text-muted">Limit for premium sellers</small></div><div class="col-md-6 mb-3"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" id="setMaintenance" '+(d.maintenanceMode?'checked':'')+'><label class="form-check-label">Maintenance Mode</label></div><div class="form-check mt-2"><input class="form-check-input" type="checkbox" id="setRegistration" '+(d.allowRegistration?'checked':'')+'><label class="form-check-label">Allow Registration</label></div></div></div><button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Save Settings</button>'}catch(e){}}
 async function saveSettings(){var data={siteName:document.getElementById('setSiteName').value,currency:document.getElementById('setCurrency').value,commissionRate:parseFloat(document.getElementById('setCommission').value),payoutThreshold:parseFloat(document.getElementById('setPayout').value),maxProductsRegular:parseInt(document.getElementById('setMaxRegular').value),maxProductsPremium:parseInt(document.getElementById('setMaxPremium').value),maintenanceMode:document.getElementById('setMaintenance').checked,allowRegistration:document.getElementById('setRegistration').checked};var r=await fetch('/api/admin/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}),d=await r.json();showToast(d.message,'success')}
 async function loadHealth(){try{var r=await fetch('/api/admin/health'),d=(await r.json()).data;document.getElementById('healthStats').innerHTML='<div class="stat-card"><h3 style="color:#10b981"><i class="fas fa-check-circle"></i> '+d.apiStatus+'</h3><small>API Status</small></div><div class="stat-card"><h3 style="color:#3b82f6"><i class="fas fa-database"></i> '+d.databaseStatus+'</h3><small>Database</small></div><div class="stat-card"><h3>'+d.memoryUsagePercent+'%</h3><small>Memory</small></div><div class="stat-card"><h3><i class="fas fa-clock"></i> '+d.uptime+'</h3><small>Uptime</small></div>'}catch(e){}}

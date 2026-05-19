@@ -53,7 +53,6 @@
     <div class="container">
         <h2>📦 My Orders</h2>
         <div id="ordersList"><div class="empty">Loading orders...</div></div>
-
         <h2 style="margin-top:40px;">⚖️ My Disputes</h2>
         <div id="myDisputes"><div class="empty">Loading disputes...</div></div>
     </div>
@@ -64,7 +63,6 @@
         if (!token) { window.location.href = '/dashboard'; }
         var F = function(v) { return new Intl.NumberFormat('fr-FR', {style:'currency', currency:'XAF', maximumFractionDigits:0}).format(v||0); };
 
-        // ========== LOAD ORDERS ==========
         async function loadOrders() {
             try {
                 var r = await fetch('/api/orders/my-orders', { headers: { 'Authorization': 'Bearer ' + token } });
@@ -74,115 +72,62 @@
                     d.data.forEach(function(o) {
                         var itemsHtml = '';
                         var sellerId = o.sellerId || 0;
-                        if (o.items) {
-                            o.items.forEach(function(i) {
-                                itemsHtml += '<div class="order-item"><span>' + i.productName + ' x' + i.quantity + '</span><span>' + F(i.effectivePrice || i.price) + '</span></div>';
-                                if (!sellerId && i.sellerId) sellerId = i.sellerId;
-                            });
-                        }
-                        var disputeBtn = (o.status === 'DELIVERED' || o.status === 'SHIPPED') ? 
-                            '<button class="btn btn-dispute" onclick="fileDispute(\'' + (o.orderNumber || o.id) + '\',' + (o.totalAmount || o.amount || 0) + ',' + (sellerId || 0) + ')">⚠ Report Problem</button>' : '';
-                        
-                        html += '<div class="order-card">' +
-                            '<div class="order-header">' +
-                                '<div><span class="order-id">Order #' + (o.orderNumber || o.id) + '</span><br><span class="order-date">' + new Date(o.createdAt).toLocaleDateString('en-GB') + '</span></div>' +
-                                '<span class="order-status status-' + (o.status || 'PENDING') + '">' + (o.status || 'PENDING') + '</span>' +
-                            '</div>' +
-                            '<div class="order-items">' + itemsHtml + '</div>' +
-                            '<div class="order-total">Total: ' + F(o.totalAmount || o.amount) + '</div>' +
-                            '<div style="margin-top:10px;display:flex;gap:8px;">' +
-                                '<a href="/order-tracking?id=' + o.id + '" class="btn btn-track">📋 Track Order</a>' +
-                                disputeBtn +
-                            '</div>' +
-                        '</div>';
+                        if (o.items) { o.items.forEach(function(i) { itemsHtml += '<div class="order-item"><span>' + i.productName + ' x' + i.quantity + '</span><span>' + F(i.effectivePrice || i.price) + '</span></div>'; if (!sellerId && i.sellerId) sellerId = i.sellerId; }); }
+                        var disputeBtn = (o.status === 'DELIVERED' || o.status === 'SHIPPED') ? '<button class="btn btn-dispute" onclick="fileDispute(\'' + (o.orderNumber || o.id) + '\',' + (o.totalAmount || o.amount || 0) + ',' + (sellerId || 0) + ')">⚠ Report Problem</button>' : '';
+                        html += '<div class="order-card"><div class="order-header"><div><span class="order-id">Order #' + (o.orderNumber || o.id) + '</span><br><span class="order-date">' + new Date(o.createdAt).toLocaleDateString('en-GB') + '</span></div><span class="order-status status-' + (o.status || 'PENDING') + '">' + (o.status || 'PENDING') + '</span></div><div class="order-items">' + itemsHtml + '</div><div class="order-total">Total: ' + F(o.totalAmount || o.amount) + '</div><div style="margin-top:10px;display:flex;gap:8px;"><a href="/order-tracking?id=' + o.id + '" class="btn btn-track">📋 Track Order</a>' + disputeBtn + '</div></div>';
                     });
                     document.getElementById('ordersList').innerHTML = html;
-                } else {
-                    document.getElementById('ordersList').innerHTML = '<div class="empty"><h3>📭 No orders yet</h3><p>Start shopping!</p><a href="/store" class="btn btn-track" style="margin-top:15px;">Browse Store</a></div>';
-                }
+                } else { document.getElementById('ordersList').innerHTML = '<div class="empty"><h3>📭 No orders yet</h3><p>Start shopping!</p><a href="/store" class="btn btn-track" style="margin-top:15px;">Browse Store</a></div>'; }
             } catch (e) { document.getElementById('ordersList').innerHTML = '<div class="empty">Failed to load orders.</div>'; }
         }
 
-        // ========== FILE DISPUTE ==========
         async function fileDispute(orderId, amount, sellerId) {
             var tokenPayload = JSON.parse(atob(token.split('.')[1]));
             var buyerId = tokenPayload.userId;
-            
-            if (!buyerId) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Please login again to update your session.' });
-                return;
-            }
-            
+            if (!buyerId) { Swal.fire({ icon: 'error', title: 'Error', text: 'Please login again.' }); return; }
             Swal.fire({
                 title: '⚠️ Report a Problem',
-                html: '<p>Order: <strong>#' + orderId + '</strong></p><p>Amount: <strong>' + F(amount) + '</strong></p>' +
-                      '<textarea id="disputeReason" class="form-control" rows="3" placeholder="Describe the issue..." style="border-radius:8px;margin-top:10px;"></textarea>',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Submit Dispute',
-                confirmButtonColor: '#ef4444',
-                cancelButtonText: 'Cancel',
-                preConfirm: function() {
-                    var reason = document.getElementById('disputeReason').value.trim();
-                    if (!reason) { Swal.showValidationMessage('Please describe the issue'); return false; }
-                    return { reason: reason };
-                }
+                html: '<p>Order: <strong>#' + orderId + '</strong></p><p>Amount: <strong>' + F(amount) + '</strong></p><textarea id="disputeReason" class="form-control" rows="3" placeholder="Describe the issue..." style="border-radius:8px;margin-top:10px;"></textarea>',
+                icon: 'warning', showCancelButton: true, confirmButtonText: 'Submit Dispute', confirmButtonColor: '#ef4444', cancelButtonText: 'Cancel',
+                preConfirm: function() { var reason = document.getElementById('disputeReason').value.trim(); if (!reason) { Swal.showValidationMessage('Please describe the issue'); return false; } return { reason: reason }; }
             }).then(async function(result) {
                 if (result.isConfirmed) {
-                    var body = {
-                        orderId: typeof orderId === 'string' ? parseInt(orderId.replace(/[^0-9]/g,'')) || orderId : orderId,
-                        buyerId: parseInt(buyerId),
-                        sellerId: parseInt(sellerId),
-                        amount: parseFloat(amount),
-                        reason: result.value.reason
-                    };
-                    try {
-                        var r = await fetch('/api/admin/disputes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-                        var d = await r.json();
-                        if (d.success) { Swal.fire({ icon: 'success', title: 'Dispute Filed!', text: 'Admin will review your case.' }); loadMyDisputes(); }
-                        else { Swal.fire({ icon: 'error', title: 'Failed', text: d.message || 'Could not file dispute' }); }
-                    } catch(e) { Swal.fire({ icon: 'error', title: 'Network Error', text: 'Please try again later.' }); }
+                    var body = { orderId: typeof orderId === 'string' ? parseInt(orderId.replace(/[^0-9]/g,'')) || orderId : orderId, buyerId: parseInt(buyerId), sellerId: parseInt(sellerId), amount: parseFloat(amount), reason: result.value.reason };
+                    try { var r = await fetch('/api/admin/disputes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); var d = await r.json(); if (d.success) { Swal.fire({ icon: 'success', title: 'Dispute Filed!', text: 'Admin will review your case.' }); loadMyDisputes(); } else { Swal.fire({ icon: 'error', title: 'Failed', text: d.message }); } } catch(e) { Swal.fire({ icon: 'error', title: 'Network Error' }); }
                 }
             });
         }
 
-        // ========== MY DISPUTES ==========
         async function loadMyDisputes() {
             try {
                 var tokenPayload = JSON.parse(atob(token.split('.')[1]));
                 var userId = tokenPayload.userId;
-                var r = await fetch('/api/admin/disputes');
-                var d = await r.json();
+                var r = await fetch('/api/admin/disputes'); var d = await r.json();
                 if (d.success && d.data) {
                     var myDisputes = d.data.filter(function(ds) { return ds.buyerId === userId; });
                     if (myDisputes.length > 0) {
                         var html = '';
                         myDisputes.forEach(function(ds) {
                             var isResolved = ds.status === 'RESOLVED_RELEASED' || ds.status === 'RESOLVED_REFUNDED';
-                            var statusColor = ds.status === 'RESOLVED_RELEASED' ? '#10b981' : ds.status === 'RESOLVED_REFUNDED' ? '#3b82f6' : ds.status === 'UNDER_REVIEW' ? '#f59e0b' : '#ef4444';
+                            var statusColor = ds.status === 'RESOLVED_RELEASED' ? '#0d9488' : ds.status === 'RESOLVED_REFUNDED' ? '#2563eb' : ds.status === 'UNDER_REVIEW' ? '#d97706' : '#e11d48';
                             var statusIcon = ds.status === 'RESOLVED_RELEASED' ? '✅' : ds.status === 'RESOLVED_REFUNDED' ? '💰' : ds.status === 'UNDER_REVIEW' ? '🔍' : '⏳';
                             var cardClass = ds.status === 'RESOLVED_RELEASED' ? 'resolved' : ds.status === 'RESOLVED_REFUNDED' ? 'refunded' : '';
-                            html += '<div class="order-card dispute-card ' + cardClass + '">' +
-                                '<div class="order-header">' +
-                                    '<div><span class="order-id">' + statusIcon + ' Dispute #' + ds.id + '</span><br><span class="order-date">' + new Date(ds.createdAt).toLocaleDateString('en-GB') + '</span></div>' +
-                                    '<span style="color:' + statusColor + ';font-weight:700;">' + ds.status.replace(/_/g,' ') + '</span>' +
-                                '</div>' +
-                                '<p><strong>Order:</strong> #' + ds.orderId + ' | <strong>Seller:</strong> ' + (ds.sellerName || 'N/A') + '</p>' +
-                                '<p><strong>Amount:</strong> ' + F(ds.amount) + '</p>' +
-                                '<p><strong>Reason:</strong> ' + ds.reason + '</p>' +
-                                (ds.resolution ? '<div class="resolution-box"><strong>📋 Resolution:</strong> ' + ds.resolution + '<br><small>Resolved by: ' + (ds.resolvedBy || 'Admin') + ' | ' + new Date(ds.resolvedAt).toLocaleDateString('en-GB') + '</small></div>' : '<p style="color:#d97706;">⏳ Waiting for admin to review your case.</p>') +
-                            '</div>';
+                            html += '<div class="order-card dispute-card ' + cardClass + '"><div class="order-header"><div><span class="order-id">' + statusIcon + ' Dispute #' + ds.id + '</span><br><span class="order-date">' + new Date(ds.createdAt).toLocaleDateString('en-GB') + '</span></div><span style="color:' + statusColor + ';font-weight:700;">' + ds.status.replace(/_/g,' ') + '</span></div><p><strong>Order:</strong> #' + ds.orderId + ' | <strong>Seller:</strong> ' + (ds.sellerName || 'N/A') + '</p><p><strong>Amount:</strong> ' + F(ds.amount) + '</p><p><strong>Reason:</strong> ' + ds.reason + '</p>' + (ds.resolution ? '<div class="resolution-box"><strong>📋 Resolution:</strong> ' + ds.resolution + '<br><small>Resolved by: ' + (ds.resolvedBy || 'Admin') + ' | ' + new Date(ds.resolvedAt).toLocaleDateString('en-GB') + '</small></div>' : '<p style="color:#d97706;">⏳ Waiting for admin review.</p>') + '<div style="margin-top:8px;"><button class="btn btn-sm" style="background:#0d9488;color:white;" onclick="viewDisputeChat(' + ds.id + ')">💬 Chat with Admin</button></div></div>';
                         });
                         document.getElementById('myDisputes').innerHTML = html;
-                    } else {
-                        document.getElementById('myDisputes').innerHTML = '<div class="empty"><p>✅ No disputes filed.</p></div>';
-                    }
+                    } else { document.getElementById('myDisputes').innerHTML = '<div class="empty"><p>✅ No disputes filed.</p></div>'; }
                 }
             } catch(e) { document.getElementById('myDisputes').innerHTML = '<div class="empty">Failed to load disputes.</div>'; }
         }
 
-        loadOrders();
-        loadMyDisputes();
+        async function viewDisputeChat(id) {
+            var commentsR = await fetch('/api/admin/disputes/'+id+'/comments'); var commentsD = await commentsR.json();
+            var commentsHtml = (commentsD.data||[]).map(function(c){ var color=c.userType==='ADMIN'?'#e11d48':c.userType==='SELLER'?'#d97706':'#0d9488'; return '<div style="background:#f8fafc;padding:8px;border-radius:6px;margin-bottom:6px;text-align:left;"><strong style="color:'+color+'">'+c.userName+'</strong> <small>('+c.userType+')</small><br>'+c.message+'<br><small>'+new Date(c.createdAt).toLocaleString()+'</small></div>'; }).join('') || '<p class="text-muted text-center">No messages yet.</p>';
+            var tokenPayload = JSON.parse(atob(token.split('.')[1])); var userId = tokenPayload.userId;
+            Swal.fire({ title:'💬 Dispute Communication', html:'<div style="max-height:180px;overflow-y:auto;margin-bottom:10px;">'+commentsHtml+'</div><textarea id="newComment" class="form-control" rows="2" placeholder="Type a message..."></textarea>', showCancelButton:true, confirmButtonText:'<i class="fas fa-paper-plane"></i> Send', confirmButtonColor:'#0d9488', preConfirm:function(){ var msg=document.getElementById('newComment').value.trim(); if(!msg){ Swal.showValidationMessage('Type a message'); return false; } return msg; } }).then(async function(result){ if(result.isConfirmed){ await fetch('/api/admin/disputes/'+id+'/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:userId,userName:'Buyer',userType:'BUYER',message:result.value})}); Swal.fire({icon:'success',title:'Message Sent',showConfirmButton:false,timer:1500}); } });
+        }
+
+        loadOrders(); loadMyDisputes();
     </script>
 </body>
 </html>
