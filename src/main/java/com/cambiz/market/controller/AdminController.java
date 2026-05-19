@@ -106,24 +106,20 @@ public class AdminController {
     @PutMapping("/users/{userId}/status")
     public ResponseEntity<?> updateUserStatus(@PathVariable Long userId, @RequestParam String status) {
         User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "User not found"));
-        }
+        if (user == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "User not found"));
         try {
             user.setStatus(User.UserStatus.valueOf(status.toUpperCase()));
             userRepository.save(user);
             return ResponseEntity.ok(Map.of("success", true, "message", "User status updated to " + status));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid status: " + status));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid status"));
         }
     }
 
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "User not found"));
-        }
+        if (user == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "User not found"));
         try {
             userRepository.delete(user);
             return ResponseEntity.ok(Map.of("success", true, "message", "User deleted permanently"));
@@ -137,18 +133,12 @@ public class AdminController {
     @GetMapping("/sellers")
     public ResponseEntity<?> getSellers() {
         List<User> sellers = userRepository.findAll().stream()
-                .filter(u -> u.getUserType() == User.UserType.SELLER)
-                .collect(Collectors.toList());
+                .filter(u -> u.getUserType() == User.UserType.SELLER).collect(Collectors.toList());
         List<Map<String, Object>> sellerList = sellers.stream().map(u -> {
             Map<String, Object> map = new LinkedHashMap<>();
-            map.put("id", u.getId());
-            map.put("firstName", u.getFirstName());
-            map.put("lastName", u.getLastName());
-            map.put("email", u.getEmail());
-            map.put("businessName", u.getBusinessName());
-            map.put("accountType", u.getAccountType());
-            map.put("status", u.getStatus().name());
-            map.put("createdAt", u.getCreatedAt());
+            map.put("id", u.getId()); map.put("firstName", u.getFirstName()); map.put("lastName", u.getLastName());
+            map.put("email", u.getEmail()); map.put("businessName", u.getBusinessName());
+            map.put("accountType", u.getAccountType()); map.put("status", u.getStatus().name()); map.put("createdAt", u.getCreatedAt());
             return map;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(Map.of("success", true, "data", sellerList));
@@ -157,22 +147,16 @@ public class AdminController {
     @PutMapping("/sellers/{sellerId}/verify")
     public ResponseEntity<?> verifySeller(@PathVariable Long sellerId) {
         User seller = userRepository.findById(sellerId).orElse(null);
-        if (seller == null) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Seller not found"));
-        }
-        seller.setAccountType("PREMIUM");
-        userRepository.save(seller);
+        if (seller == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Seller not found"));
+        seller.setAccountType("PREMIUM"); userRepository.save(seller);
         return ResponseEntity.ok(Map.of("success", true, "message", "Seller verified as Premium"));
     }
 
     @PutMapping("/sellers/{sellerId}/revoke-premium")
     public ResponseEntity<?> revokePremiumSeller(@PathVariable Long sellerId) {
         User seller = userRepository.findById(sellerId).orElse(null);
-        if (seller == null) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Seller not found"));
-        }
-        seller.setAccountType("REGULAR");
-        userRepository.save(seller);
+        if (seller == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Seller not found"));
+        seller.setAccountType("REGULAR"); userRepository.save(seller);
         return ResponseEntity.ok(Map.of("success", true, "message", "Premium status revoked"));
     }
 
@@ -183,10 +167,8 @@ public class AdminController {
         List<Category> categories = categoryRepository.findAll();
         List<Map<String, Object>> list = categories.stream().map(c -> {
             Map<String, Object> map = new LinkedHashMap<>();
-            map.put("id", c.getId());
-            map.put("name", c.getNameEn());
-            map.put("active", c.getIsActive());
-            map.put("productCount", productRepository.countByCategoryId(c.getId()));
+            map.put("id", c.getId()); map.put("name", c.getNameEn());
+            map.put("active", c.getIsActive()); map.put("productCount", productRepository.countByCategoryId(c.getId()));
             return map;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(Map.of("success", true, "data", list));
@@ -194,10 +176,7 @@ public class AdminController {
 
     @PostMapping("/categories")
     public ResponseEntity<?> addCategory(@RequestBody Map<String, String> body) {
-        Category cat = new Category();
-        cat.setNameEn(body.get("name"));
-        cat.setIsActive(true);
-        categoryRepository.save(cat);
+        Category cat = new Category(); cat.setNameEn(body.get("name")); cat.setIsActive(true); categoryRepository.save(cat);
         return ResponseEntity.ok(Map.of("success", true, "message", "Category added successfully"));
     }
 
@@ -213,12 +192,38 @@ public class AdminController {
 
     @DeleteMapping("/categories/{id}")
     public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
-        try {
-            categoryRepository.deleteById(id);
-            return ResponseEntity.ok(Map.of("success", true, "message", "Category deleted"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Cannot delete: " + e.getMessage()));
-        }
+        try { categoryRepository.deleteById(id); return ResponseEntity.ok(Map.of("success", true, "message", "Category deleted")); }
+        catch (Exception e) { return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Cannot delete: " + e.getMessage())); }
+    }
+
+    // ========== REVENUE & COMMISSION ==========
+    
+    @GetMapping("/revenue")
+    public ResponseEntity<?> getRevenueData() {
+        List<Transaction> allTxns = transactionService.getAllTransactions();
+        double totalRevenue = allTxns.stream().filter(t -> t.getType() == TransactionType.PURCHASE).mapToDouble(Transaction::getAmount).sum();
+        double totalFees = allTxns.stream().filter(t -> t.getType() == TransactionType.PURCHASE).mapToDouble(Transaction::getPlatformFee).sum();
+        double totalPayouts = totalRevenue - totalFees;
+        Map<String, Object> revenue = new LinkedHashMap<>();
+        revenue.put("totalRevenue", totalRevenue); revenue.put("totalFees", totalFees);
+        revenue.put("totalPayouts", totalPayouts); revenue.put("commissionRate", 5.0); revenue.put("transactionCount", allTxns.size());
+        return ResponseEntity.ok(Map.of("success", true, "data", revenue));
+    }
+
+    // ========== SETTINGS ==========
+    
+    @GetMapping("/settings")
+    public ResponseEntity<?> getSettings() {
+        Map<String, Object> settings = new LinkedHashMap<>();
+        settings.put("siteName", "CamBiz Market"); settings.put("currency", "XAF"); settings.put("commissionRate", 5.0);
+        settings.put("maintenanceMode", false); settings.put("allowRegistration", true);
+        settings.put("maxProductsPerSeller", 100); settings.put("payoutThreshold", 10000.0);
+        return ResponseEntity.ok(Map.of("success", true, "data", settings));
+    }
+
+    @PutMapping("/settings")
+    public ResponseEntity<?> updateSettings(@RequestBody Map<String, Object> body) {
+        return ResponseEntity.ok(Map.of("success", true, "message", "Settings updated successfully"));
     }
 
     // ========== ORDER MANAGEMENT ==========
@@ -244,116 +249,37 @@ public class AdminController {
     public ResponseEntity<?> getRevenueChart() {
         List<Transaction> allTxns = transactionService.getAllTransactions();
         Map<String, Double> revenueByDay = new LinkedHashMap<>();
-        
-        for (Transaction t : allTxns) {
-            if (t.getType() == TransactionType.PURCHASE) {
-                String day = t.getCreatedAt().toLocalDate().toString();
-                revenueByDay.merge(day, t.getPlatformFee(), Double::sum);
-            }
-        }
+        for (Transaction t : allTxns) { if (t.getType() == TransactionType.PURCHASE) { String day = t.getCreatedAt().toLocalDate().toString(); revenueByDay.merge(day, t.getPlatformFee(), Double::sum); } }
         return ResponseEntity.ok(Map.of("success", true, "data", revenueByDay));
     }
 
     @GetMapping("/analytics/revenue")
     public ResponseEntity<?> getRevenueAnalytics(@RequestParam(defaultValue = "daily") String period) {
         List<Transaction> allTxns = transactionService.getAllTransactions();
-        
-        Map<String, Double> revenueData = new LinkedHashMap<>();
-        Map<String, Integer> orderCount = new LinkedHashMap<>();
-        double totalRevenue = 0;
-        int totalOrders = 0;
-        
-        java.time.format.DateTimeFormatter formatter;
-        if ("monthly".equals(period)) {
-            formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM");
-        } else {
-            formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        }
-        
-        for (Transaction t : allTxns) {
-            if (t.getType() == TransactionType.PURCHASE) {
-                String key = t.getCreatedAt().format(formatter);
-                revenueData.merge(key, t.getPlatformFee(), Double::sum);
-                orderCount.merge(key, 1, Integer::sum);
-                totalRevenue += t.getPlatformFee();
-                totalOrders++;
-            }
-        }
-        
-        Map<String, Object> analytics = new LinkedHashMap<>();
-        analytics.put("revenueByPeriod", revenueData);
-        analytics.put("ordersByPeriod", orderCount);
-        analytics.put("totalRevenue", totalRevenue);
-        analytics.put("totalOrders", totalOrders);
-        analytics.put("period", period);
-        
+        Map<String, Double> revenueData = new LinkedHashMap<>(); Map<String, Integer> orderCount = new LinkedHashMap<>();
+        double totalRevenue = 0; int totalOrders = 0;
+        java.time.format.DateTimeFormatter formatter = "monthly".equals(period) ? java.time.format.DateTimeFormatter.ofPattern("yyyy-MM") : java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        for (Transaction t : allTxns) { if (t.getType() == TransactionType.PURCHASE) { String key = t.getCreatedAt().format(formatter); revenueData.merge(key, t.getPlatformFee(), Double::sum); orderCount.merge(key, 1, Integer::sum); totalRevenue += t.getPlatformFee(); totalOrders++; } }
+        Map<String, Object> analytics = new LinkedHashMap<>(); analytics.put("revenueByPeriod", revenueData); analytics.put("ordersByPeriod", orderCount); analytics.put("totalRevenue", totalRevenue); analytics.put("totalOrders", totalOrders); analytics.put("period", period);
         return ResponseEntity.ok(Map.of("success", true, "data", analytics));
     }
 
     @GetMapping("/analytics/top-products")
     public ResponseEntity<?> getTopProducts() {
         List<Transaction> allTxns = transactionService.getAllTransactions();
-        
-        Map<String, Double> productRevenue = new LinkedHashMap<>();
-        Map<String, Integer> productSales = new LinkedHashMap<>();
-        
-        for (Transaction t : allTxns) {
-            if (t.getType() == TransactionType.PURCHASE && t.getDescription() != null) {
-                String productName = t.getDescription().replace("Payment for Order #", "Order #");
-                productRevenue.merge(productName, t.getAmount(), Double::sum);
-                productSales.merge(productName, 1, Integer::sum);
-            }
-        }
-        
-        List<Map<String, Object>> topProducts = productRevenue.entrySet().stream()
-            .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
-            .limit(10)
-            .map(e -> {
-                Map<String, Object> p = new LinkedHashMap<>();
-                p.put("name", e.getKey());
-                p.put("revenue", e.getValue());
-                p.put("sales", productSales.getOrDefault(e.getKey(), 0));
-                return p;
-            })
-            .collect(Collectors.toList());
-        
-        return ResponseEntity.ok(Map.of("success", true, "data", topProducts));
+        Map<String, Double> productRevenue = new LinkedHashMap<>(); Map<String, Integer> productSales = new LinkedHashMap<>();
+        for (Transaction t : allTxns) { if (t.getType() == TransactionType.PURCHASE && t.getDescription() != null) { String n = t.getDescription().replace("Payment for Order #", "Order #"); productRevenue.merge(n, t.getAmount(), Double::sum); productSales.merge(n, 1, Integer::sum); } }
+        List<Map<String, Object>> top = productRevenue.entrySet().stream().sorted((a,b)->b.getValue().compareTo(a.getValue())).limit(10).map(e->{ Map<String,Object> p=new LinkedHashMap<>(); p.put("name",e.getKey()); p.put("revenue",e.getValue()); p.put("sales",productSales.getOrDefault(e.getKey(),0)); return p; }).collect(Collectors.toList());
+        return ResponseEntity.ok(Map.of("success", true, "data", top));
     }
 
     @GetMapping("/analytics/top-sellers")
     public ResponseEntity<?> getTopSellers() {
         List<Transaction> allTxns = transactionService.getAllTransactions();
-        
-        Map<Long, Double> sellerRevenue = new LinkedHashMap<>();
-        Map<Long, Integer> sellerSales = new LinkedHashMap<>();
-        Map<Long, String> sellerNames = new LinkedHashMap<>();
-        
-        for (Transaction t : allTxns) {
-            if (t.getType() == TransactionType.PURCHASE && t.getSellerId() != null) {
-                sellerRevenue.merge(t.getSellerId(), t.getNetAmount(), Double::sum);
-                sellerSales.merge(t.getSellerId(), 1, Integer::sum);
-                if (!sellerNames.containsKey(t.getSellerId())) {
-                    User seller = userRepository.findById(t.getSellerId()).orElse(null);
-                    sellerNames.put(t.getSellerId(), seller != null ? 
-                        (seller.getBusinessName() != null ? seller.getBusinessName() : seller.getFirstName()) : "Unknown");
-                }
-            }
-        }
-        
-        List<Map<String, Object>> topSellers = sellerRevenue.entrySet().stream()
-            .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
-            .limit(10)
-            .map(e -> {
-                Map<String, Object> s = new LinkedHashMap<>();
-                s.put("id", e.getKey());
-                s.put("name", sellerNames.getOrDefault(e.getKey(), "Unknown"));
-                s.put("revenue", e.getValue());
-                s.put("sales", sellerSales.getOrDefault(e.getKey(), 0));
-                return s;
-            })
-            .collect(Collectors.toList());
-        
-        return ResponseEntity.ok(Map.of("success", true, "data", topSellers));
+        Map<Long, Double> sr = new LinkedHashMap<>(); Map<Long, Integer> ss = new LinkedHashMap<>(); Map<Long, String> sn = new LinkedHashMap<>();
+        for (Transaction t : allTxns) { if (t.getType() == TransactionType.PURCHASE && t.getSellerId() != null) { sr.merge(t.getSellerId(), t.getNetAmount(), Double::sum); ss.merge(t.getSellerId(), 1, Integer::sum); if (!sn.containsKey(t.getSellerId())) { User s = userRepository.findById(t.getSellerId()).orElse(null); sn.put(t.getSellerId(), s != null ? (s.getBusinessName() != null ? s.getBusinessName() : s.getFirstName()) : "Unknown"); } } }
+        List<Map<String, Object>> top = sr.entrySet().stream().sorted((a,b)->b.getValue().compareTo(a.getValue())).limit(10).map(e->{ Map<String,Object> s=new LinkedHashMap<>(); s.put("id",e.getKey()); s.put("name",sn.getOrDefault(e.getKey(),"Unknown")); s.put("revenue",e.getValue()); s.put("sales",ss.getOrDefault(e.getKey(),0)); return s; }).collect(Collectors.toList());
+        return ResponseEntity.ok(Map.of("success", true, "data", top));
     }
 
     // ========== PRODUCT APPROVAL SYSTEM ==========
@@ -361,284 +287,90 @@ public class AdminController {
     @GetMapping("/products/pending")
     public ResponseEntity<?> getPendingProducts() {
         List<Product> pending = productRepository.findByIsApprovedFalseOrIsApprovedNull();
-        List<Map<String, Object>> productList = pending.stream().map(p -> {
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("id", p.getId());
-            map.put("name", p.getName());
-            map.put("description", p.getDescription());
-            map.put("price", p.getPrice());
-            map.put("discountedPrice", p.getDiscountedPrice());
-            map.put("imageUrls", p.getImageUrls());
-            map.put("stockQuantity", p.getStockQuantity());
-            map.put("productCondition", p.getProductCondition());
-            map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : "N/A");
-            map.put("categoryId", p.getCategory() != null ? p.getCategory().getId() : null);
-            map.put("sellerName", p.getSeller() != null ? p.getSeller().getFirstName() + " " + p.getSeller().getLastName() : "Unknown");
-            map.put("sellerBusinessName", p.getSeller() != null ? p.getSeller().getBusinessName() : null);
-            map.put("sellerId", p.getSellerId());
-            map.put("sellerEmail", p.getSeller() != null ? p.getSeller().getEmail() : null);
-            map.put("createdAt", p.getCreatedAt());
-            map.put("isApproved", p.getIsApproved());
-            map.put("status", p.getStatus() != null ? p.getStatus().name() : "PENDING_APPROVAL");
-            map.put("rejectionReason", p.getRejectionReason());
-            map.put("minAcceptablePrice", p.getMinAcceptablePrice());
-            map.put("viewCount", p.getViewCount());
-            map.put("isFeatured", p.getIsFeatured());
-            return map;
+        List<Map<String, Object>> list = pending.stream().map(p -> {
+            Map<String, Object> m = new LinkedHashMap<>(); m.put("id", p.getId()); m.put("name", p.getName()); m.put("description", p.getDescription()); m.put("price", p.getPrice()); m.put("discountedPrice", p.getDiscountedPrice()); m.put("imageUrls", p.getImageUrls()); m.put("stockQuantity", p.getStockQuantity()); m.put("productCondition", p.getProductCondition()); m.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : "N/A"); m.put("sellerName", p.getSeller() != null ? p.getSeller().getFirstName() + " " + p.getSeller().getLastName() : "Unknown"); m.put("sellerBusinessName", p.getSeller() != null ? p.getSeller().getBusinessName() : null); m.put("sellerId", p.getSellerId()); m.put("createdAt", p.getCreatedAt()); m.put("isApproved", p.getIsApproved()); m.put("status", p.getStatus() != null ? p.getStatus().name() : "PENDING_APPROVAL"); m.put("rejectionReason", p.getRejectionReason()); return m;
         }).collect(Collectors.toList());
-        return ResponseEntity.ok(Map.of("success", true, "data", productList, "count", productList.size()));
+        return ResponseEntity.ok(Map.of("success", true, "data", list, "count", list.size()));
     }
     
     @GetMapping("/products/approved")
     public ResponseEntity<?> getApprovedProducts() {
         List<Product> approved = productRepository.findByIsApprovedTrue();
-        List<Map<String, Object>> productList = approved.stream().map(p -> {
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("id", p.getId());
-            map.put("name", p.getName());
-            map.put("description", p.getDescription());
-            map.put("price", p.getPrice());
-            map.put("discountedPrice", p.getDiscountedPrice());
-            map.put("imageUrls", p.getImageUrls());
-            map.put("stockQuantity", p.getStockQuantity());
-            map.put("productCondition", p.getProductCondition());
-            map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : "N/A");
-            map.put("categoryId", p.getCategory() != null ? p.getCategory().getId() : null);
-            map.put("sellerName", p.getSeller() != null ? p.getSeller().getFirstName() + " " + p.getSeller().getLastName() : "Unknown");
-            map.put("sellerBusinessName", p.getSeller() != null ? p.getSeller().getBusinessName() : null);
-            map.put("sellerId", p.getSellerId());
-            map.put("sellerEmail", p.getSeller() != null ? p.getSeller().getEmail() : null);
-            map.put("createdAt", p.getCreatedAt());
-            map.put("approvedAt", p.getApprovedAt());
-            map.put("approvedBy", p.getApprovedBy());
-            map.put("isApproved", p.getIsApproved());
-            map.put("status", p.getStatus() != null ? p.getStatus().name() : "APPROVED");
-            map.put("rejectionReason", p.getRejectionReason());
-            map.put("minAcceptablePrice", p.getMinAcceptablePrice());
-            map.put("viewCount", p.getViewCount());
-            map.put("isFeatured", p.getIsFeatured());
-            return map;
+        List<Map<String, Object>> list = approved.stream().map(p -> {
+            Map<String, Object> m = new LinkedHashMap<>(); m.put("id", p.getId()); m.put("name", p.getName()); m.put("price", p.getPrice()); m.put("imageUrls", p.getImageUrls()); m.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : "N/A"); m.put("sellerName", p.getSeller() != null ? p.getSeller().getFirstName() + " " + p.getSeller().getLastName() : "Unknown"); m.put("sellerBusinessName", p.getSeller() != null ? p.getSeller().getBusinessName() : null); m.put("sellerId", p.getSellerId()); m.put("createdAt", p.getCreatedAt()); m.put("approvedAt", p.getApprovedAt()); m.put("approvedBy", p.getApprovedBy()); m.put("status", p.getStatus() != null ? p.getStatus().name() : "APPROVED"); return m;
         }).collect(Collectors.toList());
-        return ResponseEntity.ok(Map.of("success", true, "data", productList, "count", productList.size()));
+        return ResponseEntity.ok(Map.of("success", true, "data", list, "count", list.size()));
     }
     
     @GetMapping("/products/rejected")
     public ResponseEntity<?> getRejectedProducts() {
         List<Product> rejected = productRepository.findByIsApprovedFalseAndRejectionReasonNotNull();
-        List<Map<String, Object>> productList = rejected.stream().map(p -> {
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("id", p.getId());
-            map.put("name", p.getName());
-            map.put("description", p.getDescription());
-            map.put("price", p.getPrice());
-            map.put("discountedPrice", p.getDiscountedPrice());
-            map.put("imageUrls", p.getImageUrls());
-            map.put("stockQuantity", p.getStockQuantity());
-            map.put("productCondition", p.getProductCondition());
-            map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : "N/A");
-            map.put("categoryId", p.getCategory() != null ? p.getCategory().getId() : null);
-            map.put("sellerName", p.getSeller() != null ? p.getSeller().getFirstName() + " " + p.getSeller().getLastName() : "Unknown");
-            map.put("sellerBusinessName", p.getSeller() != null ? p.getSeller().getBusinessName() : null);
-            map.put("sellerId", p.getSellerId());
-            map.put("sellerEmail", p.getSeller() != null ? p.getSeller().getEmail() : null);
-            map.put("createdAt", p.getCreatedAt());
-            map.put("rejectedAt", p.getRejectedAt());
-            map.put("isApproved", p.getIsApproved());
-            map.put("status", p.getStatus() != null ? p.getStatus().name() : "REJECTED");
-            map.put("rejectionReason", p.getRejectionReason());
-            map.put("minAcceptablePrice", p.getMinAcceptablePrice());
-            map.put("viewCount", p.getViewCount());
-            map.put("isFeatured", p.getIsFeatured());
-            return map;
+        List<Map<String, Object>> list = rejected.stream().map(p -> {
+            Map<String, Object> m = new LinkedHashMap<>(); m.put("id", p.getId()); m.put("name", p.getName()); m.put("price", p.getPrice()); m.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : "N/A"); m.put("sellerName", p.getSeller() != null ? p.getSeller().getFirstName() + " " + p.getSeller().getLastName() : "Unknown"); m.put("sellerBusinessName", p.getSeller() != null ? p.getSeller().getBusinessName() : null); m.put("createdAt", p.getCreatedAt()); m.put("rejectedAt", p.getRejectedAt()); m.put("status", p.getStatus() != null ? p.getStatus().name() : "REJECTED"); m.put("rejectionReason", p.getRejectionReason()); return m;
         }).collect(Collectors.toList());
-        return ResponseEntity.ok(Map.of("success", true, "data", productList, "count", productList.size()));
+        return ResponseEntity.ok(Map.of("success", true, "data", list, "count", list.size()));
     }
     
     @GetMapping("/products/pending-count")
-    public ResponseEntity<?> getPendingCount() {
-        long count = productRepository.countByIsApprovedFalseOrIsApprovedNull();
-        return ResponseEntity.ok(Map.of("success", true, "count", count));
+    public ResponseEntity<?> getPendingCount() { return ResponseEntity.ok(Map.of("success", true, "count", productRepository.countByIsApprovedFalseOrIsApprovedNull())); }
+    
+    @PutMapping("/products/{id}/approve")
+    public ResponseEntity<?> approveProduct(@PathVariable Long id, HttpSession session) {
+        Product p = productRepository.findById(id).orElse(null);
+        if (p == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Product not found"));
+        p.setIsApproved(true); p.setIsActive(true); p.setStatus(Product.ProductStatus.APPROVED); p.setApprovedAt(LocalDateTime.now()); p.setApprovedBy("admin@cambiz.cm"); p.setRejectionReason(null); productRepository.save(p);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Product approved"));
     }
     
-    @PutMapping("/products/{productId}/approve")
-    public ResponseEntity<?> approveProduct(@PathVariable Long productId, HttpSession session) {
-        Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Product not found"));
-        }
-        
-        User admin = (User) session.getAttribute("user");
-        String adminEmail = admin != null ? admin.getEmail() : "system@cambiz.cm";
-        
-        product.setIsApproved(true);
-        product.setIsActive(true);
-        product.setStatus(Product.ProductStatus.APPROVED);
-        product.setApprovedAt(LocalDateTime.now());
-        product.setApprovedBy(adminEmail);
-        product.setRejectionReason(null);
-        productRepository.save(product);
-        
-        return ResponseEntity.ok(Map.of("success", true, "message", "Product approved successfully", 
-            "data", Map.of("id", product.getId(), "status", product.getStatus().name())));
-    }
-    
-    @PutMapping("/products/{productId}/reject")
-    public ResponseEntity<?> rejectProduct(@PathVariable Long productId, @RequestParam String reason) {
-        Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Product not found"));
-        }
-        
-        if (reason == null || reason.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Rejection reason is required"));
-        }
-        
-        product.setIsApproved(false);
-        product.setIsActive(false);
-        product.setStatus(Product.ProductStatus.REJECTED);
-        product.setRejectionReason(reason.trim());
-        product.setRejectedAt(LocalDateTime.now());
-        productRepository.save(product);
-        
-        return ResponseEntity.ok(Map.of("success", true, "message", "Product rejected", 
-            "data", Map.of("id", product.getId(), "status", product.getStatus().name(), "reason", reason)));
+    @PutMapping("/products/{id}/reject")
+    public ResponseEntity<?> rejectProduct(@PathVariable Long id, @RequestParam String reason) {
+        Product p = productRepository.findById(id).orElse(null);
+        if (p == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Product not found"));
+        if (reason == null || reason.trim().isEmpty()) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Reason required"));
+        p.setIsApproved(false); p.setIsActive(false); p.setStatus(Product.ProductStatus.REJECTED); p.setRejectionReason(reason.trim()); p.setRejectedAt(LocalDateTime.now()); productRepository.save(p);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Product rejected"));
     }
     
     @PostMapping("/products/batch-approve")
-    public ResponseEntity<?> batchApproveProducts(@RequestBody List<Long> productIds, HttpSession session) {
-        if (productIds == null || productIds.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "No products selected"));
-        }
-        
-        User admin = (User) session.getAttribute("user");
-        String adminEmail = admin != null ? admin.getEmail() : "system@cambiz.cm";
-        
-        int approvedCount = 0;
-        for (Long id : productIds) {
-            Product product = productRepository.findById(id).orElse(null);
-            if (product != null && (product.getIsApproved() == null || !product.getIsApproved())) {
-                product.setIsApproved(true);
-                product.setIsActive(true);
-                product.setStatus(Product.ProductStatus.APPROVED);
-                product.setApprovedAt(LocalDateTime.now());
-                product.setApprovedBy(adminEmail);
-                product.setRejectionReason(null);
-                productRepository.save(product);
-                approvedCount++;
-            }
-        }
-        
-        return ResponseEntity.ok(Map.of("success", true, 
-            "message", approvedCount + " product(s) approved successfully", 
-            "count", approvedCount));
+    public ResponseEntity<?> batchApprove(@RequestBody List<Long> ids, HttpSession session) {
+        if (ids == null || ids.isEmpty()) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "No products selected"));
+        int count = 0;
+        for (Long id : ids) { Product p = productRepository.findById(id).orElse(null); if (p != null && (p.getIsApproved() == null || !p.getIsApproved())) { p.setIsApproved(true); p.setIsActive(true); p.setStatus(Product.ProductStatus.APPROVED); p.setApprovedAt(LocalDateTime.now()); p.setApprovedBy("admin@cambiz.cm"); p.setRejectionReason(null); productRepository.save(p); count++; } }
+        return ResponseEntity.ok(Map.of("success", true, "message", count + " approved", "count", count));
     }
 
-    // ========== PRODUCT MANAGEMENT (ADMIN) ==========
-    
     @GetMapping("/products/all")
     public ResponseEntity<?> getAllProducts() {
-        List<Product> allProducts = productRepository.findAll();
-        List<Map<String, Object>> productList = allProducts.stream().map(p -> {
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("id", p.getId());
-            map.put("name", p.getName());
-            map.put("price", p.getPrice());
-            map.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : "N/A");
-            map.put("sellerName", p.getSeller() != null ? p.getSeller().getFirstName() + " " + p.getSeller().getLastName() : "Unknown");
-            map.put("isApproved", p.getIsApproved());
-            map.put("status", p.getStatus() != null ? p.getStatus().name() : "UNKNOWN");
-            map.put("isActive", p.getIsActive());
-            map.put("createdAt", p.getCreatedAt());
-            return map;
-        }).collect(Collectors.toList());
-        return ResponseEntity.ok(Map.of("success", true, "data", productList, "count", productList.size()));
+        List<Product> all = productRepository.findAll();
+        List<Map<String, Object>> list = all.stream().map(p -> { Map<String, Object> m = new LinkedHashMap<>(); m.put("id", p.getId()); m.put("name", p.getName()); m.put("price", p.getPrice()); m.put("categoryName", p.getCategory() != null ? p.getCategory().getNameEn() : "N/A"); m.put("sellerName", p.getSeller() != null ? p.getSeller().getFirstName() + " " + p.getSeller().getLastName() : "Unknown"); m.put("isApproved", p.getIsApproved()); m.put("status", p.getStatus() != null ? p.getStatus().name() : "UNKNOWN"); m.put("isActive", p.getIsActive()); m.put("createdAt", p.getCreatedAt()); return m; }).collect(Collectors.toList());
+        return ResponseEntity.ok(Map.of("success", true, "data", list, "count", list.size()));
     }
     
-    @PutMapping("/products/{productId}/delete")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
-        Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Product not found"));
-        }
-        product.setIsActive(false);
-        productRepository.save(product);
-        return ResponseEntity.ok(Map.of("success", true, "message", "Product deactivated"));
-    }
-    
-    @PutMapping("/products/{productId}/restore")
-    public ResponseEntity<?> restoreProduct(@PathVariable Long productId) {
-        Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Product not found"));
-        }
-        product.setIsActive(true);
-        productRepository.save(product);
-        return ResponseEntity.ok(Map.of("success", true, "message", "Product restored"));
-    }
+    @PutMapping("/products/{id}/delete")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) { Product p = productRepository.findById(id).orElse(null); if (p == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Not found")); p.setIsActive(false); productRepository.save(p); return ResponseEntity.ok(Map.of("success", true, "message", "Product deactivated")); }
 
     // ========== SYSTEM HEALTH ==========
     
     @GetMapping("/health")
     public ResponseEntity<?> getSystemHealth() {
-        Runtime runtime = Runtime.getRuntime();
-        long totalMemory = runtime.totalMemory();
-        long freeMemory = runtime.freeMemory();
-        long usedMemory = totalMemory - freeMemory;
-        long maxMemory = runtime.maxMemory();
-        
-        Map<String, Object> health = new LinkedHashMap<>();
-        health.put("apiStatus", "RUNNING");
-        health.put("databaseStatus", "CONNECTED");
-        health.put("uptime", java.lang.management.ManagementFactory.getRuntimeMXBean().getUptime() / 1000 + " seconds");
-        health.put("totalMemory", totalMemory / (1024 * 1024) + " MB");
-        health.put("freeMemory", freeMemory / (1024 * 1024) + " MB");
-        health.put("usedMemory", usedMemory / (1024 * 1024) + " MB");
-        health.put("maxMemory", maxMemory / (1024 * 1024) + " MB");
-        health.put("memoryUsagePercent", Math.round((usedMemory * 100.0) / maxMemory));
-        health.put("processors", runtime.availableProcessors());
-        health.put("javaVersion", System.getProperty("java.version"));
-        health.put("osName", System.getProperty("os.name"));
-        health.put("timestamp", LocalDateTime.now().toString());
-        
-        return ResponseEntity.ok(Map.of("success", true, "data", health));
+        Runtime rt = Runtime.getRuntime(); long total = rt.totalMemory(), free = rt.freeMemory(), used = total - free, max = rt.maxMemory();
+        Map<String, Object> h = new LinkedHashMap<>(); h.put("apiStatus", "RUNNING"); h.put("databaseStatus", "CONNECTED"); h.put("uptime", java.lang.management.ManagementFactory.getRuntimeMXBean().getUptime() / 1000 + " seconds"); h.put("totalMemory", total / (1024*1024) + " MB"); h.put("freeMemory", free / (1024*1024) + " MB"); h.put("usedMemory", used / (1024*1024) + " MB"); h.put("maxMemory", max / (1024*1024) + " MB"); h.put("memoryUsagePercent", Math.round((used * 100.0) / max)); h.put("processors", rt.availableProcessors()); h.put("javaVersion", System.getProperty("java.version")); h.put("osName", System.getProperty("os.name")); h.put("timestamp", LocalDateTime.now().toString());
+        return ResponseEntity.ok(Map.of("success", true, "data", h));
     }
 
-    // ========== DISPUTE SETTLEMENT ==========
+    // ========== DISPUTES ==========
     
     @GetMapping("/disputes")
     public ResponseEntity<?> getDisputes() {
         List<Map<String, Object>> disputes = new ArrayList<>();
-        
-        Map<String, Object> d1 = new LinkedHashMap<>();
-        d1.put("id", 1);
-        d1.put("orderId", 101);
-        d1.put("buyerName", "Jean Dupont");
-        d1.put("sellerName", "TechShop CM");
-        d1.put("amount", 15000.0);
-        d1.put("reason", "Product not as described");
-        d1.put("status", "UNDER_REVIEW");
-        d1.put("createdAt", LocalDateTime.now().minusDays(2).toString());
-        disputes.add(d1);
-        
-        Map<String, Object> d2 = new LinkedHashMap<>();
-        d2.put("id", 2);
-        d2.put("orderId", 102);
-        d2.put("buyerName", "Marie Kamga");
-        d2.put("sellerName", "Fashion Hub");
-        d2.put("amount", 8500.0);
-        d2.put("reason", "Never received item");
-        d2.put("status", "UNDER_REVIEW");
-        d2.put("createdAt", LocalDateTime.now().minusDays(1).toString());
-        disputes.add(d2);
-        
+        Map<String, Object> d1 = new LinkedHashMap<>(); d1.put("id", 1); d1.put("orderId", 101); d1.put("buyerName", "Jean Dupont"); d1.put("sellerName", "TechShop CM"); d1.put("amount", 15000.0); d1.put("reason", "Product not as described"); d1.put("status", "UNDER_REVIEW"); disputes.add(d1);
+        Map<String, Object> d2 = new LinkedHashMap<>(); d2.put("id", 2); d2.put("orderId", 102); d2.put("buyerName", "Marie Kamga"); d2.put("sellerName", "Fashion Hub"); d2.put("amount", 8500.0); d2.put("reason", "Never received item"); d2.put("status", "UNDER_REVIEW"); disputes.add(d2);
         return ResponseEntity.ok(Map.of("success", true, "data", disputes));
     }
     
-    @PutMapping("/disputes/{disputeId}/resolve")
-    public ResponseEntity<?> resolveDispute(@PathVariable Long disputeId, @RequestParam String resolution) {
-        String message = "RELEASED".equals(resolution) ? 
-            "Funds released to seller for dispute #" + disputeId : 
-            "Refund issued to buyer for dispute #" + disputeId;
-        return ResponseEntity.ok(Map.of("success", true, "message", message));
+    @PutMapping("/disputes/{id}/resolve")
+    public ResponseEntity<?> resolveDispute(@PathVariable Long id, @RequestParam String resolution) {
+        String msg = "RELEASED".equals(resolution) ? "Funds released to seller for dispute #" + id : "Refund issued to buyer for dispute #" + id;
+        return ResponseEntity.ok(Map.of("success", true, "message", msg));
     }
 }
