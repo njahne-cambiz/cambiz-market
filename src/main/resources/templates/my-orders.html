@@ -33,6 +33,10 @@
         .btn-dispute { background: #fee2e2; color: #ef4444; }
         .btn-track { background: #dbeafe; color: #2563eb; }
         .empty { text-align: center; padding: 60px 20px; color: #6b7280; }
+        .dispute-card { border-left: 4px solid #f59e0b; }
+        .dispute-card.resolved { border-left-color: #10b981; }
+        .dispute-card.refunded { border-left-color: #3b82f6; }
+        .resolution-box { background: #f0fdf4; padding: 10px; border-radius: 8px; margin-top: 8px; }
         .footer { text-align: center; padding: 2rem; color: #6b7280; font-size: 0.9rem; margin-top: 3rem; }
     </style>
 </head>
@@ -49,6 +53,9 @@
     <div class="container">
         <h2>📦 My Orders</h2>
         <div id="ordersList"><div class="empty">Loading orders...</div></div>
+
+        <h2 style="margin-top:40px;">⚖️ My Disputes</h2>
+        <div id="myDisputes"><div class="empty">Loading disputes...</div></div>
     </div>
     <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
 
@@ -57,6 +64,7 @@
         if (!token) { window.location.href = '/dashboard'; }
         var F = function(v) { return new Intl.NumberFormat('fr-FR', {style:'currency', currency:'XAF', maximumFractionDigits:0}).format(v||0); };
 
+        // ========== LOAD ORDERS ==========
         async function loadOrders() {
             try {
                 var r = await fetch('/api/orders/my-orders', { headers: { 'Authorization': 'Bearer ' + token } });
@@ -95,6 +103,7 @@
             } catch (e) { document.getElementById('ordersList').innerHTML = '<div class="empty">Failed to load orders.</div>'; }
         }
 
+        // ========== FILE DISPUTE ==========
         async function fileDispute(orderId, amount, sellerId) {
             var tokenPayload = JSON.parse(atob(token.split('.')[1]));
             var buyerId = tokenPayload.userId;
@@ -130,14 +139,50 @@
                     try {
                         var r = await fetch('/api/admin/disputes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                         var d = await r.json();
-                        if (d.success) { Swal.fire({ icon: 'success', title: 'Dispute Filed!', text: 'Admin will review your case.' }); }
+                        if (d.success) { Swal.fire({ icon: 'success', title: 'Dispute Filed!', text: 'Admin will review your case.' }); loadMyDisputes(); }
                         else { Swal.fire({ icon: 'error', title: 'Failed', text: d.message || 'Could not file dispute' }); }
                     } catch(e) { Swal.fire({ icon: 'error', title: 'Network Error', text: 'Please try again later.' }); }
                 }
             });
         }
 
+        // ========== MY DISPUTES ==========
+        async function loadMyDisputes() {
+            try {
+                var tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                var userId = tokenPayload.userId;
+                var r = await fetch('/api/admin/disputes');
+                var d = await r.json();
+                if (d.success && d.data) {
+                    var myDisputes = d.data.filter(function(ds) { return ds.buyerId === userId; });
+                    if (myDisputes.length > 0) {
+                        var html = '';
+                        myDisputes.forEach(function(ds) {
+                            var isResolved = ds.status === 'RESOLVED_RELEASED' || ds.status === 'RESOLVED_REFUNDED';
+                            var statusColor = ds.status === 'RESOLVED_RELEASED' ? '#10b981' : ds.status === 'RESOLVED_REFUNDED' ? '#3b82f6' : ds.status === 'UNDER_REVIEW' ? '#f59e0b' : '#ef4444';
+                            var statusIcon = ds.status === 'RESOLVED_RELEASED' ? '✅' : ds.status === 'RESOLVED_REFUNDED' ? '💰' : ds.status === 'UNDER_REVIEW' ? '🔍' : '⏳';
+                            var cardClass = ds.status === 'RESOLVED_RELEASED' ? 'resolved' : ds.status === 'RESOLVED_REFUNDED' ? 'refunded' : '';
+                            html += '<div class="order-card dispute-card ' + cardClass + '">' +
+                                '<div class="order-header">' +
+                                    '<div><span class="order-id">' + statusIcon + ' Dispute #' + ds.id + '</span><br><span class="order-date">' + new Date(ds.createdAt).toLocaleDateString('en-GB') + '</span></div>' +
+                                    '<span style="color:' + statusColor + ';font-weight:700;">' + ds.status.replace(/_/g,' ') + '</span>' +
+                                '</div>' +
+                                '<p><strong>Order:</strong> #' + ds.orderId + ' | <strong>Seller:</strong> ' + (ds.sellerName || 'N/A') + '</p>' +
+                                '<p><strong>Amount:</strong> ' + F(ds.amount) + '</p>' +
+                                '<p><strong>Reason:</strong> ' + ds.reason + '</p>' +
+                                (ds.resolution ? '<div class="resolution-box"><strong>📋 Resolution:</strong> ' + ds.resolution + '<br><small>Resolved by: ' + (ds.resolvedBy || 'Admin') + ' | ' + new Date(ds.resolvedAt).toLocaleDateString('en-GB') + '</small></div>' : '<p style="color:#d97706;">⏳ Waiting for admin to review your case.</p>') +
+                            '</div>';
+                        });
+                        document.getElementById('myDisputes').innerHTML = html;
+                    } else {
+                        document.getElementById('myDisputes').innerHTML = '<div class="empty"><p>✅ No disputes filed.</p></div>';
+                    }
+                }
+            } catch(e) { document.getElementById('myDisputes').innerHTML = '<div class="empty">Failed to load disputes.</div>'; }
+        }
+
         loadOrders();
+        loadMyDisputes();
     </script>
 </body>
 </html>
