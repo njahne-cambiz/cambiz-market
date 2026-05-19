@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | CamBiz Market</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f3f4f6; min-height: 100vh; color: #333; }
-        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: center; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .header .logo { font-size: 1.5rem; font-weight: 800; color: white; text-decoration: none; letter-spacing: -0.5px; }
         .header .logo span { color: #febd69; }
+        .header .nav-right { display: flex; align-items: center; gap: 20px; }
+        .cart-icon { position: relative; cursor: pointer; text-decoration: none; color: white; font-size: 1.3rem; }
+        .cart-badge { position: absolute; top: -8px; right: -10px; background: #febd69; color: #0f1111; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
         .container { max-width: 1100px; margin: 2.5rem auto; padding: 0 1.5rem; }
         .section-title { font-size: 1.2rem; font-weight: 700; color: #0f1111; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.8rem; margin-top: 2rem; }
         .section-title::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
@@ -86,6 +90,11 @@
 <body>
     <header class="header">
         <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+        <div class="nav-right">
+            <a href="/cart" class="cart-icon" title="Shopping Cart">
+                🛒<span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+            </a>
+        </div>
     </header>
 
     <div class="container">
@@ -93,7 +102,7 @@
             <div class="hero"><div class="icon">🚀</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform</p></div>
             <div class="stats-grid">
                 <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
-                <div class="stat-card"><div class="value">2k+</div><div class="label">Users</div></div>
+                <div class="stat-card"><div class="value" id="pubUserCount">-</div><div class="label">Users</div></div>
                 <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
                 <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
             </div>
@@ -139,11 +148,34 @@
     </div>
 
     <script>
+        var F = function(v) { return new Intl.NumberFormat('fr-FR', {style:'currency', currency:'XAF', maximumFractionDigits:0}).format(v||0); };
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if(token) { loadUserDashboard(); checkPremiumStatus(); } else { init(); }
+        
+        if(token) { loadUserDashboard(); checkPremiumStatus(); updateCartBadge(); } else { init(); }
 
         async function init() {
-            try { var r = await fetch('/api/products?page=0&size=200'); var d = await r.json(); if(d.data) document.getElementById('pubProductCount').textContent = d.data.length; } catch(e) {}
+            try { 
+                var r = await fetch('/api/products?page=0&size=200'); var d = await r.json(); 
+                if(d.data) document.getElementById('pubProductCount').textContent = d.data.length; 
+            } catch(e) {}
+            try {
+                var ur = await fetch('/api/admin/stats'); var ud = await ur.json();
+                if(ud.success && ud.data) document.getElementById('pubUserCount').textContent = ud.data.totalUsers + '+';
+            } catch(e) { document.getElementById('pubUserCount').textContent = '2k+'; }
+        }
+
+        async function updateCartBadge() {
+            if(!token) return;
+            try {
+                var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                if(d.success && d.data && d.data.items) {
+                    var count = d.data.items.length;
+                    var badge = document.getElementById('cartBadge');
+                    if(count > 0) { badge.textContent = count; badge.style.display = 'flex'; }
+                    else { badge.style.display = 'none'; }
+                }
+            } catch(e) {}
         }
 
         async function checkPremiumStatus() {
@@ -185,7 +217,7 @@
                 '<div class="stat-card"><div class="value" id="wishlistCount">-</div><div class="label">Wishlist</div></div>' +
                 '<div class="stat-card"><div class="value" id="orderCount">-</div><div class="label">Orders</div></div>' +
                 '<div class="stat-card"><div class="value" id="cartTotal" style="font-size:1.5rem;">-</div><div class="label">Cart Total</div></div>';
-            try { var cr = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token }}); var cd = await cr.json(); if(cd.success && cd.data && cd.data.items) { document.getElementById('cartCount').textContent = cd.data.items.length; document.getElementById('cartTotal').textContent = cd.data.total.toLocaleString() + ' XAF'; } } catch(e) { document.getElementById('cartCount').textContent = '0'; }
+            try { var cr = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token }}); var cd = await cr.json(); if(cd.success && cd.data && cd.data.items) { document.getElementById('cartCount').textContent = cd.data.items.length; document.getElementById('cartTotal').textContent = F(cd.data.total); } } catch(e) { document.getElementById('cartCount').textContent = '0'; }
             try { var wr = await fetch('/api/wishlist/count', { headers: { 'Authorization': 'Bearer ' + token }}); var wd = await wr.json(); if(wd.success) document.getElementById('wishlistCount').textContent = wd.count; } catch(e) { document.getElementById('wishlistCount').textContent = '0'; }
             try { var o = await fetch('/api/orders/my-orders', { headers: { 'Authorization': 'Bearer ' + token }}); var od = await o.json(); if(od.success && od.data) document.getElementById('orderCount').textContent = od.data.length; } catch(e) { document.getElementById('orderCount').textContent = '0'; }
         }
@@ -194,8 +226,8 @@
             var panel = document.getElementById('buyerCartPanel');
             try { var r = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json();
                 if(d.success && d.data && d.data.items && d.data.items.length > 0) { panel.style.display = 'block'; var html = '<div class="panel-box"><div class="section-title" style="margin-top:0;">🛒 Your Cart</div>';
-                    for(var i = 0; i < d.data.items.length; i++) { var item = d.data.items[i]; html += '<div class="panel-row"><span><strong>' + item.productName + '</strong> x' + item.quantity + '</span><span>' + item.effectivePrice.toLocaleString() + ' XAF</span></div>'; }
-                    html += '<div class="panel-total">Total: ' + d.data.total.toLocaleString() + ' XAF</div>'; html += '<a href="/cart" class="btn btn-primary" style="margin-top:1rem;width:100%;">⚡ Proceed to Checkout</a></div>'; panel.innerHTML = html;
+                    for(var i = 0; i < d.data.items.length; i++) { var item = d.data.items[i]; html += '<div class="panel-row"><span><strong>' + item.productName + '</strong> x' + item.quantity + '</span><span>' + F(item.effectivePrice) + '</span></div>'; }
+                    html += '<div class="panel-total">Total: ' + F(d.data.total) + '</div>'; html += '<a href="/cart" class="btn btn-primary" style="margin-top:1rem;width:100%;">⚡ Proceed to Checkout</a></div>'; panel.innerHTML = html;
                 } else { panel.style.display = 'none'; panel.innerHTML = ''; }
             } catch(e) { panel.style.display = 'none'; }
         }
@@ -205,12 +237,12 @@
             try { var r = await fetch('/api/makola/my-offers', { headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json();
                 if(d.success && d.data && d.data.length > 0) { panel.style.display = 'block'; var html = '<div class="panel-box"><div class="section-title" style="margin-top:0;">💬 Makola AI Offers</div>';
                     for(var i = 0; i < d.data.length; i++) { var o = d.data[i]; var sc = o.status === 'ACCEPTED' ? '#10b981' : o.status === 'REJECTED' ? '#ef4444' : '#d97706'; var action = ''; if(o.status === 'ACCEPTED') { action = '<button class="btn-sm btn-add-cart" onclick="addNegotiatedToCart(' + o.negotiationId + ')">🛒 Add to Cart</button>'; } else if(o.status === 'REJECTED') { action = '<button class="btn-sm btn-reject" onclick="dismissOffer(' + o.negotiationId + ')">✕ Dismiss</button>'; } else { action = '<span style="color:#d97706;font-weight:600;">⏳ Waiting</span>'; }
-                        html += '<div class="panel-row" id="offer-row-' + o.negotiationId + '"><span><strong>' + o.productName + '</strong></span><span class="status" style="background-color:transparent;color:' + sc + ';">' + o.status + '</span><span>' + o.buyerOffer.toLocaleString() + ' XAF</span><span>' + action + '</span></div>'; }
+                        html += '<div class="panel-row" id="offer-row-' + o.negotiationId + '"><span><strong>' + o.productName + '</strong></span><span class="status" style="background-color:transparent;color:' + sc + ';">' + o.status + '</span><span>' + F(o.buyerOffer) + '</span><span>' + action + '</span></div>'; }
                     html += '</div>'; panel.innerHTML = html; } else { panel.style.display = 'none'; panel.innerHTML = ''; }
             } catch(e) { panel.style.display = 'none'; }
         }
 
-        async function addNegotiatedToCart(nid) { try { var r = await fetch('/api/makola/add-to-cart/' + nid, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success) { alert('✅ Added to cart!'); loadBuyerCart(); loadBuyerStats(); loadBuyerOffers(); } else { alert('❌ ' + (d.message || 'Failed')); } } catch(e) { alert('Network error'); } }
+        async function addNegotiatedToCart(nid) { try { var r = await fetch('/api/makola/add-to-cart/' + nid, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success) { Swal.fire({icon:'success',title:'Added to cart!'}); loadBuyerCart(); loadBuyerStats(); loadBuyerOffers(); updateCartBadge(); } else { Swal.fire({icon:'error',title:'Failed',text:d.message}); } } catch(e) { Swal.fire({icon:'error',title:'Network error'}); } }
         async function dismissOffer(nid) { var row = document.getElementById('offer-row-' + nid); if(row) { row.remove(); } if(document.querySelectorAll('#buyerOffersPanel .panel-row').length === 0) { document.getElementById('buyerOffersPanel').style.display = 'none'; } }
 
         async function loadSellerView() {
@@ -231,7 +263,7 @@
 
         async function loadSellerOrders() {
             try { var r = await fetch('/api/orders/seller-orders', { headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); var pc = 0; try { var pr = await fetch('/api/products/my-products', { headers: { 'Authorization': 'Bearer ' + token }}); var pd = await pr.json(); if(pd.success && pd.data) pc = pd.data.length; } catch(e) {} var oc = d.success && d.data ? d.data.length : 0; var rev = 0; if(d.success && d.data) { for(var i = 0; i < d.data.length; i++) { rev += d.data[i].sellerPayout || 0; } }
-                document.getElementById('userStats').innerHTML = '<div class="stat-card"><div class="value">' + pc + '</div><div class="label">My Products</div></div><div class="stat-card"><div class="value">' + oc + '</div><div class="label">Orders</div></div><div class="stat-card"><div class="value" style="font-size:1.5rem;">' + rev.toLocaleString() + ' XAF</div><div class="label">Total Revenue</div></div>';
+                document.getElementById('userStats').innerHTML = '<div class="stat-card"><div class="value">' + pc + '</div><div class="label">My Products</div></div><div class="stat-card"><div class="value">' + oc + '</div><div class="label">Orders</div></div><div class="stat-card"><div class="value" style="font-size:1.5rem;">' + F(rev) + '</div><div class="label">Total Revenue</div></div>';
                 var panel = document.getElementById('sellerPanel'); var html = '<div class="section-title">📦 Customer Orders</div><div class="order-table"><div class="order-row header-row"><span>Order #</span><span>Product</span><span>Qty</span><span>Status</span><span>Action</span></div>';
                 if(d.success && d.data && d.data.length > 0) { for(var j = 0; j < d.data.length; j++) { var o = d.data[j]; var items = o.items ? o.items.map(function(i) { return i.productName; }).join(', ') : 'Product'; var qty = o.items ? o.items.reduce(function(s, i) { return s + i.quantity; }, 0) : 0; html += '<div class="order-row"><span><strong>#' + o.sellerOrderId.toString().slice(-6) + '</strong></span><span>' + items + '</span><span>' + qty + '</span><span class="status status-' + o.status + '">' + o.status + '</span><span>' + (o.status === 'PENDING' ? '<button class="btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'CONFIRMED\')">Confirm</button>' : o.status === 'CONFIRMED' ? '<button class="btn-sm btn-ship" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'SHIPPED\')">Ship</button>' : o.status === 'SHIPPED' ? '<button class="btn-sm btn-confirm" onclick="updateOrderStatus(' + o.sellerOrderId + ',\'DELIVERED\')">Deliver</button>' : '<span style="color:#059669;font-weight:700;">✅ Done</span>') + '</span></div>'; } } else { html += '<div class="empty-state">You have no new orders yet.</div>'; } html += '</div>'; panel.innerHTML = html;
             } catch(e) {}
@@ -239,13 +271,18 @@
 
         async function loadSellerOffers() {
             try { var r = await fetch('/api/makola/seller/offers', { headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); var panel = document.getElementById('sellerPanel'); var html = '<div class="section-title" style="margin-top:2rem;">💰 Active Customer Offers</div><div class="order-table"><div class="order-row header-row"><span>Product</span><span>Offer</span><span>Status</span><span>Action</span></div>';
-                if(d.success && d.data && d.data.length > 0) { for(var i = 0; i < d.data.length; i++) { var o = d.data[i]; html += '<div class="order-row"><span><strong>' + o.productName + '</strong></span><span>' + o.buyerOffer.toLocaleString() + ' XAF</span><span class="status status-PENDING">' + o.status + '</span><span style="display:flex;gap:8px;"><button class="btn-sm btn-confirm" onclick="acceptOffer(' + o.negotiationId + ')">Accept</button><button class="btn-sm btn-reject" onclick="rejectOffer(' + o.negotiationId + ')">Reject</button></span></div>'; } } else { html += '<div class="empty-state">No active offers at the moment.</div>'; } html += '</div>'; panel.innerHTML += html;
+                if(d.success && d.data && d.data.length > 0) { for(var i = 0; i < d.data.length; i++) { var o = d.data[i]; html += '<div class="order-row"><span><strong>' + o.productName + '</strong></span><span>' + F(o.buyerOffer) + '</span><span class="status status-PENDING">' + o.status + '</span><span style="display:flex;gap:8px;"><button class="btn-sm btn-confirm" onclick="acceptOffer(' + o.negotiationId + ')">Accept</button><button class="btn-sm btn-reject" onclick="rejectOffer(' + o.negotiationId + ')">Reject</button></span></div>'; } } else { html += '<div class="empty-state">No active offers at the moment.</div>'; } html += '</div>'; panel.innerHTML += html;
             } catch(e) {}
         }
 
-        async function updateOrderStatus(oid, status) { try { var r = await fetch('/api/orders/' + oid + '/update-status?status=' + status, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success) { alert('✅ Order ' + status + '!'); loadSellerView(); } else { alert('❌ ' + (d.message || 'Failed')); } } catch(e) { alert('Network error'); } }
-        async function acceptOffer(nid) { try { var r = await fetch('/api/makola/accept/' + nid, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success) { alert('✅ Offer accepted!'); loadSellerView(); } else { alert('❌ ' + (d.message || 'Failed')); } } catch(e) { alert('Network error'); } }
-        async function rejectOffer(nid) { var reason = prompt('Reason (optional):'); try { var url = '/api/makola/reject/' + nid; if(reason) url += '?reason=' + encodeURIComponent(reason); var r = await fetch(url, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success) { alert('Offer rejected'); loadSellerView(); } else { alert('❌ ' + (d.message || 'Failed')); } } catch(e) { alert('Network error'); } }
+        async function updateOrderStatus(oid, status) { try { var r = await fetch('/api/orders/' + oid + '/update-status?status=' + status, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success) { Swal.fire({icon:'success',title:'Order ' + status + '!'}); loadSellerView(); } else { Swal.fire({icon:'error',title:'Failed',text:d.message}); } } catch(e) { Swal.fire({icon:'error',title:'Network error'}); } }
+        async function acceptOffer(nid) { try { var r = await fetch('/api/makola/accept/' + nid, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success) { Swal.fire({icon:'success',title:'Offer accepted!'}); loadSellerView(); } else { Swal.fire({icon:'error',title:'Failed',text:d.message}); } } catch(e) { Swal.fire({icon:'error',title:'Network error'}); } }
+        async function rejectOffer(nid) { 
+            var result = await Swal.fire({title:'Reject Offer?',input:'text',inputPlaceholder:'Reason (optional)',showCancelButton:true,confirmButtonText:'Reject',confirmButtonColor:'#ef4444'});
+            if(result.isConfirmed) { 
+                try { var url = '/api/makola/reject/' + nid; if(result.value) url += '?reason=' + encodeURIComponent(result.value); var r = await fetch(url, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }}); var d = await r.json(); if(d.success) { Swal.fire({icon:'success',title:'Offer rejected'}); loadSellerView(); } } catch(e) {} 
+            }
+        }
 
         function showLogin() { document.getElementById('loginForm').style.display = 'block'; }
         async function doLogin() {
