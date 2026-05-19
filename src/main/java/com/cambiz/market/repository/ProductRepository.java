@@ -28,6 +28,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Products by category
     Page<Product> findByCategoryIdAndIsActiveTrue(Long categoryId, Pageable pageable);
     
+    // Count products by category
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId")
+    long countByCategoryId(@Param("categoryId") Long categoryId);
+    
     // Search products
     Page<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
             String name, String description, Pageable pageable);
