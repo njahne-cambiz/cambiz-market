@@ -4,126 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders | CamBiz Market</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f5f6fa; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #2d3436, #636e72); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .header .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
-        .header nav a { color: white; text-decoration: none; margin-left: 1.5rem; }
-        .container { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; }
-        .back-btn { color: #0984e3; text-decoration: none; margin-bottom: 1.5rem; display: inline-block; }
-        .order-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1rem; }
-        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .order-id { font-weight: bold; color: #2d3436; }
-        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
-        .status-PENDING { background: #ffeaa7; color: #d68910; }
-        .status-CONFIRMED { background: #74b9ff; color: white; }
-        .order-total { font-weight: bold; color: #2d3436; margin-top: 0.5rem; }
-        .btn-track { display: inline-block; background: #0984e3; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: bold; margin-top: 0.5rem; }
-        .empty-state { text-align: center; padding: 4rem 2rem; }
-        .empty-state .icon { font-size: 4rem; margin-bottom: 1rem; }
-        .btn-primary { background: #0984e3; color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; }
-        .login-prompt { background: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-width: 400px; margin: 2rem auto; }
-        .login-prompt input { display: block; width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #dfe6e9; border-radius: 8px; }
-        .login-prompt button { width: 100%; padding: 12px; background: #0984e3; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body { background: #f3f4f6; min-height: 100vh; color: #333; }
+        .header { background: #131921; color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .header .logo { font-size: 1.5rem; font-weight: 800; color: white; text-decoration: none; }
+        .header .logo span { color: #febd69; }
+        .header .nav-links { display: flex; gap: 20px; }
+        .header .nav-links a { color: white; text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+        .header .nav-links a:hover { color: #febd69; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
+        h2 { font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem; }
+        .order-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+        .order-id { font-weight: 700; color: #111827; }
+        .order-date { color: #6b7280; font-size: 0.85rem; }
+        .order-status { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .status-PENDING { background: #fef3c7; color: #d97706; }
+        .status-CONFIRMED { background: #dbeafe; color: #2563eb; }
+        .status-SHIPPED { background: #f3e8ff; color: #7e22ce; }
+        .status-DELIVERED { background: #d1fae5; color: #059669; }
+        .status-CANCELLED { background: #fee2e2; color: #ef4444; }
+        .status-DISPUTED { background: #ffe4e6; color: #be123c; }
+        .order-items { border-top: 1px solid #f3f4f6; padding-top: 12px; }
+        .order-item { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.9rem; }
+        .order-total { text-align: right; font-weight: 700; margin-top: 10px; font-size: 1.1rem; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+        .btn-dispute { background: #fee2e2; color: #ef4444; }
+        .btn-dispute:hover { background: #fecaca; }
+        .btn-track { background: #dbeafe; color: #2563eb; }
+        .btn-track:hover { background: #bfdbfe; }
+        .empty { text-align: center; padding: 60px 20px; color: #6b7280; }
+        .footer { text-align: center; padding: 2rem; color: #6b7280; font-size: 0.9rem; margin-top: 3rem; }
+        @media(max-width:768px){ .header { flex-direction: column; gap: 10px; padding: 1rem; } }
     </style>
 </head>
 <body>
     <header class="header">
-        <a href="/store" class="logo">🛒 CamBiz Market</a>
-        <nav>
-            <a href="/store">📦 Products</a>
-            <a href="/wishlist">❤️ Wishlist</a>
-            <a href="/dashboard">👤 Dashboard</a>
-        </nav>
+        <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/store">Store</a>
+            <a href="/cart">Cart</a>
+            <a href="/orders">My Orders</a>
+        </div>
     </header>
 
-    <main class="container">
-        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
-        <h1 style="margin-bottom:1.5rem;">📦 My Orders</h1>
-        <div id="loginSection" style="display:none;">
-            <div class="login-prompt">
-                <h2>Login Required</h2>
-                <p>Please log in to view your orders.</p>
-                <input type="email" id="loginEmail" placeholder="Email">
-                <input type="password" id="loginPassword" placeholder="Password">
-                <button onclick="doLogin()">Login</button>
-                <p id="loginError" style="color:#d63031; margin-top:8px; display:none;"></p>
-                <a href="/register" style="display:inline-block; margin-top:10px; color:#00b894; font-weight:bold;">Create Account</a>
-            </div>
-        </div>
-        <div id="ordersList"></div>
-        <div id="emptyState" class="empty-state" style="display:none;">
-            <div class="icon">📭</div>
-            <h2>No orders yet</h2>
-            <p>Start shopping and your orders will appear here.</p>
-            <a href="/store" class="btn-primary">Browse Products</a>
-        </div>
-        <div id="loading" style="text-align:center; padding:3rem;">Loading orders...</div>
-    </main>
+    <div class="container">
+        <h2>📦 My Orders</h2>
+        <div id="ordersList"><div class="empty">Loading orders...</div></div>
+    </div>
+
+    <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
 
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (!token) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('loginSection').style.display = 'block';
-        } else {
-            loadOrders();
-        }
-        async function doLogin() {
-            var email = document.getElementById('loginEmail').value;
-            var password = document.getElementById('loginPassword').value;
-            var errorEl = document.getElementById('loginError');
-            try {
-                var res = await fetch('/api/auth/login', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, password: password })
-                });
-                var data = await res.json();
-                if (data.success && data.data && data.data.token) {
-                    token = data.data.token;
-                    localStorage.setItem('token', token);
-                    errorEl.style.display = 'none';
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('loading').style.display = 'block';
-                    loadOrders();
-                } else {
-                    errorEl.textContent = data.message || 'Login failed';
-                    errorEl.style.display = 'block';
-                }
-            } catch(e) { errorEl.textContent = 'Network error'; errorEl.style.display = 'block'; }
-        }
+        if (!token) { window.location.href = '/dashboard'; }
+
+        var F = function(v) { return new Intl.NumberFormat('fr-FR', {style:'currency', currency:'XAF', maximumFractionDigits:0}).format(v||0); };
+
         async function loadOrders() {
-            document.getElementById('loading').style.display = 'block';
             try {
-                var res = await fetch('/api/orders/my-orders', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                var data = await res.json();
-                document.getElementById('loading').style.display = 'none';
-                if (data.success && data.data && data.data.length > 0) {
+                var r = await fetch('/api/orders/my-orders', { headers: { 'Authorization': 'Bearer ' + token } });
+                var d = await r.json();
+                if (d.success && d.data && d.data.length > 0) {
                     var html = '';
-                    for (var i = 0; i < data.data.length; i++) {
-                        var order = data.data[i];
+                    d.data.forEach(function(o) {
+                        var itemsHtml = '';
+                        var sellerId = null;
+                        if (o.items) {
+                            o.items.forEach(function(i) {
+                                itemsHtml += '<div class="order-item"><span>' + i.productName + ' x' + i.quantity + '</span><span>' + F(i.effectivePrice || i.price) + '</span></div>';
+                                if (!sellerId && i.sellerId) sellerId = i.sellerId;
+                            });
+                        }
+                        var disputeBtn = (o.status === 'DELIVERED' || o.status === 'SHIPPED') ? 
+                            '<button class="btn btn-dispute" onclick="fileDispute(\'' + (o.orderNumber || o.id) + '\',' + (o.totalAmount || o.amount || 0) + ',' + (sellerId || 0) + ')">⚠ Report Problem</button>' : '';
+                        
                         html += '<div class="order-card">' +
                             '<div class="order-header">' +
-                            '<span class="order-id">📦 ' + order.orderNumber + '</span>' +
-                            '<span class="status-badge status-' + order.status + '">' + order.status + '</span>' +
+                                '<div><span class="order-id">Order #' + (o.orderNumber || o.id) + '</span><br><span class="order-date">' + new Date(o.createdAt).toLocaleDateString('en-GB') + '</span></div>' +
+                                '<span class="order-status status-' + (o.status || 'PENDING') + '">' + (o.status || 'PENDING') + '</span>' +
                             '</div>' +
-                            '<div class="order-total">💰 ' + order.totalAmount.toLocaleString() + ' XAF</div>' +
-                            '<a href="/order-tracking?id=' + order.orderId + '" class="btn-track">📋 Track Order</a>' +
-                            '</div>';
-                    }
+                            '<div class="order-items">' + itemsHtml + '</div>' +
+                            '<div class="order-total">Total: ' + F(o.totalAmount || o.amount) + '</div>' +
+                            '<div style="margin-top:10px;display:flex;gap:8px;">' +
+                                '<a href="/order-tracking?id=' + o.id + '" class="btn btn-track">📋 Track Order</a>' +
+                                disputeBtn +
+                            '</div>' +
+                        '</div>';
+                    });
                     document.getElementById('ordersList').innerHTML = html;
-                    document.getElementById('emptyState').style.display = 'none';
                 } else {
-                    document.getElementById('emptyState').style.display = 'block';
+                    document.getElementById('ordersList').innerHTML = '<div class="empty"><h3>📭 No orders yet</h3><p>Start shopping on CamBiz Market!</p><a href="/store" class="btn btn-track" style="margin-top:15px;">Browse Store</a></div>';
                 }
-            } catch(e) {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('ordersList').innerHTML = '<p style="text-align:center;color:#d63031;">Error loading orders.</p>';
-            }
+            } catch (e) { document.getElementById('ordersList').innerHTML = '<div class="empty">Failed to load orders.</div>'; }
         }
+
+        async function fileDispute(orderId, amount, sellerId) {
+            var tokenPayload = JSON.parse(atob(token.split('.')[1]));
+            var buyerId = tokenPayload.userId || tokenPayload.sub;
+            
+            Swal.fire({
+                title: '⚠️ Report a Problem',
+                html: '<p>Order: <strong>#' + orderId + '</strong></p><p>Amount: <strong>' + F(amount) + '</strong></p>' +
+                      '<textarea id="disputeReason" class="form-control" rows="3" placeholder="Describe the issue..." style="border-radius:8px;margin-top:10px;"></textarea>' +
+                      '<input id="disputeEvidence" class="form-control mt-2" placeholder="Evidence URL (optional)" style="border-radius:8px;">',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Submit Dispute',
+                confirmButtonColor: '#ef4444',
+                cancelButtonText: 'Cancel',
+                preConfirm: function() {
+                    var reason = document.getElementById('disputeReason').value.trim();
+                    if (!reason) { Swal.showValidationMessage('Please describe the issue'); return false; }
+                    return { reason: reason, evidence: document.getElementById('disputeEvidence').value.trim() };
+                }
+            }).then(async function(result) {
+                if (result.isConfirmed) {
+                    var body = {
+                        orderId: parseInt(orderId.replace(/[^0-9]/g,'')) || orderId,
+                        buyerId: parseInt(buyerId),
+                        sellerId: parseInt(sellerId),
+                        amount: parseFloat(amount),
+                        reason: result.value.reason,
+                        evidence: result.value.evidence || ''
+                    };
+                    var r = await fetch('/api/admin/disputes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    var d = await r.json();
+                    if (d.success) {
+                        Swal.fire({ icon: 'success', title: 'Dispute Filed!', text: 'Admin will review your case and respond shortly.' });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Failed', text: d.message || 'Could not file dispute' });
+                    }
+                }
+            });
+        }
+
+        loadOrders();
     </script>
 </body>
 </html>
