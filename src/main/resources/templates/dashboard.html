@@ -251,12 +251,18 @@
                         for (var i = 0; i < myDisputes.length; i++) {
                             var ds = myDisputes[i];
                             var sc = ds.status === 'RESOLVED_RELEASED' ? '#0d9488' : ds.status === 'RESOLVED_REFUNDED' ? '#2563eb' : '#d97706';
-                            html += '<div class="order-row"><span><strong>#' + ds.id + '</strong></span><span>' + ds.buyerName + '</span><span>' + F(ds.amount) + '</span><span style="color:' + sc + ';font-weight:600;">' + ds.status.replace(/_/g,' ') + '</span><span style="font-size:0.75rem;">' + (ds.resolution || 'Pending admin review') + '</span></div>';
+                            html += '<div class="order-row"><span><strong>#' + ds.id + '</strong></span><span>' + ds.buyerName + '</span><span>' + F(ds.amount) + '</span><span style="color:' + sc + ';font-weight:600;">' + ds.status.replace(/_/g,' ') + '</span><span style="font-size:0.75rem;">' + (ds.resolution || 'Pending admin review') + ' <button class="btn-sm" style="background:#0d9488;color:white;margin-left:5px;" onclick="sellerDisputeChat(' + ds.id + ')">💬 Chat</button></span></div>';
                         }
                         html += '</div>'; panel.innerHTML += html;
                     }
                 }
             } catch(e) {}
+        }
+        async function sellerDisputeChat(id) {
+            var commentsR = await fetch('/api/admin/disputes/'+id+'/comments'); var commentsD = await commentsR.json();
+            var commentsHtml = (commentsD.data||[]).map(function(c){ var color=c.userType==='ADMIN'?'#e11d48':c.userType==='SELLER'?'#d97706':'#0d9488'; return '<div style="background:#f8fafc;padding:8px;border-radius:6px;margin-bottom:6px;text-align:left;"><strong style="color:'+color+'">'+c.userName+'</strong> <small>('+c.userType+')</small><br>'+c.message+'<br><small>'+new Date(c.createdAt).toLocaleString()+'</small></div>'; }).join('') || '<p class="text-muted text-center">No messages yet.</p>';
+            var tokenPayload = JSON.parse(atob(token.split('.')[1])); var userId = tokenPayload.userId;
+            Swal.fire({ title:'💬 Dispute Communication', html:'<div style="max-height:180px;overflow-y:auto;margin-bottom:10px;">'+commentsHtml+'</div><textarea id="newComment" class="form-control" rows="2" placeholder="Type a message..."></textarea>', showCancelButton:true, confirmButtonText:'<i class="fas fa-paper-plane"></i> Send', confirmButtonColor:'#0d9488', preConfirm:function(){ var msg=document.getElementById('newComment').value.trim(); if(!msg){ Swal.showValidationMessage('Type a message'); return false; } return msg; } }).then(async function(result){ if(result.isConfirmed){ await fetch('/api/admin/disputes/'+id+'/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:userId,userName:'Seller',userType:'SELLER',message:result.value})}); Swal.fire({icon:'success',title:'Message Sent',showConfirmButton:false,timer:1500}); } });
         }
         async function updateOrderStatus(oid, status) { 
             var result = await Swal.fire({title:'Update Order Status',text:'Set order to ' + status + '?',icon:'question',showCancelButton:true,confirmButtonText:'Yes, ' + status,confirmButtonColor:status==='CONFIRMED'?'#d97706':status==='SHIPPED'?'#334155':'#0d9488'});
