@@ -25,19 +25,15 @@
         .status-CONFIRMED { background: #dbeafe; color: #2563eb; }
         .status-SHIPPED { background: #f3e8ff; color: #7e22ce; }
         .status-DELIVERED { background: #d1fae5; color: #059669; }
-        .status-CANCELLED { background: #fee2e2; color: #ef4444; }
         .status-DISPUTED { background: #ffe4e6; color: #be123c; }
         .order-items { border-top: 1px solid #f3f4f6; padding-top: 12px; }
         .order-item { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.9rem; }
         .order-total { text-align: right; font-weight: 700; margin-top: 10px; font-size: 1.1rem; }
-        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.8rem; text-decoration: none; display: inline-block; }
         .btn-dispute { background: #fee2e2; color: #ef4444; }
-        .btn-dispute:hover { background: #fecaca; }
         .btn-track { background: #dbeafe; color: #2563eb; }
-        .btn-track:hover { background: #bfdbfe; }
         .empty { text-align: center; padding: 60px 20px; color: #6b7280; }
         .footer { text-align: center; padding: 2rem; color: #6b7280; font-size: 0.9rem; margin-top: 3rem; }
-        @media(max-width:768px){ .header { flex-direction: column; gap: 10px; padding: 1rem; } }
     </style>
 </head>
 <body>
@@ -50,18 +46,15 @@
             <a href="/orders">My Orders</a>
         </div>
     </header>
-
     <div class="container">
         <h2>📦 My Orders</h2>
         <div id="ordersList"><div class="empty">Loading orders...</div></div>
     </div>
-
     <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
 
     <script>
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) { window.location.href = '/dashboard'; }
-
         var F = function(v) { return new Intl.NumberFormat('fr-FR', {style:'currency', currency:'XAF', maximumFractionDigits:0}).format(v||0); };
 
         async function loadOrders() {
@@ -72,7 +65,7 @@
                     var html = '';
                     d.data.forEach(function(o) {
                         var itemsHtml = '';
-                        var sellerId = null;
+                        var sellerId = o.sellerId || 0;
                         if (o.items) {
                             o.items.forEach(function(i) {
                                 itemsHtml += '<div class="order-item"><span>' + i.productName + ' x' + i.quantity + '</span><span>' + F(i.effectivePrice || i.price) + '</span></div>';
@@ -97,20 +90,24 @@
                     });
                     document.getElementById('ordersList').innerHTML = html;
                 } else {
-                    document.getElementById('ordersList').innerHTML = '<div class="empty"><h3>📭 No orders yet</h3><p>Start shopping on CamBiz Market!</p><a href="/store" class="btn btn-track" style="margin-top:15px;">Browse Store</a></div>';
+                    document.getElementById('ordersList').innerHTML = '<div class="empty"><h3>📭 No orders yet</h3><p>Start shopping!</p><a href="/store" class="btn btn-track" style="margin-top:15px;">Browse Store</a></div>';
                 }
             } catch (e) { document.getElementById('ordersList').innerHTML = '<div class="empty">Failed to load orders.</div>'; }
         }
 
         async function fileDispute(orderId, amount, sellerId) {
             var tokenPayload = JSON.parse(atob(token.split('.')[1]));
-            var buyerId = tokenPayload.userId || tokenPayload.sub;
+            var buyerId = tokenPayload.userId;
+            
+            if (!buyerId) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Please login again to update your session.' });
+                return;
+            }
             
             Swal.fire({
                 title: '⚠️ Report a Problem',
                 html: '<p>Order: <strong>#' + orderId + '</strong></p><p>Amount: <strong>' + F(amount) + '</strong></p>' +
-                      '<textarea id="disputeReason" class="form-control" rows="3" placeholder="Describe the issue..." style="border-radius:8px;margin-top:10px;"></textarea>' +
-                      '<input id="disputeEvidence" class="form-control mt-2" placeholder="Evidence URL (optional)" style="border-radius:8px;">',
+                      '<textarea id="disputeReason" class="form-control" rows="3" placeholder="Describe the issue..." style="border-radius:8px;margin-top:10px;"></textarea>',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Submit Dispute',
@@ -119,29 +116,23 @@
                 preConfirm: function() {
                     var reason = document.getElementById('disputeReason').value.trim();
                     if (!reason) { Swal.showValidationMessage('Please describe the issue'); return false; }
-                    return { reason: reason, evidence: document.getElementById('disputeEvidence').value.trim() };
+                    return { reason: reason };
                 }
             }).then(async function(result) {
                 if (result.isConfirmed) {
                     var body = {
-                        orderId: parseInt(orderId.replace(/[^0-9]/g,'')) || orderId,
+                        orderId: typeof orderId === 'string' ? parseInt(orderId.replace(/[^0-9]/g,'')) || orderId : orderId,
                         buyerId: parseInt(buyerId),
                         sellerId: parseInt(sellerId),
                         amount: parseFloat(amount),
-                        reason: result.value.reason,
-                        evidence: result.value.evidence || ''
+                        reason: result.value.reason
                     };
-                    var r = await fetch('/api/admin/disputes', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body)
-                    });
-                    var d = await r.json();
-                    if (d.success) {
-                        Swal.fire({ icon: 'success', title: 'Dispute Filed!', text: 'Admin will review your case and respond shortly.' });
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Failed', text: d.message || 'Could not file dispute' });
-                    }
+                    try {
+                        var r = await fetch('/api/admin/disputes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                        var d = await r.json();
+                        if (d.success) { Swal.fire({ icon: 'success', title: 'Dispute Filed!', text: 'Admin will review your case.' }); }
+                        else { Swal.fire({ icon: 'error', title: 'Failed', text: d.message || 'Could not file dispute' }); }
+                    } catch(e) { Swal.fire({ icon: 'error', title: 'Network Error', text: 'Please try again later.' }); }
                 }
             });
         }

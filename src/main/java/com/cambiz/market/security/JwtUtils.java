@@ -53,10 +53,11 @@ public class JwtUtils {
                 .signWith(getSigningKey()).compact();
     }
 
-    public String generateTokenWithRoles(String username, List<String> roles, String userType) {
+    public String generateTokenWithRoles(String username, List<String> roles, String userType, Long userId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roles);
         claims.put("userType", userType);
+        claims.put("userId", userId);
         return Jwts.builder().claims(claims).subject(username)
                 .issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey()).compact();
