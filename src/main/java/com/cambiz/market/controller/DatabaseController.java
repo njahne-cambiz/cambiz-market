@@ -106,4 +106,14 @@ public class DatabaseController {
         } catch (Exception e) { results.add("table: " + e.getMessage()); }
         return ResponseEntity.ok(Map.of("success", true, "results", results));
     }
+
+    @PostMapping("/create-disputes-table")
+    public ResponseEntity<Map<String, Object>> createDisputesTable() {
+        List<String> results = new ArrayList<>();
+        try {
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS disputes (id BIGSERIAL PRIMARY KEY, order_id BIGINT NOT NULL, buyer_id BIGINT NOT NULL, seller_id BIGINT NOT NULL, amount DOUBLE PRECISION NOT NULL, reason TEXT NOT NULL, evidence TEXT, status VARCHAR(30) DEFAULT 'OPEN', resolution TEXT, resolved_by VARCHAR(255), created_at TIMESTAMP DEFAULT NOW(), updated_at TIMESTAMP DEFAULT NOW(), resolved_at TIMESTAMP)");
+            results.add("disputes table created");
+        } catch (Exception e) { results.add("disputes: " + e.getMessage()); }
+        return ResponseEntity.ok(Map.of("success", true, "results", results));
+    }
 }

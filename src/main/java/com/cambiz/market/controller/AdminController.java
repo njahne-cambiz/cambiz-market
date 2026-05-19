@@ -1,7 +1,6 @@
 package com.cambiz.market.controller;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cambiz.market.dto.AdminStatsDTO;
 import com.cambiz.market.model.Category;
+import com.cambiz.market.model.Dispute;
 import com.cambiz.market.model.Product;
 import com.cambiz.market.model.Transaction;
 import com.cambiz.market.model.TransactionType;
 import com.cambiz.market.model.User;
 import com.cambiz.market.repository.CategoryRepository;
+import com.cambiz.market.repository.DisputeRepository;
 import com.cambiz.market.repository.ProductRepository;
 import com.cambiz.market.repository.UserRepository;
 import com.cambiz.market.service.OrderService;
@@ -379,19 +380,73 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("success", true, "data", h));
     }
 
-    // ========== DISPUTES ==========
-    
+ // ========== DISPUTE SETTLEMENT ==========
+
+    @Autowired
+    private DisputeRepository disputeRepository;
+
     @GetMapping("/disputes")
     public ResponseEntity<?> getDisputes() {
-        List<Map<String, Object>> disputes = new ArrayList<>();
-        Map<String, Object> d1 = new LinkedHashMap<>(); d1.put("id", 1); d1.put("orderId", 101); d1.put("buyerName", "Jean Dupont"); d1.put("sellerName", "TechShop CM"); d1.put("amount", 15000.0); d1.put("reason", "Product not as described"); d1.put("status", "UNDER_REVIEW"); disputes.add(d1);
-        Map<String, Object> d2 = new LinkedHashMap<>(); d2.put("id", 2); d2.put("orderId", 102); d2.put("buyerName", "Marie Kamga"); d2.put("sellerName", "Fashion Hub"); d2.put("amount", 8500.0); d2.put("reason", "Never received item"); d2.put("status", "UNDER_REVIEW"); disputes.add(d2);
-        return ResponseEntity.ok(Map.of("success", true, "data", disputes));
+        List<Dispute> disputes = disputeRepository.findByOrderByCreatedAtDesc();
+        List<Map<String, Object>> list = disputes.stream().map(d -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", d.getId()); m.put("orderId", d.getOrderId());
+            m.put("buyerId", d.getBuyerId()); m.put("sellerId", d.getSellerId());
+            // Get buyer and seller names
+            User buyer = userRepository.findById(d.getBuyerId()).orElse(null);
+            User seller = userRepository.findById(d.getSellerId()).orElse(null);
+            m.put("buyerName", buyer != null ? buyer.getFirstName() + " " + buyer.getLastName() : "Buyer #" + d.getBuyerId());
+            m.put("sellerName", seller != null ? (seller.getBusinessName() != null ? seller.getBusinessName() : seller.getFirstName()) : "Seller #" + d.getSellerId());
+            m.put("amount", d.getAmount()); m.put("reason", d.getReason());
+            m.put("evidence", d.getEvidence()); m.put("status", d.getStatus().name());
+            m.put("resolution", d.getResolution()); m.put("resolvedBy", d.getResolvedBy());
+            m.put("createdAt", d.getCreatedAt()); m.put("resolvedAt", d.getResolvedAt());
+            return m;
+        }).collect(Collectors.toList());
+        long openCount = disputeRepository.countByStatus(Dispute.DisputeStatus.OPEN) + disputeRepository.countByStatus(Dispute.DisputeStatus.UNDER_REVIEW);
+        long resolvedCount = disputeRepository.countByStatus(Dispute.DisputeStatus.RESOLVED_RELEASED) + disputeRepository.countByStatus(Dispute.DisputeStatus.RESOLVED_REFUNDED);
+        return ResponseEntity.ok(Map.of("success", true, "data", list, "openCount", openCount, "resolvedCount", resolvedCount));
     }
-    
+
+    @PutMapping("/disputes/{id}/review")
+    public ResponseEntity<?> reviewDispute(@PathVariable Long id, HttpSession session) {
+        Dispute d = disputeRepository.findById(id).orElse(null);
+        if (d == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Dispute not found"));
+        d.setStatus(Dispute.DisputeStatus.UNDER_REVIEW);
+        disputeRepository.save(d);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Dispute #" + id + " under review"));
+    }
+
     @PutMapping("/disputes/{id}/resolve")
-    public ResponseEntity<?> resolveDispute(@PathVariable Long id, @RequestParam String resolution) {
+    public ResponseEntity<?> resolveDispute(@PathVariable Long id, @RequestParam String resolution, @RequestParam(required = false) String notes, HttpSession session) {
+        Dispute d = disputeRepository.findById(id).orElse(null);
+        if (d == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Dispute not found"));
+        
+        User admin = (User) session.getAttribute("user");
+        String adminName = admin != null ? admin.getEmail() : "system@cambiz.cm";
+        
+        d.setStatus("RELEASED".equals(resolution) ? Dispute.DisputeStatus.RESOLVED_RELEASED : Dispute.DisputeStatus.RESOLVED_REFUNDED);
+        d.setResolution(notes != null ? notes : ("RELEASED".equals(resolution) ? "Funds released to seller" : "Refund issued to buyer"));
+        d.setResolvedBy(adminName);
+        d.setResolvedAt(LocalDateTime.now());
+        disputeRepository.save(d);
+        
         String msg = "RELEASED".equals(resolution) ? "Funds released to seller for dispute #" + id : "Refund issued to buyer for dispute #" + id;
         return ResponseEntity.ok(Map.of("success", true, "message", msg));
+    }
+
+    // Buyer files a dispute
+    @PostMapping("/disputes")
+    public ResponseEntity<?> fileDispute(@RequestBody Map<String, Object> body, HttpSession session) {
+        Dispute d = new Dispute();
+        d.setOrderId(Long.valueOf(body.get("orderId").toString()));
+        d.setBuyerId(Long.valueOf(body.get("buyerId").toString()));
+        d.setSellerId(Long.valueOf(body.get("sellerId").toString()));
+        d.setAmount(Double.valueOf(body.get("amount").toString()));
+        d.setReason(body.get("reason").toString());
+        if (body.containsKey("evidence")) d.setEvidence(body.get("evidence").toString());
+        d.setStatus(Dispute.DisputeStatus.OPEN);
+        disputeRepository.save(d);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Dispute filed successfully. Admin will review."));
     }
 }
