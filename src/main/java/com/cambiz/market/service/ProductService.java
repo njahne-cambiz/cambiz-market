@@ -33,246 +33,79 @@ public class ProductService {
     
     @Transactional
     public ProductResponse createProduct(ProductRequest request, Long sellerId) {
-        User seller = userRepository.findById(sellerId)
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
-        
-        if (seller.getUserType() != User.UserType.SELLER) {
-            throw new RuntimeException("Only sellers can add products");
-        }
-        
+        User seller = userRepository.findById(sellerId).orElseThrow(() -> new RuntimeException("Seller not found"));
+        if (seller.getUserType() != User.UserType.SELLER) throw new RuntimeException("Only sellers can add products");
         Product product = new Product();
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setDiscountedPrice(request.getDiscountedPrice());
-        product.setStockQuantity(request.getQuantity());
-        product.setProductCondition(request.getCondition());
-        product.setImageUrls(request.getImageUrls());
-        product.setSeller(seller);
+        product.setName(request.getName()); product.setDescription(request.getDescription()); product.setPrice(request.getPrice());
+        product.setDiscountedPrice(request.getDiscountedPrice()); product.setStockQuantity(request.getQuantity());
+        product.setProductCondition(request.getCondition()); product.setImageUrls(request.getImageUrls()); product.setSeller(seller);
         product.setIsFeatured(request.getIsFeatured() != null ? request.getIsFeatured() : false);
-        product.setIsApproved(false);
-        product.setStatus(Product.ProductStatus.PENDING_APPROVAL);
-        
-        if (request.getCategoryId() != null) {
-            Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            product.setCategory(category);
-        }
-        
+        product.setIsApproved(false); product.setStatus(Product.ProductStatus.PENDING_APPROVAL);
+        if (request.getCategoryId() != null) { Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found")); product.setCategory(category); }
         product = productRepository.save(product);
         return ProductResponse.fromProduct(product);
     }
     
     @Transactional
-    public ProductResponse getProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setViewCount(product.getViewCount() + 1);
-        productRepository.save(product);
-        product.getImageUrls().size();
-        return ProductResponse.fromProduct(product);
-    }
+    public ProductResponse getProduct(Long id) { Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found")); product.setViewCount(product.getViewCount() + 1); productRepository.save(product); product.getImageUrls().size(); return ProductResponse.fromProduct(product); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> getAllProducts(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Product> products = productRepository.findByIsActiveTrue(pageable);
-        products.getContent().forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(products.getContent());
-    }
+    public List<ProductResponse> getAllProducts(int page, int size) { Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending()); Page<Product> products = productRepository.findActiveAndApproved(pageable); products.getContent().forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(products.getContent()); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> getFeaturedProducts() {
-        List<Product> products = productRepository.findTop10ByIsFeaturedTrueAndApprovedOrderByCreatedAtDesc();
-        products.forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(products);
-    }
+    public List<ProductResponse> getFeaturedProducts() { List<Product> products = productRepository.findTop10ByIsFeaturedTrueAndApprovedOrderByCreatedAtDesc(); products.forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(products); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> getProductsByCategory(Long categoryId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Product> products = productRepository.findByCategoryIdAndActiveAndApproved(categoryId, pageable);
-        products.getContent().forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(products.getContent());
-    }
+    public List<ProductResponse> getProductsByCategory(Long categoryId, int page, int size) { Pageable pageable = PageRequest.of(page, size); Page<Product> products = productRepository.findByCategoryIdAndActiveAndApproved(categoryId, pageable); products.getContent().forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(products.getContent()); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> searchProducts(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Product> products = productRepository.searchApprovedProducts(keyword, pageable);
-        products.getContent().forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(products.getContent());
-    }
+    public List<ProductResponse> searchProducts(String keyword, int page, int size) { Pageable pageable = PageRequest.of(page, size); Page<Product> products = productRepository.searchApprovedProducts(keyword, pageable); products.getContent().forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(products.getContent()); }
     
     @Transactional
-    public ProductResponse updateProduct(Long id, ProductRequest request, Long sellerId) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        
-        if (!product.getSeller().getId().equals(sellerId)) {
-            throw new RuntimeException("You can only update your own products");
-        }
-        
-        if (request.getName() != null) product.setName(request.getName());
-        if (request.getDescription() != null) product.setDescription(request.getDescription());
-        if (request.getPrice() != null) product.setPrice(request.getPrice());
-        if (request.getDiscountedPrice() != null) product.setDiscountedPrice(request.getDiscountedPrice());
-        if (request.getQuantity() != null) product.setStockQuantity(request.getQuantity());
-        if (request.getCondition() != null) product.setProductCondition(request.getCondition());
-        if (request.getImageUrls() != null) product.setImageUrls(request.getImageUrls());
-        if (request.getIsFeatured() != null) product.setIsFeatured(request.getIsFeatured());
-        
-        product.setIsApproved(false);
-        product.setStatus(Product.ProductStatus.PENDING_APPROVAL);
-        product.setRejectionReason(null);
-        
-        if (request.getCategoryId() != null) {
-            Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            product.setCategory(category);
-        }
-        
-        product = productRepository.save(product);
-        return ProductResponse.fromProduct(product);
-    }
+    public ProductResponse updateProduct(Long id, ProductRequest request, Long sellerId) { Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found")); if (!product.getSeller().getId().equals(sellerId)) throw new RuntimeException("You can only update your own products"); if (request.getName() != null) product.setName(request.getName()); if (request.getDescription() != null) product.setDescription(request.getDescription()); if (request.getPrice() != null) product.setPrice(request.getPrice()); if (request.getDiscountedPrice() != null) product.setDiscountedPrice(request.getDiscountedPrice()); if (request.getQuantity() != null) product.setStockQuantity(request.getQuantity()); if (request.getCondition() != null) product.setProductCondition(request.getCondition()); if (request.getImageUrls() != null) product.setImageUrls(request.getImageUrls()); if (request.getIsFeatured() != null) product.setIsFeatured(request.getIsFeatured()); product.setIsApproved(false); product.setStatus(Product.ProductStatus.PENDING_APPROVAL); product.setRejectionReason(null); if (request.getCategoryId() != null) { Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found")); product.setCategory(category); } product = productRepository.save(product); return ProductResponse.fromProduct(product); }
     
     @Transactional
-    public void deleteProduct(Long id, Long sellerId) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        
-        if (!product.getSeller().getId().equals(sellerId)) {
-            throw new RuntimeException("You can only delete your own products");
-        }
-        
-        product.setIsActive(false);
-        productRepository.save(product);
-    }
+    public void deleteProduct(Long id, Long sellerId) { Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found")); if (!product.getSeller().getId().equals(sellerId)) throw new RuntimeException("You can only delete your own products"); product.setIsActive(false); productRepository.save(product); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> getSellerProducts(Long sellerId) {
-        User seller = userRepository.findById(sellerId)
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
-        List<Product> products = productRepository.findBySeller(seller);
-        products.forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(products);
-    }
+    public List<ProductResponse> getSellerProducts(Long sellerId) { User seller = userRepository.findById(sellerId).orElseThrow(() -> new RuntimeException("Seller not found")); List<Product> products = productRepository.findBySeller(seller); products.forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(products); }
     
     @Transactional(readOnly = true)
-    public Product getProductEntity(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-        product.getImageUrls().size();
-        return product;
-    }
+    public Product getProductEntity(Long id) { Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found with id: " + id)); product.getImageUrls().size(); return product; }
     
     @Transactional
-    public void updateProductEntity(Product product) {
-        productRepository.save(product);
-    }
+    public void updateProductEntity(Product product) { productRepository.save(product); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> getPendingApprovalProducts() {
-        List<Product> products = productRepository.findByIsApprovedFalseOrIsApprovedNull();
-        products.forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(products);
-    }
+    public List<ProductResponse> getPendingApprovalProducts() { List<Product> products = productRepository.findByIsApprovedFalseOrIsApprovedNull(); products.forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(products); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> getApprovedProducts() {
-        List<Product> products = productRepository.findByIsApprovedTrue();
-        products.forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(products);
-    }
+    public List<ProductResponse> getApprovedProducts() { List<Product> products = productRepository.findByIsApprovedTrue(); products.forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(products); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> getRejectedProducts() {
-        List<Product> products = productRepository.findByIsApprovedFalseAndRejectionReasonNotNull();
-        products.forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(products);
-    }
+    public List<ProductResponse> getRejectedProducts() { List<Product> products = productRepository.findByIsApprovedFalseAndRejectionReasonNotNull(); products.forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(products); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> getAllProductsAdmin() {
-        List<Product> products = productRepository.findAll();
-        products.forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(products);
-    }
+    public List<ProductResponse> getAllProductsAdmin() { List<Product> products = productRepository.findAll(); products.forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(products); }
     
     @Transactional
-    public void adminDeleteProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setIsActive(false);
-        productRepository.save(product);
-    }
+    public void adminDeleteProduct(Long id) { Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found")); product.setIsActive(false); productRepository.save(product); }
     
     @Transactional
-    public ProductResponse approveProduct(Long productId, String adminEmail) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        
-        product.setIsApproved(true);
-        product.setIsActive(true);
-        product.setStatus(Product.ProductStatus.APPROVED);
-        product.setApprovedBy(adminEmail);
-        product.setApprovedAt(LocalDateTime.now());
-        product.setRejectionReason(null);
-        
-        product = productRepository.save(product);
-        return ProductResponse.fromProduct(product);
-    }
+    public ProductResponse approveProduct(Long productId, String adminEmail) { Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found")); product.setIsApproved(true); product.setIsActive(true); product.setStatus(Product.ProductStatus.APPROVED); product.setApprovedBy(adminEmail); product.setApprovedAt(LocalDateTime.now()); product.setRejectionReason(null); product = productRepository.save(product); return ProductResponse.fromProduct(product); }
     
     @Transactional
-    public ProductResponse rejectProduct(Long productId, String reason) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        
-        product.setIsApproved(false);
-        product.setIsActive(false);
-        product.setStatus(Product.ProductStatus.REJECTED);
-        product.setRejectionReason(reason);
-        product.setRejectedAt(LocalDateTime.now());
-        
-        product = productRepository.save(product);
-        return ProductResponse.fromProduct(product);
-    }
+    public ProductResponse rejectProduct(Long productId, String reason) { Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found")); product.setIsApproved(false); product.setIsActive(false); product.setStatus(Product.ProductStatus.REJECTED); product.setRejectionReason(reason); product.setRejectedAt(LocalDateTime.now()); product = productRepository.save(product); return ProductResponse.fromProduct(product); }
     
     @Transactional
-    public int batchApproveProducts(List<Long> productIds, String adminEmail) {
-        int approvedCount = 0;
-        for (Long id : productIds) {
-            Product product = productRepository.findById(id).orElse(null);
-            if (product != null && (product.getIsApproved() == null || !product.getIsApproved())) {
-                product.setIsApproved(true);
-                product.setIsActive(true);
-                product.setStatus(Product.ProductStatus.APPROVED);
-                product.setApprovedBy(adminEmail);
-                product.setApprovedAt(LocalDateTime.now());
-                product.setRejectionReason(null);
-                productRepository.save(product);
-                approvedCount++;
-            }
-        }
-        return approvedCount;
-    }
+    public int batchApproveProducts(List<Long> productIds, String adminEmail) { int approvedCount = 0; for (Long id : productIds) { Product product = productRepository.findById(id).orElse(null); if (product != null && (product.getIsApproved() == null || !product.getIsApproved())) { product.setIsApproved(true); product.setIsActive(true); product.setStatus(Product.ProductStatus.APPROVED); product.setApprovedBy(adminEmail); product.setApprovedAt(LocalDateTime.now()); product.setRejectionReason(null); productRepository.save(product); approvedCount++; } } return approvedCount; }
     
     @Transactional(readOnly = true)
-    public long getPendingApprovalCount() {
-        return productRepository.countByIsApprovedFalseOrIsApprovedNull();
-    }
+    public long getPendingApprovalCount() { return productRepository.countByIsApprovedFalseOrIsApprovedNull(); }
     
     @Transactional(readOnly = true)
-    public long getTotalProducts() {
-        return productRepository.count();
-    }
+    public long getTotalProducts() { return productRepository.count(); }
     
     @Transactional(readOnly = true)
-    public List<ProductResponse> getTopSellingProducts() {
-        List<Product> products = productRepository.findAll();
-        products.sort((a, b) -> b.getViewCount().compareTo(a.getViewCount()));
-        List<Product> top10 = products.size() > 10 ? products.subList(0, 10) : products;
-        top10.forEach(p -> p.getImageUrls().size());
-        return ProductResponse.fromProducts(top10);
-    }
+    public List<ProductResponse> getTopSellingProducts() { List<Product> products = productRepository.findAll(); products.sort((a, b) -> b.getViewCount().compareTo(a.getViewCount())); List<Product> top10 = products.size() > 10 ? products.subList(0, 10) : products; top10.forEach(p -> p.getImageUrls().size()); return ProductResponse.fromProducts(top10); }
 }

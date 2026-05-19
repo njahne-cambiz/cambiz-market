@@ -177,7 +177,28 @@ public class AdminController {
 
     // ========== REVIEWS MODERATION ==========
     @GetMapping("/reviews")
-    public ResponseEntity<?> getAllReviews() { List<Review> reviews = reviewRepository.findAllByOrderByCreatedAtDesc(); List<Map<String, Object>> list = reviews.stream().map(r -> { Map<String, Object> m = new LinkedHashMap<>(); m.put("id", r.getId()); m.put("productId", r.getProduct() != null ? r.getProduct().getId() : null); m.put("productName", r.getProduct() != null ? r.getProduct().getName() : "N/A"); m.put("userId", r.getUser() != null ? r.getUser().getId() : null); m.put("userName", r.getUser() != null ? (r.getUser().getFirstName() != null ? r.getUser().getFirstName() : r.getUser().getEmail()) : "N/A"); m.put("rating", r.getRating()); m.put("comment", r.getComment()); m.put("isHidden", r.getIsHidden()); m.put("isFlagged", r.getIsFlagged()); m.put("adminReply", r.getAdminReply()); m.put("repliedAt", r.getRepliedAt()); m.put("createdAt", r.getCreatedAt()); return m; }).collect(Collectors.toList()); return ResponseEntity.ok(Map.of("success", true, "data", list)); }
+    public ResponseEntity<?> getAllReviews() {
+        List<Review> reviews = reviewRepository.findAllByOrderByCreatedAtDesc();
+        List<Map<String, Object>> list = reviews.stream().map(r -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", r.getId());
+            String productName = "N/A";
+            try { if (r.getProduct() != null) productName = r.getProduct().getName(); } catch (Exception e) {}
+            m.put("productName", productName);
+            String userName = "N/A";
+            try { if (r.getUser() != null) userName = r.getUser().getFirstName() != null ? r.getUser().getFirstName() : r.getUser().getEmail(); } catch (Exception e) {}
+            m.put("userName", userName);
+            m.put("rating", r.getRating());
+            m.put("comment", r.getComment());
+            m.put("isHidden", r.getIsHidden() != null ? r.getIsHidden() : false);
+            m.put("isFlagged", r.getIsFlagged() != null ? r.getIsFlagged() : false);
+            m.put("adminReply", r.getAdminReply());
+            m.put("repliedAt", r.getRepliedAt());
+            m.put("createdAt", r.getCreatedAt());
+            return m;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(Map.of("success", true, "data", list));
+    }
 
     @PutMapping("/reviews/{id}/hide")
     public ResponseEntity<?> hideReview(@PathVariable Long id) { Review r = reviewRepository.findById(id).orElse(null); if (r == null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Not found")); r.setIsHidden(true); reviewRepository.save(r); return ResponseEntity.ok(Map.of("success", true, "message", "Review hidden")); }
