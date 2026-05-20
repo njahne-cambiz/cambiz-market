@@ -8,82 +8,154 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --sidebar-w: 240px; --bg: #0f172a; --accent: #f59e0b; --cambiz-blue: #1a3a5c; --cambiz-gold: #d4a853; --cambiz-teal: #0d9488; --cambiz-rose: #e11d48; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; min-height: 100vh; }
+        :root { --sidebar-w: 240px; --bg: #0f172a; --accent: #f59e0b; --cambiz-blue: #1a3a5c; --cambiz-gold: #d4a853; --cambiz-teal: #0d9488; --cambiz-rose: #e11d48; --cambiz-amber: #d97706; --cambiz-slate: #334155; --cambiz-light: #f8fafc; --cambiz-white: #ffffff; --cambiz-gray: #64748b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--cambiz-light); min-height: 100vh; color: var(--cambiz-slate); }
+        .header { background: var(--cambiz-blue); color: white; padding: 0.9rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+        .header .logo { font-size: 1.35rem; font-weight: 700; color: white; text-decoration: none; letter-spacing: -0.3px; }
+        .header .logo span { color: var(--cambiz-gold); }
+        .header .nav-right { display: flex; align-items: center; gap: 18px; }
+        .cart-icon { position: relative; cursor: pointer; text-decoration: none; color: white; font-size: 1.15rem; }
+        .cart-badge { position: absolute; top: -7px; right: -9px; background: var(--cambiz-gold); color: var(--cambiz-blue); border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
+        .container { max-width: 1050px; margin: 2rem auto; padding: 0 1.5rem; }
+        .hero { text-align: center; margin-bottom: 2.5rem; padding: 1.5rem 0; }
+        .hero .icon { font-size: 3.5rem; margin-bottom: 0.8rem; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        .hero h1 { font-size: 2.2rem; font-weight: 800; color: var(--cambiz-blue); margin-bottom: 0.4rem; }
+        .hero p { color: var(--cambiz-gray); font-size: 1.05rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--cambiz-white); border-radius: 10px; padding: 1.3rem; text-align: center; border: 1px solid #e2e8f0; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.05); }
+        .stat-card .value { font-size: 1.7rem; font-weight: 800; color: var(--cambiz-blue); }
+        .stat-card .label { color: var(--cambiz-gray); font-size: 0.7rem; margin-top: 0.3rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+        .login-card { background: var(--cambiz-white); border-radius: 10px; padding: 2.5rem 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; max-width: 420px; margin: 0 auto 2.5rem auto; position: relative; overflow: hidden; }
+        .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg,var(--cambiz-gold),var(--cambiz-teal)); }
+        .login-card h2 { font-size: 1.4rem; font-weight: 700; color: var(--cambiz-blue); margin-bottom: 0.4rem; }
+        .login-card p { color: var(--cambiz-gray); margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .btn { padding: 10px 28px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; font-size: 13px; margin: 5px; min-width: 180px; transition: all 0.2s; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .btn-primary { background: var(--cambiz-gold); color: var(--cambiz-blue); }
+        .btn-success { background: var(--cambiz-white); color: var(--cambiz-slate); border: 1px solid #cbd5e1; }
+        .login-form { display: none; margin-top: 1.2rem; padding: 1.3rem; background: #f8fafc; border-radius: 6px; text-align: left; border: 1px solid #e2e8f0; }
+        .login-form input { display: block; width: 100%; padding: 10px 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 13px; }
+        .login-form input:focus { border-color: var(--cambiz-gold); outline: none; }
+        .login-form button { width: 100%; margin: 0; }
+        .user-view { display: none; }
         .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--bg); color: #fff; overflow-y: auto; z-index: 1000; box-shadow: 2px 0 15px rgba(0,0,0,0.1); transition: left 0.3s; }
         .sidebar .logo { padding: 22px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 800; font-size: 1.3rem; }
         .sidebar .logo span { color: var(--accent); }
         .sidebar .nav-link { color: rgba(255,255,255,0.65); padding: 12px 20px; display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 0.88rem; border-left: 3px solid transparent; cursor: pointer; transition: all 0.2s; font-weight: 500; }
         .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,0.04); border-left-color: var(--accent); }
         .sidebar .nav-link i { width: 20px; text-align: center; font-size: 0.95rem; }
+        .badge-count { background: #ef4444; color: #fff; border-radius: 12px; padding: 2px 9px; font-size: 0.7rem; font-weight: 700; margin-left: auto; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
         .main { margin-left: var(--sidebar-w); padding: 25px 30px; min-height: 100vh; transition: margin-left 0.3s; }
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: #fff; padding: 16px 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); flex-wrap: wrap; gap: 10px; }
         .topbar h4 { font-weight: 700; color: #0f172a; font-size: 1.2rem; }
         .btn-logout { padding: 9px 22px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; }
-        .stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 28px; }
-        .stat-card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
-        .stat-card h3 { font-size: 2rem; font-weight: 800; margin: 0 0 4px 0; color: #0f172a; }
-        .stat-card small { color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
         .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px; border: 1px solid #e2e8f0; }
         .card-header { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
         .card-body { padding: 24px; } .card-body.p-0 { padding: 0; }
         .table { margin: 0; } .table th { font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px; padding: 14px 16px; background: #f8fafc; }
         .table td { padding: 14px 16px; vertical-align: middle; font-size: 0.88rem; }
         .badge { font-weight: 600; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; }
-        .btn-sm { padding: 6px 14px; font-size: 0.78rem; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .btn-sm { padding: 6px 14px; font-size: 0.78rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
         .tab-panel { display: none; } .tab-panel.active { display: block; animation: fadeIn 0.25s ease; }
         @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-        .status-active { background: #10b981; } .status-suspended { background: #ef4444; }
+        .section-title { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 1rem 0; display: flex; align-items: center; gap: 0.6rem; }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+        .order-row { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; align-items: center; font-size: 0.85rem; }
+        .order-row.header-row { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.78rem; text-transform: uppercase; }
+        .status-PENDING { color: #d97706; } .status-CONFIRMED { color: #2563eb; } .status-DELIVERED { color: #0d9488; }
+        .btn-confirm { background: #f59e0b; color: #0f172a; } .btn-ship { background: #334155; color: white; } .btn-reject { background: #fee2e2; color: #e11d48; } .btn-add-cart { background: #0d9488; color: white; }
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .action-card { background: #fff; border-radius: 10px; padding: 1.2rem 0.8rem; border: 1px solid #e2e8f0; text-align: center; text-decoration: none; color: #0f172a; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+        .action-card:hover { border-color: #f59e0b; transform: translateY(-2px); }
+        .action-card .icon { font-size: 1.5rem; } .action-card .title { font-weight: 700; font-size: 0.82rem; } .action-card .sub { font-size: 0.7rem; color: #64748b; }
+        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; margin: 2rem 0; }
+        .about-card { background: var(--cambiz-white); border-radius: 10px; padding: 1.6rem; text-align: center; border: 1px solid #e2e8f0; }
+        .about-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.04); }
+        .about-card .icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
+        .about-card h3 { color: var(--cambiz-blue); font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .about-card p { color: var(--cambiz-gray); font-size: 0.82rem; line-height: 1.4; }
+        .footer { text-align: center; padding: 1.5rem; color: var(--cambiz-gray); font-size: 0.8rem; margin-top: 1.5rem; }
         .mobile-menu-btn { display: none; position: fixed; top: 10px; left: 10px; z-index: 1001; background: #0f172a; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
         .sidebar-overlay.show { display: block; }
-        .cart-icon { position: relative; cursor: pointer; text-decoration: none; color: white; font-size: 1.15rem; }
-        .cart-badge { position: absolute; top: -7px; right: -9px; background: var(--accent); color: var(--bg); border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
-        .order-row { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; align-items: center; font-size: 0.85rem; }
-        .order-row.header-row { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.78rem; text-transform: uppercase; }
-        .status-PENDING { color: #d97706; font-weight: 600; }
-        .status-CONFIRMED { color: #2563eb; font-weight: 600; }
-        .status-DELIVERED { color: #0d9488; font-weight: 600; }
-        @media (max-width: 768px) { .mobile-menu-btn { display: block; } .sidebar { left: -260px; } .sidebar.open { left: 0; } .main { margin-left: 0 !important; padding: 60px 10px 15px 10px !important; } .stat-row { grid-template-columns: repeat(2,1fr); gap: 10px; } .stat-card { padding: 15px; } .stat-card h3 { font-size: 1.4rem; } .table th, .table td { padding: 8px 6px; font-size: 0.7rem; } .btn-sm { padding: 4px 8px; font-size: 0.65rem; } }
+        @media (max-width: 768px) { .mobile-menu-btn { display: block; } .sidebar { left: -260px; } .sidebar.open { left: 0; } .main { margin-left: 0 !important; padding: 60px 10px 15px 10px !important; } .stats-grid { grid-template-columns: repeat(2,1fr); } .hero h1 { font-size: 1.8rem; } .quick-actions { grid-template-columns: repeat(2,1fr); } }
     </style>
 </head>
 <body>
 
-<button class="mobile-menu-btn" onclick="toggleSidebar()">☰ Menu</button>
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-<nav class="sidebar" id="sidebar">
-    <div class="logo">⚡ cam<span>Biz</span> Market</div>
-    <div id="sidebarLinks"></div>
-</nav>
-
-<div class="main">
-    <div class="topbar">
-        <h4 id="pageTitle">👋 Welcome!</h4>
-        <button class="btn btn-outline-danger btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+<!-- PUBLIC HEADER -->
+<div id="publicHeader" class="header">
+    <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+    <div class="nav-right">
+        <a href="/cart" class="cart-icon">🛒<span class="cart-badge" id="cartBadge" style="display:none;">0</span></a>
     </div>
+</div>
 
-    <!-- BUYER TABS -->
-    <div class="tab-panel" id="tab-store"><div class="card"><div class="card-header">🛍️ Quick Store Access</div><div class="card-body text-center"><a href="/store" class="btn btn-primary btn-lg">Browse Store</a></div></div></div>
-    <div class="tab-panel" id="tab-bcart"><div class="card"><div class="card-header">🛒 My Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div></div>
-    <div class="tab-panel" id="tab-borders"><div class="card"><div class="card-header">📋 My Orders</div><div class="card-body p-0" id="buyerOrdersContent">Loading...</div></div></div>
-    <div class="tab-panel" id="tab-bdisputes"><div class="card"><div class="card-header">⚖️ My Disputes</div><div class="card-body p-0" id="buyerDisputesContent">Loading...</div></div></div>
+<!-- LOGGED-IN SIDEBAR + HEADER -->
+<div id="userView" style="display:none;">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰ Menu</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar"><div class="logo">⚡ cam<span>Biz</span> Market</div><div id="sidebarLinks"></div></nav>
+    <div class="main">
+        <div class="topbar"><h4 id="pageTitle">👋 Welcome!</h4><button class="btn btn-outline-danger btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button></div>
 
-    <!-- SELLER TABS -->
-    <div class="tab-panel" id="tab-sorders"><div class="card"><div class="card-header">📦 Customer Orders</div><div class="card-body p-0" id="sellerOrdersContent">Loading...</div></div></div>
-    <div class="tab-panel" id="tab-sproducts"><div class="card"><div class="card-header">📦 My Products</div><div class="card-body p-0" id="sellerProductsContent">Loading...</div></div></div>
-    <div class="tab-panel" id="tab-soffers"><div class="card"><div class="card-header">💰 Customer Offers</div><div class="card-body p-0" id="sellerOffersContent">Loading...</div></div></div>
-    <div class="tab-panel" id="tab-sdisputes"><div class="card"><div class="card-header">⚖️ Disputes Against Me</div><div class="card-body p-0" id="sellerDisputesContent">Loading...</div></div></div>
+        <!-- BUYER TABS -->
+        <div class="tab-panel" id="tab-bstore"><div class="card"><div class="card-header">🛍️ Quick Store Access</div><div class="card-body text-center"><a href="/store" class="btn btn-primary btn-lg">Browse Store</a></div></div></div>
+        <div class="tab-panel" id="tab-bcart"><div class="card"><div class="card-header">🛒 My Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-borders"><div class="card"><div class="card-header">📋 My Orders</div><div class="card-body p-0" id="buyerOrdersContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-boffers"><div class="card"><div class="card-header">💬 Makola AI Offers</div><div class="card-body p-0" id="buyerOffersContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-bdisputes"><div class="card"><div class="card-header">⚖️ My Disputes</div><div class="card-body p-0" id="buyerDisputesContent">Loading...</div></div></div>
 
-    <!-- ADMIN TABS (same as before) -->
-    <div class="tab-panel" id="tab-adashboard"><div class="stat-row" id="dashStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div></div>
-    <div class="tab-panel" id="tab-ausers"><div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div></div>
-    <div class="tab-panel" id="tab-asellers"><div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div></div>
-    <div class="tab-panel" id="tab-aproducts"><div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-box me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div></div>
-    <div class="tab-panel" id="tab-adisputes"><div class="stat-row"><div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div><div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-gavel text-danger me-2"></i>Dispute Cases</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="disputesTable"></tbody></table></div></div></div></div>
-    <div class="tab-panel" id="tab-areviews"><div class="card"><div class="card-header"><span><i class="fas fa-star text-warning me-2"></i>Reviews Moderation</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Product</th><th>User</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reviewsTable"></tbody></table></div></div></div></div>
+        <!-- SELLER TABS -->
+        <div class="tab-panel" id="tab-soverview"><div class="stat-row" id="sellerStats"></div><div class="section-title">⚡ Quick Actions</div><div class="quick-actions" id="sellerActions"></div></div>
+        <div class="tab-panel" id="tab-sorders"><div class="card"><div class="card-header">📦 Customer Orders</div><div class="card-body p-0" id="sellerOrdersContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-soffers"><div class="card"><div class="card-header">💰 Customer Offers</div><div class="card-body p-0" id="sellerOffersContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-sdisputes"><div class="card"><div class="card-header">⚖️ Disputes Against Me</div><div class="card-body p-0" id="sellerDisputesContent">Loading...</div></div></div>
+
+        <!-- ADMIN TABS -->
+        <div class="tab-panel" id="tab-adashboard"><div class="stat-row" id="dashStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div></div>
+        <div class="tab-panel" id="tab-ausers"><div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div></div>
+        <div class="tab-panel" id="tab-asellers"><div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div></div>
+        <div class="tab-panel" id="tab-aproducts"><div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-box me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div></div>
+        <div class="tab-panel" id="tab-adisputes"><div class="stat-row"><div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div><div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-gavel text-danger me-2"></i>Dispute Cases</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="disputesTable"></tbody></table></div></div></div></div>
+        <div class="tab-panel" id="tab-areviews"><div class="card"><div class="card-header"><span><i class="fas fa-star text-warning me-2"></i>Reviews Moderation</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Product</th><th>User</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reviewsTable"></tbody></table></div></div></div></div>
+    </div>
+</div>
+
+<!-- PUBLIC VIEW -->
+<div id="publicView" class="container">
+    <div class="hero"><div class="icon">🚀</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform</p></div>
+    <div class="stats-grid">
+        <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
+        <div class="stat-card"><div class="value" id="pubUserCount">-</div><div class="label">Users</div></div>
+        <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
+        <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
+    </div>
+    <div class="login-card">
+        <h2>Sign In</h2><p>Access your CamBiz Market account</p>
+        <button class="btn btn-primary" onclick="showLogin()">Sign In</button>
+        <a href="/register" class="btn btn-success">Create Account</a>
+        <div class="login-form" id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email Address">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button class="btn btn-primary" onclick="doLogin()">Log In Securely</button>
+            <p id="loginError" style="color:var(--cambiz-rose);margin-top:10px;display:none;font-size:0.82rem;font-weight:600;"></p>
+        </div>
+    </div>
+    <div class="section-title">💡 Why Choose CamBiz Market?</div>
+    <div class="about-grid">
+        <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect securely with verified buyers and sellers across Cameroon.</p></div>
+        <div class="about-card"><div class="icon">📱</div><h3>Mobile Money</h3><p>Seamless integrations with MTN & Orange Mobile Money.</p></div>
+        <div class="about-card"><div class="icon">📈</div><h3>Boost Business</h3><p>Access premium seller tools to expand your customer reach.</p></div>
+        <div class="about-card"><div class="icon">🤖</div><h3>AI Negotiation</h3><p>Utilize Makola AI pricing for fair and automated bargaining.</p></div>
+        <div class="about-card"><div class="icon">🤝</div><h3>Njangi Groups</h3><p>Buy together with friends and community members to save.</p></div>
+        <div class="about-card"><div class="icon">⚡</div><h3>Flash Sales</h3><p>Score massive discounts during exclusive limited-time deals.</p></div>
+    </div>
+    <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -91,11 +163,37 @@
 <script>
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
 var token=localStorage.getItem('token')||sessionStorage.getItem('token');
-if(!token){window.location.href='/dashboard'}
 var F=function(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'XAF',maximumFractionDigits:0}).format(v||0)};
 var D=function(d){return d?new Date(d).toLocaleDateString('en-GB'):'N/A'};
 function showToast(t,i){Swal.fire({toast:true,position:'top-end',icon:i||'success',title:t,showConfirmButton:false,timer:2000,timerProgressBar:true})}
-function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');window.location.href='/dashboard'}
+
+// PUBLIC
+function showLogin(){document.getElementById('loginForm').style.display='block'}
+async function doLogin(){
+    var email=document.getElementById('loginEmail').value,password=document.getElementById('loginPassword').value,errorEl=document.getElementById('loginError');
+    if(!email||!password){errorEl.textContent='Please enter email and password.';errorEl.style.display='block';return}
+    try{var r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})}),d=await r.json();
+        if(d.success&&d.data&&d.data.token){localStorage.setItem('token',d.data.token);location.reload()}else{errorEl.textContent=d.message||'Login failed.';errorEl.style.display='block'}
+    }catch(e){errorEl.textContent='Network error.';errorEl.style.display='block'}
+}
+async function init(){
+    try{var r=await fetch('/api/products?page=0&size=200'),d=await r.json();if(d.data)document.getElementById('pubProductCount').textContent=d.data.length}catch(e){}
+    try{var ur=await fetch('/api/admin/stats'),ud=await ur.json();if(ud.success&&ud.data)document.getElementById('pubUserCount').textContent=ud.data.totalUsers+'+'}catch(e){document.getElementById('pubUserCount').textContent='2k+'}
+}
+async function updateCartBadge(){
+    if(!token)return;
+    try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items){var count=d.data.items.length;var badge=document.getElementById('cartBadge');if(count>0){badge.textContent=count;badge.style.display='flex'}else{badge.style.display='none'}}}catch(e){}
+}
+function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');location.href='/dashboard'}
+
+// AUTH CHECK
+if(token){
+    document.getElementById('publicView').style.display='none';
+    document.getElementById('publicHeader').style.display='none';
+    document.getElementById('userView').style.display='block';
+    updateCartBadge();
+    loadUserDashboard();
+}else{init()}
 
 var userType='BUYER';
 try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];if(Array.isArray(roles)&&roles.indexOf('ROLE_ADMIN')!==-1)userType='ADMIN';else if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)userType='SELLER';else if(payload.userType==='SELLER')userType='SELLER';else if(payload.userType==='ADMIN')userType='ADMIN'}catch(e){}
@@ -103,61 +201,51 @@ try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[
 function showTab(t){
     document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active')});
     document.querySelectorAll('.sidebar .nav-link').forEach(function(l){l.classList.remove('active')});
-    var tab=document.getElementById('tab-'+t);
-    if(tab)tab.classList.add('active');
-    var link=document.querySelector('.sidebar .nav-link[onclick*="'+t+'"]');
-    if(link)link.classList.add('active');
+    var tab=document.getElementById('tab-'+t);if(tab)tab.classList.add('active');
+    var link=document.querySelector('.sidebar .nav-link[onclick*="'+t+'"]');if(link)link.classList.add('active');
     if(window.innerWidth<768)toggleSidebar();
-    // Load data based on tab
-    if(t==='adashboard')loadAdminDashboard();
-    if(t==='ausers')loadUsers();
-    if(t==='asellers')loadSellers();
-    if(t==='aproducts')loadProducts('pending');
-    if(t==='adisputes')loadDisputes();
-    if(t==='areviews')loadReviews();
-    if(t==='bcart')loadBuyerCart();
-    if(t==='borders')loadBuyerOrders();
-    if(t==='bdisputes')loadBuyerDisputes();
-    if(t==='sorders')loadSellerOrders();
-    if(t==='sproducts')loadSellerProducts();
-    if(t==='soffers')loadSellerOffers();
-    if(t==='sdisputes')loadSellerDisputes();
+    if(t==='adashboard')loadAdminDashboard(); if(t==='ausers')loadUsers(); if(t==='asellers')loadSellers();
+    if(t==='aproducts')loadProducts('pending'); if(t==='adisputes')loadDisputes(); if(t==='areviews')loadReviews();
+    if(t==='bcart')loadBuyerCart(); if(t==='borders')loadBuyerOrders(); if(t==='boffers')loadBuyerOffers(); if(t==='bdisputes')loadBuyerDisputes();
+    if(t==='soverview')loadSellerOverview(); if(t==='sorders')loadSellerOrders(); if(t==='soffers')loadSellerOffers(); if(t==='sdisputes')loadSellerDisputes();
 }
 
-// BUILD SIDEBAR
 function buildSidebar(){
     var html='';
     if(userType==='BUYER'){
-        html+='<a class="nav-link active" onclick="showTab(\'store\')"><i class="fas fa-store"></i> Store</a>';
+        html+='<a class="nav-link active" onclick="showTab(\'bstore\')"><i class="fas fa-store"></i> Store</a>';
         html+='<a class="nav-link" onclick="showTab(\'bcart\')"><i class="fas fa-shopping-cart"></i> Cart</a>';
         html+='<a class="nav-link" onclick="showTab(\'borders\')"><i class="fas fa-list"></i> Orders</a>';
+        html+='<a class="nav-link" onclick="showTab(\'boffers\')"><i class="fas fa-comments"></i> Offers</a>';
         html+='<a class="nav-link" onclick="showTab(\'bdisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
-        document.getElementById('pageTitle').textContent='🛒 Buyer Dashboard';
+        document.getElementById('pageTitle').innerHTML='🛒 Buyer Dashboard';
     }else if(userType==='SELLER'){
-        html+='<a class="nav-link active" onclick="showTab(\'sorders\')"><i class="fas fa-shopping-cart"></i> Orders</a>';
-        html+='<a class="nav-link" onclick="showTab(\'sproducts\')"><i class="fas fa-box"></i> My Products</a>';
+        html+='<a class="nav-link active" onclick="showTab(\'soverview\')"><i class="fas fa-th-large"></i> Overview</a>';
+        html+='<a class="nav-link" onclick="showTab(\'sorders\')"><i class="fas fa-shopping-cart"></i> Orders</a>';
         html+='<a class="nav-link" onclick="showTab(\'soffers\')"><i class="fas fa-tags"></i> Offers</a>';
         html+='<a class="nav-link" onclick="showTab(\'sdisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
-        document.getElementById('pageTitle').textContent='🏪 Seller Dashboard';
+        document.getElementById('pageTitle').innerHTML='🏪 Seller Dashboard';
     }else if(userType==='ADMIN'){
         html+='<a class="nav-link active" onclick="showTab(\'adashboard\')"><i class="fas fa-th-large"></i> Dashboard</a>';
         html+='<a class="nav-link" onclick="showTab(\'ausers\')"><i class="fas fa-users"></i> Users</a>';
         html+='<a class="nav-link" onclick="showTab(\'asellers\')"><i class="fas fa-store"></i> Sellers</a>';
-        html+='<a class="nav-link" onclick="showTab(\'aproducts\')"><i class="fas fa-box"></i> Products <span class="badge bg-danger badge-count" id="pendingBadge">0</span></a>';
+        html+='<a class="nav-link" onclick="showTab(\'aproducts\')"><i class="fas fa-box"></i> Products <span class="badge-count" id="pendingBadge">0</span></a>';
         html+='<a class="nav-link" onclick="showTab(\'adisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
         html+='<a class="nav-link" onclick="showTab(\'areviews\')"><i class="fas fa-star"></i> Reviews</a>';
-        document.getElementById('pageTitle').textContent='🛡️ Admin Dashboard';
+        document.getElementById('pageTitle').innerHTML='🛡️ Admin Dashboard';
     }
     document.getElementById('sidebarLinks').innerHTML=html;
 }
 
-// ADMIN FUNCTIONS
+function loadUserDashboard(){buildSidebar();if(userType==='ADMIN'){showTab('adashboard');loadAdminDashboard()}else if(userType==='SELLER'){showTab('soverview');loadSellerOverview()}else{showTab('bstore')}}
+
+// ========== ADMIN FUNCTIONS ==========
 var revenueChart=null,currentProductFilter='pending';
 async function loadAdminDashboard(){try{var r=await fetch('/api/admin/stats'),d=(await r.json()).data;document.getElementById('dashStats').innerHTML='<div class="stat-card"><h3>'+d.totalUsers+'</h3><small>👥 Users</small></div><div class="stat-card"><h3>'+d.totalSellers+'</h3><small>🏪 Sellers</small></div><div class="stat-card"><h3>'+d.totalProducts+'</h3><small>📦 Products</small></div><div class="stat-card"><h3>'+F(d.totalRevenue)+'</h3><small>💰 Revenue</small></div>';var cr=await fetch('/api/admin/revenue-chart'),cd=(await cr.json()).data;if(cd){var ctx=document.getElementById('revenueChart').getContext('2d');if(revenueChart)revenueChart.destroy();revenueChart=new Chart(ctx,{type:'line',data:{labels:Object.keys(cd),datasets:[{label:'Revenue',data:Object.values(cd),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',fill:true,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return F(v)}}}}}});}}catch(e){}}
-async function loadUsers(){try{var r=await fetch('/api/admin/users'),d=(await r.json()).data;document.getElementById('usersTable').innerHTML=d.map(function(u){var a='';if(u.status==='ACTIVE')a+='<button class="btn btn-outline-danger btn-sm me-1" onclick="toggleUser('+u.id+',\'SUSPENDED\')"><i class="fas fa-ban"></i> Suspend</button>';else a+='<button class="btn btn-outline-success btn-sm me-1" onclick="toggleUser('+u.id+',\'ACTIVE\')"><i class="fas fa-check"></i> Activate</button>';a+='<button class="btn btn-outline-dark btn-sm" onclick="deleteUser('+u.id+',\''+u.firstName+' '+u.lastName+'\')"><i class="fas fa-trash"></i></button>';return '<tr><td><strong>#'+u.id+'</strong></td><td>'+u.firstName+' '+u.lastName+'</td><td>'+u.email+'</td><td><span class="badge bg-info">'+u.userType+'</span></td><td><span class="badge '+(u.status==='ACTIVE'?'bg-success':'bg-danger')+'">'+u.status+'</span></td><td>'+a+'</td></tr>'}).join('')}catch(e){}}
+async function loadUsers(){try{var r=await fetch('/api/admin/users'),d=(await r.json()).data;document.getElementById('usersTable').innerHTML=d.map(function(u){var a='';if(u.status==='ACTIVE')a+='<button class="btn btn-outline-danger btn-sm me-1" onclick="toggleUser('+u.id+',\'SUSPENDED\')">Suspend</button>';else a+='<button class="btn btn-outline-success btn-sm me-1" onclick="toggleUser('+u.id+',\'ACTIVE\')">Activate</button>';a+='<button class="btn btn-outline-dark btn-sm" onclick="deleteUser('+u.id+',\''+u.firstName+' '+u.lastName+'\')"><i class="fas fa-trash"></i></button>';return '<tr><td>#'+u.id+'</td><td>'+u.firstName+' '+u.lastName+'</td><td>'+u.email+'</td><td><span class="badge bg-info">'+u.userType+'</span></td><td><span class="badge '+(u.status==='ACTIVE'?'bg-success':'bg-danger')+'">'+u.status+'</span></td><td>'+a+'</td></tr>'}).join('')}catch(e){}}
 async function toggleUser(id,s){await fetch('/api/admin/users/'+id+'/status?status='+s,{method:'PUT'});showToast(s==='SUSPENDED'?'Suspended':'Activated','success');loadUsers()}
 async function deleteUser(id,n){var r=await Swal.fire({title:'Delete?',text:'Delete '+n+'?',icon:'error',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});if(r.isConfirmed){await fetch('/api/admin/users/'+id,{method:'DELETE'});showToast('Deleted','success');loadUsers()}}
-async function loadSellers(){try{var r=await fetch('/api/admin/sellers'),d=(await r.json()).data;document.getElementById('sellersTable').innerHTML=d.map(function(s){var p=s.accountType==='PREMIUM';return '<tr><td><strong>#'+s.id+'</strong></td><td><strong>'+(s.businessName||'N/A')+'</strong></td><td>'+s.firstName+' '+s.lastName+'</td><td>'+s.email+'</td><td><span class="badge '+(p?'bg-warning text-dark':'bg-secondary')+'">'+(p?'🏆 ':'')+s.accountType+'</span></td><td>'+(!p?'<button class="btn btn-warning btn-sm" onclick="verifySeller('+s.id+')"><i class="fas fa-check"></i> Verify</button>':'<button class="btn btn-outline-danger btn-sm" onclick="revokeSeller('+s.id+')"><i class="fas fa-times"></i> Revoke</button>')+'</td></tr>'}).join('')}catch(e){}}
+async function loadSellers(){try{var r=await fetch('/api/admin/sellers'),d=(await r.json()).data;document.getElementById('sellersTable').innerHTML=d.map(function(s){var p=s.accountType==='PREMIUM';return '<tr><td>#'+s.id+'</td><td><strong>'+(s.businessName||'N/A')+'</strong></td><td>'+s.firstName+' '+s.lastName+'</td><td>'+s.email+'</td><td><span class="badge '+(p?'bg-warning text-dark':'bg-secondary')+'">'+(p?'🏆 ':'')+s.accountType+'</span></td><td>'+(!p?'<button class="btn btn-warning btn-sm" onclick="verifySeller('+s.id+')">Verify</button>':'<button class="btn btn-outline-danger btn-sm" onclick="revokeSeller('+s.id+')">Revoke</button>')+'</td></tr>'}).join('')}catch(e){}}
 async function verifySeller(id){await fetch('/api/admin/sellers/'+id+'/verify',{method:'PUT'});showToast('Verified','success');loadSellers()}
 async function revokeSeller(id){await fetch('/api/admin/sellers/'+id+'/revoke-premium',{method:'PUT'});showToast('Revoked','info');loadSellers()}
 async function loadProducts(f){currentProductFilter=f||currentProductFilter;try{var p=await fetch('/api/admin/products/pending').then(function(r){return r.json()});var a=await fetch('/api/admin/products/approved').then(function(r){return r.json()});var rj=await fetch('/api/admin/products/rejected').then(function(r){return r.json()});var all=await fetch('/api/admin/products/all').then(function(r){return r.json()});document.getElementById('prodPending').textContent=(p.data||[]).length;document.getElementById('prodApproved').textContent=(a.data||[]).length;document.getElementById('prodRejected').textContent=(rj.data||[]).length;document.getElementById('prodTotal').textContent=(all.data||[]).length;var badge=document.getElementById('pendingBadge');if(badge)badge.textContent=(p.data||[]).length;var data=currentProductFilter==='pending'?p.data:currentProductFilter==='approved'?a.data:currentProductFilter==='rejected'?rj.data:all.data;document.getElementById('productsTable').innerHTML=(data||[]).map(function(pr){var sb=currentProductFilter==='pending'?'bg-warning text-dark':currentProductFilter==='approved'?'bg-success':'bg-danger';var ac=currentProductFilter==='pending'?'<button class="btn btn-success btn-sm me-1" onclick="approveProduct('+pr.id+')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="showReject('+pr.id+',\''+(pr.name||'').replace(/'/g,"\\'")+'\')"><i class="fas fa-times"></i></button>':currentProductFilter==='rejected'?'<button class="btn btn-outline-success btn-sm" onclick="approveProduct('+pr.id+')"><i class="fas fa-redo"></i></button><br><small class="text-danger">'+(pr.rejectionReason||'')+'</small>':'<small class="text-muted">Approved</small>';return '<tr><td>'+(currentProductFilter==='pending'?'<input type="checkbox" class="prodCheck" value="'+pr.id+'">':'')+'</td><td><strong>'+(pr.name||'N/A')+'</strong></td><td>'+(pr.sellerBusinessName||pr.sellerName||'N/A')+'</td><td><strong>'+F(pr.price)+'</strong></td><td><span class="badge '+sb+'">'+currentProductFilter+'</span></td><td>'+ac+'</td></tr>'}).join('')}catch(e){}}
@@ -169,30 +257,31 @@ async function loadDisputes(){try{var r=await fetch('/api/admin/disputes'),d=awa
 async function reviewDispute(id){await fetch('/api/admin/disputes/'+id+'/review',{method:'PUT'});showToast('Reviewing','success');loadDisputes()}
 async function resolveDispute(id,res,n){var isR=res==='RELEASED';Swal.fire({title:isR?'Release?':'Refund?',text:(isR?'Release to ':'Refund ')+n+'?',icon:'question',showCancelButton:true,confirmButtonText:isR?'Release':'Refund',confirmButtonColor:isR?'#10b981':'#ef4444'}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/disputes/'+id+'/resolve?resolution='+res,{method:'PUT'});showToast('Resolved','success');loadDisputes()}})}
 async function viewDisputeChat(id){var r=await fetch('/api/admin/disputes/'+id+'/comments'),d=await r.json();var html=(d.data||[]).map(function(c){return '<div style="background:#f8fafc;padding:8px;border-radius:6px;margin-bottom:6px;"><strong>'+c.userName+'</strong>: '+c.message+'</div>'}).join('')||'No messages';Swal.fire({title:'Chat',html:html+'<textarea id="newMsg" class="form-control mt-2" rows="2" placeholder="Message..."></textarea>',showCancelButton:true,confirmButtonText:'Send',confirmButtonColor:'#0d9488',preConfirm:function(){var msg=document.getElementById('newMsg').value.trim();if(!msg){Swal.showValidationMessage('Type a message');return false}return msg}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/disputes/'+id+'/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:0,userName:'Admin',userType:'ADMIN',message:r.value})});showToast('Sent','success')}})}
-async function loadReviews(){try{var r=await fetch('/api/admin/reviews'),d=(await r.json()).data;document.getElementById('reviewsTable').innerHTML=(d||[]).map(function(rv){var stars='';for(var i=1;i<=5;i++)stars+=i<=rv.rating?'⭐':'☆';var actions=rv.isHidden?'<button class="btn btn-outline-success btn-sm me-1" onclick="unhideReview('+rv.id+')"><i class="fas fa-eye"></i></button>':'<button class="btn btn-outline-warning btn-sm me-1" onclick="hideReview('+rv.id+')"><i class="fas fa-eye-slash"></i></button>';actions+='<button class="btn btn-outline-danger btn-sm" onclick="deleteReview('+rv.id+')"><i class="fas fa-trash"></i></button>';return '<tr><td><strong>#'+rv.id+'</strong></td><td>'+rv.productName+'</td><td>'+rv.userName+'</td><td>'+stars+'</td><td>'+(rv.comment||'').substring(0,50)+'</td><td><span class="badge '+(rv.isHidden?'bg-danger':'bg-success')+'">'+(rv.isHidden?'Hidden':'Visible')+'</span></td><td>'+actions+'</td></tr>'}).join('')}catch(e){}}
+async function loadReviews(){try{var r=await fetch('/api/admin/reviews'),d=(await r.json()).data;document.getElementById('reviewsTable').innerHTML=(d||[]).map(function(rv){var stars='';for(var i=1;i<=5;i++)stars+=i<=rv.rating?'⭐':'☆';var actions=rv.isHidden?'<button class="btn btn-outline-success btn-sm me-1" onclick="unhideReview('+rv.id+')"><i class="fas fa-eye"></i></button>':'<button class="btn btn-outline-warning btn-sm me-1" onclick="hideReview('+rv.id+')"><i class="fas fa-eye-slash"></i></button>';actions+='<button class="btn btn-outline-danger btn-sm" onclick="deleteReview('+rv.id+')"><i class="fas fa-trash"></i></button>';return '<tr><td>#'+rv.id+'</td><td>'+rv.productName+'</td><td>'+rv.userName+'</td><td>'+stars+'</td><td>'+(rv.comment||'').substring(0,50)+'</td><td><span class="badge '+(rv.isHidden?'bg-danger':'bg-success')+'">'+(rv.isHidden?'Hidden':'Visible')+'</span></td><td>'+actions+'</td></tr>'}).join('')}catch(e){}}
 async function hideReview(id){await fetch('/api/admin/reviews/'+id+'/hide',{method:'PUT'});showToast('Hidden','success');loadReviews()}
 async function unhideReview(id){await fetch('/api/admin/reviews/'+id+'/unhide',{method:'PUT'});showToast('Visible','success');loadReviews()}
 async function deleteReview(id){var r=await Swal.fire({title:'Delete?',icon:'error',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});if(r.isConfirmed){await fetch('/api/admin/reviews/'+id,{method:'DELETE'});showToast('Deleted','success');loadReviews()}}
 
-// BUYER FUNCTIONS
-async function loadBuyerCart(){try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items&&d.data.items.length>0){var html='<div class="table-responsive"><table class="table table-hover"><tbody>';d.data.items.forEach(function(i){html+='<tr><td>'+i.productName+' x'+i.quantity+'</td><td>'+F(i.effectivePrice)+'</td></tr>'});html+='</tbody></table></div><div class="text-end fw-bold mt-2">Total: '+F(d.data.total)+'</div><a href="/cart" class="btn btn-primary btn-sm mt-2">Checkout</a>';document.getElementById('buyerCartContent').innerHTML=html}else{document.getElementById('buyerCartContent').innerHTML='<p class="text-muted">Cart empty</p>'}}catch(e){}}
-async function loadBuyerOrders(){try{var r=await fetch('/api/orders/my-orders',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){html+='<tr><td>#'+(o.orderNumber||o.id)+'</td><td>'+F(o.totalAmount||o.amount)+'</td><td><span class="status-'+o.status+'">'+o.status+'</span></td><td>'+D(o.createdAt)+'</td><td>'+(o.status==='DELIVERED'||o.status==='SHIPPED'?'<button class="btn btn-sm btn-outline-danger" onclick="fileDispute(\''+(o.orderNumber||o.id)+'\','+(o.totalAmount||o.amount)+','+(o.sellerId||0)+')">Report</button>':'')+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('buyerOrdersContent').innerHTML=html}else{document.getElementById('buyerOrdersContent').innerHTML='<p class="text-muted">No orders</p>'}}catch(e){}}
+// ========== BUYER FUNCTIONS ==========
+async function loadBuyerCart(){try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items&&d.data.items.length>0){var html='<div class="table-responsive"><table class="table table-hover"><tbody>';d.data.items.forEach(function(i){html+='<tr><td>'+i.productName+' x'+i.quantity+'</td><td>'+F(i.effectivePrice)+'</td></tr>'});html+='</tbody></table></div><div class="text-end fw-bold mt-2">Total: '+F(d.data.total)+'</div><a href="/cart" class="btn btn-warning btn-sm mt-2">Checkout</a>';document.getElementById('buyerCartContent').innerHTML=html}else{document.getElementById('buyerCartContent').innerHTML='<p class="text-muted">Cart empty</p>'}}catch(e){}}
+async function loadBuyerOrders(){try{var r=await fetch('/api/orders/my-orders',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var sid=o.sellerId||0;html+='<tr><td>#'+(o.orderNumber||o.id)+'</td><td>'+F(o.totalAmount||o.amount)+'</td><td><span class="status-'+o.status+'">'+o.status+'</span></td><td>'+(o.status==='DELIVERED'||o.status==='SHIPPED'?'<button class="btn btn-sm btn-outline-danger" onclick="fileDispute(\''+(o.orderNumber||o.id)+'\','+(o.totalAmount||o.amount)+','+sid+')">Report</button>':'')+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('buyerOrdersContent').innerHTML=html}else{document.getElementById('buyerOrdersContent').innerHTML='<p class="text-muted">No orders</p>'}}catch(e){}}
 async function fileDispute(oid,amt,sid){var tp=JSON.parse(atob(token.split('.')[1]));Swal.fire({title:'Report Problem',html:'<textarea id="dReason" class="form-control" rows="3" placeholder="Describe..."></textarea>',icon:'warning',showCancelButton:true,confirmButtonText:'Submit',confirmButtonColor:'#ef4444',preConfirm:function(){var r=document.getElementById('dReason').value.trim();if(!r){Swal.showValidationMessage('Required');return false}return r}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/disputes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:parseInt(String(oid).replace(/[^0-9]/g,''))||oid,buyerId:tp.userId,sellerId:sid,amount:amt,reason:r.value})});showToast('Filed','success')}})}
+async function loadBuyerOffers(){try{var r=await fetch('/api/makola/my-offers',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Offer</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var action='';if(o.status==='ACCEPTED')action='<button class="btn btn-sm btn-add-cart" onclick="addToCart('+o.negotiationId+')">Add to Cart</button>';else if(o.status==='REJECTED')action='<button class="btn btn-sm btn-reject" onclick="dismissOffer('+o.negotiationId+')">Dismiss</button>';else action='<span style="color:#d97706">Waiting</span>';html+='<tr><td>'+o.productName+'</td><td>'+F(o.buyerOffer)+'</td><td>'+o.status+'</td><td>'+action+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('buyerOffersContent').innerHTML=html}else{document.getElementById('buyerOffersContent').innerHTML='<p class="text-muted">No offers</p>'}}catch(e){}}
+async function addToCart(nid){await fetch('/api/makola/add-to-cart/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});showToast('Added','success');loadBuyerCart();loadBuyerOffers()}
+async function dismissOffer(nid){await fetch('/api/makola/reject/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});showToast('Dismissed','info');loadBuyerOffers()}
 async function loadBuyerDisputes(){try{var tp=JSON.parse(atob(token.split('.')[1]));var r=await fetch('/api/admin/disputes'),d=await r.json();var my=d.data?d.data.filter(function(ds){return ds.buyerId===tp.userId}):[];if(my.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Seller</th><th>Amount</th><th>Status</th><th>Resolution</th></tr></thead><tbody>';my.forEach(function(ds){html+='<tr><td>#'+ds.id+'</td><td>'+ds.sellerName+'</td><td>'+F(ds.amount)+'</td><td>'+ds.status+'</td><td>'+(ds.resolution||'Pending')+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('buyerDisputesContent').innerHTML=html}else{document.getElementById('buyerDisputesContent').innerHTML='<p class="text-muted">No disputes</p>'}}catch(e){}}
 
-// SELLER FUNCTIONS
-async function loadSellerOrders(){try{var r=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Items</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var items=o.items?o.items.map(function(i){return i.productName}).join(', '):'N/A';var qty=o.items?o.items.reduce(function(s,i){return s+i.quantity},0):0;var action='';if(o.status==='PENDING')action='<button class="btn btn-sm btn-warning" onclick="updateOrder(\''+o.sellerOrderId+'\',\'CONFIRMED\')">Confirm</button>';else if(o.status==='CONFIRMED')action='<button class="btn btn-sm btn-info" onclick="updateOrder(\''+o.sellerOrderId+'\',\'SHIPPED\')">Ship</button>';else if(o.status==='SHIPPED')action='<button class="btn btn-sm btn-success" onclick="updateOrder(\''+o.sellerOrderId+'\',\'DELIVERED\')">Deliver</button>';else action='✅ Done';html+='<tr><td>#'+String(o.sellerOrderId).slice(-6)+'</td><td>'+items+' x'+qty+'</td><td>'+F(o.totalAmount||o.amount)+'</td><td>'+o.status+'</td><td>'+action+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('sellerOrdersContent').innerHTML=html}else{document.getElementById('sellerOrdersContent').innerHTML='<p class="text-muted">No orders</p>'}}catch(e){}}
-async function updateOrder(oid,s){await fetch('/api/orders/'+oid+'/update-status?status='+s,{method:'PUT',headers:{'Authorization':'Bearer '+token}});showToast(s,'success');loadSellerOrders()}
-async function loadSellerProducts(){try{var r=await fetch('/api/products/my-products',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th></tr></thead><tbody>';d.data.forEach(function(p){html+='<tr><td>'+p.name+'</td><td>'+F(p.price)+'</td><td>'+p.stockQuantity+'</td><td>'+(p.status||'N/A')+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('sellerProductsContent').innerHTML=html}else{document.getElementById('sellerProductsContent').innerHTML='<p class="text-muted">No products</p>'}}catch(e){}}
-async function loadSellerOffers(){try{var r=await fetch('/api/makola/seller/offers',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Offer</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){html+='<tr><td>'+o.productName+'</td><td>'+F(o.buyerOffer)+'</td><td><button class="btn btn-sm btn-success me-1" onclick="acceptOffer('+o.negotiationId+')">Accept</button><button class="btn btn-sm btn-outline-danger" onclick="rejectOffer('+o.negotiationId+')">Reject</button></td></tr>'});html+='</tbody></table></div>';document.getElementById('sellerOffersContent').innerHTML=html}else{document.getElementById('sellerOffersContent').innerHTML='<p class="text-muted">No offers</p>'}}catch(e){}}
+// ========== SELLER FUNCTIONS ==========
+async function loadSellerOverview(){
+    document.getElementById('sellerActions').innerHTML='<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a><a href="/create-flash-sale" class="action-card"><div class="icon">⚡</div><div class="title">Flash Sale</div><div class="sub">Limited deal</div></a><a href="/create-coupon" class="action-card"><div class="icon">🏷️</div><div class="title">Coupon</div><div class="sub">Discount</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi</div><div class="sub">Group deal</div></a><a href="/transactions" class="action-card"><div class="icon">💰</div><div class="title">Transactions</div><div class="sub">History</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer</div><div class="sub">Earn</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Premium</div><div class="sub">Upgrade</div></a>';
+    try{var pr=await fetch('/api/products/my-products',{headers:{'Authorization':'Bearer '+token}}),pd=await pr.json();var pc=pd.success&&pd.data?pd.data.length:0;var or=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}}),od=await or.json();var oc=od.success&&od.data?od.data.length:0;var rev=0;if(od.success&&od.data){for(var i=0;i<od.data.length;i++)rev+=od.data[i].sellerPayout||0}document.getElementById('sellerStats').innerHTML='<div class="stat-card"><h3>'+pc+'</h3><small>My Products</small></div><div class="stat-card"><h3>'+oc+'</h3><small>Orders</small></div><div class="stat-card"><h3>'+F(rev)+'</h3><small>Revenue</small></div><div class="stat-card"><h3>🏪</h3><small>Seller</small></div>'}catch(e){}
+}
+async function loadSellerOrders(){try{var r=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Items</th><th>Qty</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var items=o.items?o.items.map(function(i){return i.productName}).join(', '):'N/A';var qty=o.items?o.items.reduce(function(s,i){return s+i.quantity},0):0;var action='';if(o.status==='PENDING')action='<button class="btn btn-sm btn-confirm" onclick="updateOrder(\''+o.sellerOrderId+'\',\'CONFIRMED\')">Confirm</button>';else if(o.status==='CONFIRMED')action='<button class="btn btn-sm btn-ship" onclick="updateOrder(\''+o.sellerOrderId+'\',\'SHIPPED\')">Ship</button>';else if(o.status==='SHIPPED')action='<button class="btn btn-sm btn-confirm" onclick="updateOrder(\''+o.sellerOrderId+'\',\'DELIVERED\')">Deliver</button>';else action='✅ Done';html+='<tr><td>#'+String(o.sellerOrderId).slice(-6)+'</td><td>'+items+'</td><td>'+qty+'</td><td><span class="status-'+o.status+'">'+o.status+'</span></td><td>'+action+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('sellerOrdersContent').innerHTML=html}else{document.getElementById('sellerOrdersContent').innerHTML='<p class="text-muted">No orders</p>'}}catch(e){}}
+async function updateOrder(oid,s){await fetch('/api/orders/'+oid+'/update-status?status='+s,{method:'PUT',headers:{'Authorization':'Bearer '+token}});showToast(s,'success');loadSellerOrders();loadSellerOverview()}
+async function loadSellerOffers(){try{var r=await fetch('/api/makola/seller/offers',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Offer</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){html+='<tr><td>'+o.productName+'</td><td>'+F(o.buyerOffer)+'</td><td><button class="btn btn-sm btn-confirm me-1" onclick="acceptOffer('+o.negotiationId+')">Accept</button><button class="btn btn-sm btn-reject" onclick="rejectOffer('+o.negotiationId+')">Reject</button></td></tr>'});html+='</tbody></table></div>';document.getElementById('sellerOffersContent').innerHTML=html}else{document.getElementById('sellerOffersContent').innerHTML='<p class="text-muted">No offers</p>'}}catch(e){}}
 async function acceptOffer(id){await fetch('/api/makola/accept/'+id,{method:'POST',headers:{'Authorization':'Bearer '+token}});showToast('Accepted','success');loadSellerOffers()}
-async function rejectOffer(id){await fetch('/api/makola/reject/'+id,{method:'POST',headers:{'Authorization':'Bearer '+token}});showToast('Rejected','info');loadSellerOffers()}
+async function rejectOffer(id){var r=await Swal.fire({title:'Reject?',text:'Reason (optional):',input:'text',showCancelButton:true,confirmButtonText:'Reject',confirmButtonColor:'#e11d48'});if(r.isConfirmed){var url='/api/makola/reject/'+id;if(r.value)url+='?reason='+encodeURIComponent(r.value);await fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+token}});showToast('Rejected','info');loadSellerOffers()}}
 async function loadSellerDisputes(){try{var tp=JSON.parse(atob(token.split('.')[1]));var r=await fetch('/api/admin/disputes'),d=await r.json();var my=d.data?d.data.filter(function(ds){return ds.sellerId===tp.userId}):[];if(my.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Amount</th><th>Status</th><th>Resolution</th></tr></thead><tbody>';my.forEach(function(ds){html+='<tr><td>#'+ds.id+'</td><td>'+ds.buyerName+'</td><td>'+F(ds.amount)+'</td><td>'+ds.status+'</td><td>'+(ds.resolution||'Pending')+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('sellerDisputesContent').innerHTML=html}else{document.getElementById('sellerDisputesContent').innerHTML='<p class="text-muted">No disputes</p>'}}catch(e){}}
-
-// INIT
-buildSidebar();
-if(userType==='ADMIN'){showTab('adashboard');loadAdminDashboard()}else if(userType==='SELLER'){showTab('sorders');loadSellerOrders()}else{showTab('store')}
-setInterval(async function(){if(userType==='ADMIN'){try{var r=await fetch('/api/admin/products/pending-count'),d=await r.json();if(d.success)document.getElementById('pendingBadge').textContent=d.count}catch(e){}}},30000);
 </script>
 </body>
 </html>
