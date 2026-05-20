@@ -24,16 +24,16 @@
         .hero h1 { font-size: 2.2rem; font-weight: 800; color: var(--cambiz-blue); margin-bottom: 0.4rem; }
         .hero p { color: var(--cambiz-gray); font-size: 1.05rem; }
         .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: var(--cambiz-white); border-radius: 10px; padding: 1.3rem; text-align: center; border: 1px solid #e2e8f0; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.05); }
+        .stat-card { background: var(--cambiz-white); border-radius: 10px; padding: 1.3rem; text-align: center; border: 1px solid #e2e8f0; }
+        .stat-card:hover { transform: translateY(-2px); }
         .stat-card .value { font-size: 1.7rem; font-weight: 800; color: var(--cambiz-blue); }
-        .stat-card .label { color: var(--cambiz-gray); font-size: 0.7rem; margin-top: 0.3rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+        .stat-card .label { color: var(--cambiz-gray); font-size: 0.7rem; margin-top: 0.3rem; font-weight: 600; text-transform: uppercase; }
         .login-card { background: var(--cambiz-white); border-radius: 10px; padding: 2.5rem 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; max-width: 420px; margin: 0 auto 2.5rem auto; position: relative; overflow: hidden; }
         .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg,var(--cambiz-gold),var(--cambiz-teal)); }
         .login-card h2 { font-size: 1.4rem; font-weight: 700; color: var(--cambiz-blue); margin-bottom: 0.4rem; }
         .login-card p { color: var(--cambiz-gray); margin-bottom: 1.5rem; font-size: 0.9rem; }
         .btn { padding: 10px 28px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; font-size: 13px; margin: 5px; min-width: 180px; transition: all 0.2s; }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .btn:hover { transform: translateY(-1px); }
         .btn-primary { background: var(--cambiz-gold); color: var(--cambiz-blue); }
         .btn-success { background: var(--cambiz-white); color: var(--cambiz-slate); border: 1px solid #cbd5e1; }
         .login-form { display: none; margin-top: 1.2rem; padding: 1.3rem; background: #f8fafc; border-radius: 6px; text-align: left; border: 1px solid #e2e8f0; }
@@ -56,7 +56,7 @@
         .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px; border: 1px solid #e2e8f0; }
         .card-header { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
         .card-body { padding: 24px; } .card-body.p-0 { padding: 0; }
-        .table { margin: 0; } .table th { font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px; padding: 14px 16px; background: #f8fafc; }
+        .table { margin: 0; } .table th { font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700; padding: 14px 16px; background: #f8fafc; }
         .table td { padding: 14px 16px; vertical-align: middle; font-size: 0.88rem; }
         .badge { font-weight: 600; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; }
         .btn-sm { padding: 6px 14px; font-size: 0.78rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
@@ -74,9 +74,9 @@
         .action-card .icon { font-size: 1.5rem; } .action-card .title { font-weight: 700; font-size: 0.82rem; } .action-card .sub { font-size: 0.7rem; color: #64748b; }
         .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; margin: 2rem 0; }
         .about-card { background: var(--cambiz-white); border-radius: 10px; padding: 1.6rem; text-align: center; border: 1px solid #e2e8f0; }
-        .about-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.04); }
+        .about-card:hover { transform: translateY(-3px); }
         .about-card .icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
-        .about-card h3 { color: var(--cambiz-blue); font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .about-card h3 { color: var(--cambiz-blue); font-size: 0.95rem; font-weight: 700; }
         .about-card p { color: var(--cambiz-gray); font-size: 0.82rem; line-height: 1.4; }
         .footer { text-align: center; padding: 1.5rem; color: var(--cambiz-gray); font-size: 0.8rem; margin-top: 1.5rem; }
         .mobile-menu-btn { display: none; position: fixed; top: 10px; left: 10px; z-index: 1001; background: #0f172a; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
@@ -92,37 +92,6 @@
     <a href="/store" class="logo">cam<span>Biz</span> Market</a>
     <div class="nav-right">
         <a href="/cart" class="cart-icon">🛒<span class="cart-badge" id="cartBadge" style="display:none;">0</span></a>
-    </div>
-</div>
-
-<!-- LOGGED-IN SIDEBAR + HEADER -->
-<div id="userView" style="display:none;">
-    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰ Menu</button>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-    <nav class="sidebar" id="sidebar"><div class="logo">⚡ cam<span>Biz</span> Market</div><div id="sidebarLinks"></div></nav>
-    <div class="main">
-        <div class="topbar"><h4 id="pageTitle">👋 Welcome!</h4><button class="btn btn-outline-danger btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button></div>
-
-        <!-- BUYER TABS -->
-        <div class="tab-panel" id="tab-bstore"><div class="card"><div class="card-header">🛍️ Quick Store Access</div><div class="card-body text-center"><a href="/store" class="btn btn-primary btn-lg">Browse Store</a></div></div></div>
-        <div class="tab-panel" id="tab-bcart"><div class="card"><div class="card-header">🛒 My Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-borders"><div class="card"><div class="card-header">📋 My Orders</div><div class="card-body p-0" id="buyerOrdersContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-boffers"><div class="card"><div class="card-header">💬 Makola AI Offers</div><div class="card-body p-0" id="buyerOffersContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-bdisputes"><div class="card"><div class="card-header">⚖️ My Disputes</div><div class="card-body p-0" id="buyerDisputesContent">Loading...</div></div></div>
-
-        <!-- SELLER TABS -->
-        <div class="tab-panel" id="tab-soverview"><div class="stat-row" id="sellerStats"></div><div class="section-title">⚡ Quick Actions</div><div class="quick-actions" id="sellerActions"></div></div>
-        <div class="tab-panel" id="tab-sorders"><div class="card"><div class="card-header">📦 Customer Orders</div><div class="card-body p-0" id="sellerOrdersContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-soffers"><div class="card"><div class="card-header">💰 Customer Offers</div><div class="card-body p-0" id="sellerOffersContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-sdisputes"><div class="card"><div class="card-header">⚖️ Disputes Against Me</div><div class="card-body p-0" id="sellerDisputesContent">Loading...</div></div></div>
-
-        <!-- ADMIN TABS -->
-        <div class="tab-panel" id="tab-adashboard"><div class="stat-row" id="dashStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div></div>
-        <div class="tab-panel" id="tab-ausers"><div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div></div>
-        <div class="tab-panel" id="tab-asellers"><div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div></div>
-        <div class="tab-panel" id="tab-aproducts"><div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-box me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div></div>
-        <div class="tab-panel" id="tab-adisputes"><div class="stat-row"><div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div><div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-gavel text-danger me-2"></i>Dispute Cases</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="disputesTable"></tbody></table></div></div></div></div>
-        <div class="tab-panel" id="tab-areviews"><div class="card"><div class="card-header"><span><i class="fas fa-star text-warning me-2"></i>Reviews Moderation</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Product</th><th>User</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reviewsTable"></tbody></table></div></div></div></div>
     </div>
 </div>
 
@@ -158,6 +127,37 @@
     <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
 </div>
 
+<!-- LOGGED-IN VIEW -->
+<div id="userView" style="display:none;">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰ Menu</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar"><div class="logo">⚡ cam<span>Biz</span> Market</div><div id="sidebarLinks"></div></nav>
+    <div class="main">
+        <div class="topbar"><h4 id="pageTitle">👋 Welcome!</h4><button class="btn btn-outline-danger btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button></div>
+
+        <!-- BUYER TABS -->
+        <div class="tab-panel" id="tab-bstore"><div class="card"><div class="card-header">🛍️ Store</div><div class="card-body text-center"><a href="/store" class="btn btn-primary btn-lg">Browse Store</a></div></div></div>
+        <div class="tab-panel" id="tab-bcart"><div class="card"><div class="card-header">🛒 My Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-borders"><div class="card"><div class="card-header">📋 My Orders</div><div class="card-body p-0" id="buyerOrdersContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-boffers"><div class="card"><div class="card-header">💬 Makola AI Offers</div><div class="card-body p-0" id="buyerOffersContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-bdisputes"><div class="card"><div class="card-header">⚖️ My Disputes</div><div class="card-body p-0" id="buyerDisputesContent">Loading...</div></div></div>
+
+        <!-- SELLER TABS -->
+        <div class="tab-panel" id="tab-soverview"><div class="stat-row" id="sellerStats"></div><div class="section-title">⚡ Quick Actions</div><div class="quick-actions" id="sellerActions"></div></div>
+        <div class="tab-panel" id="tab-sorders"><div class="card"><div class="card-header">📦 Customer Orders</div><div class="card-body p-0" id="sellerOrdersContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-soffers"><div class="card"><div class="card-header">💰 Customer Offers</div><div class="card-body p-0" id="sellerOffersContent">Loading...</div></div></div>
+        <div class="tab-panel" id="tab-sdisputes"><div class="card"><div class="card-header">⚖️ Disputes Against Me</div><div class="card-body p-0" id="sellerDisputesContent">Loading...</div></div></div>
+
+        <!-- ADMIN TABS -->
+        <div class="tab-panel" id="tab-adashboard"><div class="stat-row" id="dashStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div></div>
+        <div class="tab-panel" id="tab-ausers"><div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div></div>
+        <div class="tab-panel" id="tab-asellers"><div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div></div>
+        <div class="tab-panel" id="tab-aproducts"><div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-box me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div></div>
+        <div class="tab-panel" id="tab-adisputes"><div class="stat-row"><div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div><div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-gavel text-danger me-2"></i>Dispute Cases</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="disputesTable"></tbody></table></div></div></div></div>
+        <div class="tab-panel" id="tab-areviews"><div class="card"><div class="card-header"><span><i class="fas fa-star text-warning me-2"></i>Reviews Moderation</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Product</th><th>User</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reviewsTable"></tbody></table></div></div></div></div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
@@ -166,9 +166,9 @@ var token=localStorage.getItem('token')||sessionStorage.getItem('token');
 var F=function(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'XAF',maximumFractionDigits:0}).format(v||0)};
 var D=function(d){return d?new Date(d).toLocaleDateString('en-GB'):'N/A'};
 function showToast(t,i){Swal.fire({toast:true,position:'top-end',icon:i||'success',title:t,showConfirmButton:false,timer:2000,timerProgressBar:true})}
-
-// PUBLIC
 function showLogin(){document.getElementById('loginForm').style.display='block'}
+function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');location.href='/dashboard'}
+
 async function doLogin(){
     var email=document.getElementById('loginEmail').value,password=document.getElementById('loginPassword').value,errorEl=document.getElementById('loginError');
     if(!email||!password){errorEl.textContent='Please enter email and password.';errorEl.style.display='block';return}
@@ -184,19 +184,19 @@ async function updateCartBadge(){
     if(!token)return;
     try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items){var count=d.data.items.length;var badge=document.getElementById('cartBadge');if(count>0){badge.textContent=count;badge.style.display='flex'}else{badge.style.display='none'}}}catch(e){}
 }
-function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');location.href='/dashboard'}
 
-// AUTH CHECK
+var userType='BUYER';
 if(token){
+    try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];if(Array.isArray(roles)&&roles.indexOf('ROLE_ADMIN')!==-1)userType='ADMIN';else if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)userType='SELLER';else if(payload.userType==='SELLER')userType='SELLER';else if(payload.userType==='ADMIN')userType='ADMIN'}catch(e){}
     document.getElementById('publicView').style.display='none';
     document.getElementById('publicHeader').style.display='none';
     document.getElementById('userView').style.display='block';
     updateCartBadge();
-    loadUserDashboard();
+    buildSidebar();
+    if(userType==='ADMIN'){showTab('adashboard');loadAdminDashboard()}
+    else if(userType==='SELLER'){showTab('soverview');loadSellerOverview()}
+    else{showTab('bstore')}
 }else{init()}
-
-var userType='BUYER';
-try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];if(Array.isArray(roles)&&roles.indexOf('ROLE_ADMIN')!==-1)userType='ADMIN';else if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)userType='SELLER';else if(payload.userType==='SELLER')userType='SELLER';else if(payload.userType==='ADMIN')userType='ADMIN'}catch(e){}
 
 function showTab(t){
     document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active')});
@@ -213,20 +213,20 @@ function showTab(t){
 function buildSidebar(){
     var html='';
     if(userType==='BUYER'){
-        html+='<a class="nav-link active" onclick="showTab(\'bstore\')"><i class="fas fa-store"></i> Store</a>';
+        html='<a class="nav-link active" onclick="showTab(\'bstore\')"><i class="fas fa-store"></i> Store</a>';
         html+='<a class="nav-link" onclick="showTab(\'bcart\')"><i class="fas fa-shopping-cart"></i> Cart</a>';
         html+='<a class="nav-link" onclick="showTab(\'borders\')"><i class="fas fa-list"></i> Orders</a>';
         html+='<a class="nav-link" onclick="showTab(\'boffers\')"><i class="fas fa-comments"></i> Offers</a>';
         html+='<a class="nav-link" onclick="showTab(\'bdisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
         document.getElementById('pageTitle').innerHTML='🛒 Buyer Dashboard';
     }else if(userType==='SELLER'){
-        html+='<a class="nav-link active" onclick="showTab(\'soverview\')"><i class="fas fa-th-large"></i> Overview</a>';
+        html='<a class="nav-link active" onclick="showTab(\'soverview\')"><i class="fas fa-th-large"></i> Overview</a>';
         html+='<a class="nav-link" onclick="showTab(\'sorders\')"><i class="fas fa-shopping-cart"></i> Orders</a>';
         html+='<a class="nav-link" onclick="showTab(\'soffers\')"><i class="fas fa-tags"></i> Offers</a>';
         html+='<a class="nav-link" onclick="showTab(\'sdisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
         document.getElementById('pageTitle').innerHTML='🏪 Seller Dashboard';
     }else if(userType==='ADMIN'){
-        html+='<a class="nav-link active" onclick="showTab(\'adashboard\')"><i class="fas fa-th-large"></i> Dashboard</a>';
+        html='<a class="nav-link active" onclick="showTab(\'adashboard\')"><i class="fas fa-th-large"></i> Dashboard</a>';
         html+='<a class="nav-link" onclick="showTab(\'ausers\')"><i class="fas fa-users"></i> Users</a>';
         html+='<a class="nav-link" onclick="showTab(\'asellers\')"><i class="fas fa-store"></i> Sellers</a>';
         html+='<a class="nav-link" onclick="showTab(\'aproducts\')"><i class="fas fa-box"></i> Products <span class="badge-count" id="pendingBadge">0</span></a>';
@@ -236,8 +236,6 @@ function buildSidebar(){
     }
     document.getElementById('sidebarLinks').innerHTML=html;
 }
-
-function loadUserDashboard(){buildSidebar();if(userType==='ADMIN'){showTab('adashboard');loadAdminDashboard()}else if(userType==='SELLER'){showTab('soverview');loadSellerOverview()}else{showTab('bstore')}}
 
 // ========== ADMIN FUNCTIONS ==========
 var revenueChart=null,currentProductFilter='pending';
