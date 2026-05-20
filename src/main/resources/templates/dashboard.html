@@ -137,8 +137,11 @@ function buildSidebar(){
     if(userType==='BUYER'){
         html='<a class="nav-link active" onclick="showTab(\'bstore\')"><i class="fas fa-store"></i> Store</a>';
         html+='<a class="nav-link" onclick="showTab(\'bcart\')"><i class="fas fa-shopping-cart"></i> Cart</a>';
-        html+='<a class="nav-link" onclick="showTab(\'borders\')"><i class="fas fa-list"></i> Orders</a>';
-        html+='<a class="nav-link" onclick="showTab(\'boffers\')"><i class="fas fa-comments"></i> Offers</a>';
+        html+='<a class="nav-link" onclick="showTab(\'borders\')"><i class="fas fa-list"></i> My Orders</a>';
+        html+='<a class="nav-link" onclick="showTab(\'bwishlist\')"><i class="fas fa-heart"></i> Wishlist</a>';
+        html+='<a class="nav-link" onclick="showTab(\'bnjangi\')"><i class="fas fa-users"></i> Njangi Groups</a>';
+        html+='<a class="nav-link" onclick="showTab(\'boffers\')"><i class="fas fa-comments"></i> AI Offers</a>';
+        html+='<a class="nav-link" onclick="showTab(\'breferral\')"><i class="fas fa-gift"></i> Refer & Earn</a>';
         html+='<a class="nav-link" onclick="showTab(\'bdisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
         document.getElementById('pageTitle').innerHTML='🛒 Buyer Dashboard';
     }else if(userType==='SELLER'){
@@ -157,13 +160,16 @@ function showTab(t){
     document.querySelectorAll('.sidebar .nav-link').forEach(function(l){l.classList.remove('active')});
     var link=document.querySelector('.sidebar .nav-link[onclick*="'+t+'"]');if(link)link.classList.add('active');
     if(window.innerWidth<768)toggleSidebar();
-    var titles={bstore:'🛍️ Store',bcart:'🛒 Cart',borders:'📋 Orders',boffers:'💬 Offers',bdisputes:'⚖️ Disputes',soverview:'🏪 Overview',sorders:'📦 Orders',soffers:'💰 Offers',sdisputes:'⚖️ Disputes'};
+    var titles={bstore:'🛍️ Store',bcart:'🛒 Cart',borders:'📋 My Orders',bwishlist:'❤️ Wishlist',bnjangi:'🤝 Njangi Groups',boffers:'💬 AI Offers',breferral:'🎁 Refer & Earn',bdisputes:'⚖️ Disputes',soverview:'🏪 Overview',sorders:'📦 Orders',soffers:'💰 Offers',sdisputes:'⚖️ Disputes'};
     document.getElementById('pageTitle').innerHTML=titles[t]||t;
     var content='';
     if(t==='bstore')content='<div class="card"><div class="card-header">🛍️ Store</div><div class="card-body text-center"><a href="/store" class="btn btn-primary btn-lg">Browse Store</a></div></div>';
     else if(t==='bcart')content='<div class="card"><div class="card-header">🛒 My Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div>';
     else if(t==='borders')content='<div class="card"><div class="card-header">📋 My Orders</div><div class="card-body p-0" id="buyerOrdersContent">Loading...</div></div>';
+    else if(t==='bwishlist')content='<div class="card"><div class="card-header">❤️ Wishlist</div><div class="card-body text-center"><a href="/wishlist" class="btn btn-primary">View Wishlist</a></div></div>';
+    else if(t==='bnjangi')content='<div class="card"><div class="card-header">🤝 Njangi Groups</div><div class="card-body text-center"><a href="/njangi" class="btn btn-primary">Browse Njangi Groups</a></div></div>';
     else if(t==='boffers')content='<div class="card"><div class="card-header">💬 Makola AI Offers</div><div class="card-body p-0" id="buyerOffersContent">Loading...</div></div>';
+    else if(t==='breferral')content='<div class="card"><div class="card-header">🎁 Refer & Earn</div><div class="card-body text-center"><a href="/referral" class="btn btn-primary">View Referrals</a></div></div>';
     else if(t==='bdisputes')content='<div class="card"><div class="card-header">⚖️ My Disputes</div><div class="card-body p-0" id="buyerDisputesContent">Loading...</div></div>';
     else if(t==='soverview')content='<div id="sellerStats" class="stat-row"></div><div class="section-title">⚡ Quick Actions</div><div class="quick-actions" id="sellerActions"></div>';
     else if(t==='sorders')content='<div class="card"><div class="card-header">📦 Customer Orders</div><div class="card-body p-0" id="sellerOrdersContent">Loading...</div></div>';
