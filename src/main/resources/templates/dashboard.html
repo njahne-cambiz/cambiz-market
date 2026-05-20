@@ -8,44 +8,40 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --sidebar-w: 240px; --bg: #0f172a; --accent: #f59e0b; --cambiz-blue: #1a3a5c; --cambiz-gold: #d4a853; --cambiz-teal: #0d9488; --cambiz-rose: #e11d48; --cambiz-amber: #d97706; --cambiz-slate: #334155; --cambiz-light: #f8fafc; --cambiz-white: #ffffff; --cambiz-gray: #64748b; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: var(--cambiz-light); min-height: 100vh; color: var(--cambiz-slate); }
-        .header { background: var(--cambiz-blue); color: white; padding: 0.9rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-        .header .logo { font-size: 1.35rem; font-weight: 700; color: white; text-decoration: none; letter-spacing: -0.3px; }
-        .header .logo span { color: var(--cambiz-gold); }
-        .header .nav-right { display: flex; align-items: center; gap: 18px; }
-        .cart-icon { position: relative; cursor: pointer; text-decoration: none; color: white; font-size: 1.15rem; }
-        .cart-badge { position: absolute; top: -7px; right: -9px; background: var(--cambiz-gold); color: var(--cambiz-blue); border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
+        :root { --sidebar-w: 240px; --bg: #0f172a; --accent: #f59e0b; --cambiz-blue: #1a3a5c; --cambiz-gold: #d4a853; --cambiz-teal: #0d9488; --cambiz-rose: #e11d48; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f1f5f9; min-height: 100vh; color: #334155; }
+        .header { background: #1a3a5c; color: white; padding: 0.9rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .header .logo { font-size: 1.35rem; font-weight: 700; color: white; text-decoration: none; }
+        .header .logo span { color: #d4a853; }
+        .cart-icon { position: relative; text-decoration: none; color: white; font-size: 1.15rem; }
+        .cart-badge { position: absolute; top: -7px; right: -9px; background: #d4a853; color: #1a3a5c; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
         .container { max-width: 1050px; margin: 2rem auto; padding: 0 1.5rem; }
         .hero { text-align: center; margin-bottom: 2.5rem; padding: 1.5rem 0; }
         .hero .icon { font-size: 3.5rem; margin-bottom: 0.8rem; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        .hero h1 { font-size: 2.2rem; font-weight: 800; color: var(--cambiz-blue); margin-bottom: 0.4rem; }
-        .hero p { color: var(--cambiz-gray); font-size: 1.05rem; }
+        .hero h1 { font-size: 2.2rem; font-weight: 800; color: #1a3a5c; }
+        .hero p { color: #64748b; font-size: 1.05rem; }
         .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: var(--cambiz-white); border-radius: 10px; padding: 1.3rem; text-align: center; border: 1px solid #e2e8f0; }
-        .stat-card:hover { transform: translateY(-2px); }
-        .stat-card .value { font-size: 1.7rem; font-weight: 800; color: var(--cambiz-blue); }
-        .stat-card .label { color: var(--cambiz-gray); font-size: 0.7rem; margin-top: 0.3rem; font-weight: 600; text-transform: uppercase; }
-        .login-card { background: var(--cambiz-white); border-radius: 10px; padding: 2.5rem 2rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; max-width: 420px; margin: 0 auto 2.5rem auto; position: relative; overflow: hidden; }
-        .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg,var(--cambiz-gold),var(--cambiz-teal)); }
-        .login-card h2 { font-size: 1.4rem; font-weight: 700; color: var(--cambiz-blue); margin-bottom: 0.4rem; }
-        .login-card p { color: var(--cambiz-gray); margin-bottom: 1.5rem; font-size: 0.9rem; }
-        .btn { padding: 10px 28px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; font-size: 13px; margin: 5px; min-width: 180px; transition: all 0.2s; }
-        .btn:hover { transform: translateY(-1px); }
-        .btn-primary { background: var(--cambiz-gold); color: var(--cambiz-blue); }
-        .btn-success { background: var(--cambiz-white); color: var(--cambiz-slate); border: 1px solid #cbd5e1; }
+        .stat-card { background: #fff; border-radius: 10px; padding: 1.3rem; text-align: center; border: 1px solid #e2e8f0; }
+        .stat-card .value { font-size: 1.7rem; font-weight: 800; color: #1a3a5c; }
+        .stat-card .label { color: #64748b; font-size: 0.7rem; margin-top: 0.3rem; font-weight: 600; text-transform: uppercase; }
+        .login-card { background: #fff; border-radius: 10px; padding: 2.5rem 2rem; text-align: center; border: 1px solid #e2e8f0; max-width: 420px; margin: 0 auto 2.5rem auto; position: relative; overflow: hidden; }
+        .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg,#d4a853,#0d9488); }
+        .login-card h2 { font-size: 1.4rem; font-weight: 700; color: #1a3a5c; }
+        .login-card p { color: #64748b; margin-bottom: 1.5rem; }
+        .btn { padding: 10px 28px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; font-size: 13px; margin: 5px; min-width: 180px; }
+        .btn-primary { background: #d4a853; color: #1a3a5c; }
+        .btn-success { background: #fff; color: #334155; border: 1px solid #cbd5e1; }
         .login-form { display: none; margin-top: 1.2rem; padding: 1.3rem; background: #f8fafc; border-radius: 6px; text-align: left; border: 1px solid #e2e8f0; }
         .login-form input { display: block; width: 100%; padding: 10px 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 13px; }
-        .login-form input:focus { border-color: var(--cambiz-gold); outline: none; }
+        .login-form input:focus { border-color: #d4a853; outline: none; }
         .login-form button { width: 100%; margin: 0; }
-        .user-view { display: none; }
-        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--bg); color: #fff; overflow-y: auto; z-index: 1000; box-shadow: 2px 0 15px rgba(0,0,0,0.1); transition: left 0.3s; }
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: #0f172a; color: #fff; overflow-y: auto; z-index: 1000; box-shadow: 2px 0 15px rgba(0,0,0,0.1); transition: left 0.3s; }
         .sidebar .logo { padding: 22px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 800; font-size: 1.3rem; }
-        .sidebar .logo span { color: var(--accent); }
+        .sidebar .logo span { color: #f59e0b; }
         .sidebar .nav-link { color: rgba(255,255,255,0.65); padding: 12px 20px; display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 0.88rem; border-left: 3px solid transparent; cursor: pointer; transition: all 0.2s; font-weight: 500; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,0.04); border-left-color: var(--accent); }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,0.04); border-left-color: #f59e0b; }
         .sidebar .nav-link i { width: 20px; text-align: center; font-size: 0.95rem; }
         .badge-count { background: #ef4444; color: #fff; border-radius: 12px; padding: 2px 9px; font-size: 0.7rem; font-weight: 700; margin-left: auto; animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
@@ -73,12 +69,12 @@
         .action-card:hover { border-color: #f59e0b; transform: translateY(-2px); }
         .action-card .icon { font-size: 1.5rem; } .action-card .title { font-weight: 700; font-size: 0.82rem; } .action-card .sub { font-size: 0.7rem; color: #64748b; }
         .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; margin: 2rem 0; }
-        .about-card { background: var(--cambiz-white); border-radius: 10px; padding: 1.6rem; text-align: center; border: 1px solid #e2e8f0; }
+        .about-card { background: #fff; border-radius: 10px; padding: 1.6rem; text-align: center; border: 1px solid #e2e8f0; }
         .about-card:hover { transform: translateY(-3px); }
         .about-card .icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
-        .about-card h3 { color: var(--cambiz-blue); font-size: 0.95rem; font-weight: 700; }
-        .about-card p { color: var(--cambiz-gray); font-size: 0.82rem; line-height: 1.4; }
-        .footer { text-align: center; padding: 1.5rem; color: var(--cambiz-gray); font-size: 0.8rem; margin-top: 1.5rem; }
+        .about-card h3 { color: #1a3a5c; font-size: 0.95rem; font-weight: 700; }
+        .about-card p { color: #64748b; font-size: 0.82rem; line-height: 1.4; }
+        .footer { text-align: center; padding: 1.5rem; color: #64748b; font-size: 0.8rem; margin-top: 1.5rem; }
         .mobile-menu-btn { display: none; position: fixed; top: 10px; left: 10px; z-index: 1001; background: #0f172a; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
         .sidebar-overlay.show { display: block; }
@@ -86,75 +82,23 @@
     </style>
 </head>
 <body>
-
-<!-- PUBLIC HEADER -->
-<div id="publicHeader" class="header">
-    <a href="/store" class="logo">cam<span>Biz</span> Market</a>
-    <div class="nav-right">
-        <a href="/cart" class="cart-icon">🛒<span class="cart-badge" id="cartBadge" style="display:none;">0</span></a>
-    </div>
-</div>
-
-<!-- PUBLIC VIEW -->
+<div id="publicHeader" class="header"><a href="/store" class="logo">cam<span>Biz</span> Market</a><div class="nav-right"><a href="/cart" class="cart-icon">🛒<span class="cart-badge" id="cartBadge" style="display:none;">0</span></a></div></div>
 <div id="publicView" class="container">
     <div class="hero"><div class="icon">🚀</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform</p></div>
-    <div class="stats-grid">
-        <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div>
-        <div class="stat-card"><div class="value" id="pubUserCount">-</div><div class="label">Users</div></div>
-        <div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div>
-        <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
-    </div>
-    <div class="login-card">
-        <h2>Sign In</h2><p>Access your CamBiz Market account</p>
-        <button class="btn btn-primary" onclick="showLogin()">Sign In</button>
-        <a href="/register" class="btn btn-success">Create Account</a>
-        <div class="login-form" id="loginForm">
-            <input type="email" id="loginEmail" placeholder="Email Address">
-            <input type="password" id="loginPassword" placeholder="Password">
-            <button class="btn btn-primary" onclick="doLogin()">Log In Securely</button>
-            <p id="loginError" style="color:var(--cambiz-rose);margin-top:10px;display:none;font-size:0.82rem;font-weight:600;"></p>
-        </div>
-    </div>
+    <div class="stats-grid"><div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div><div class="stat-card"><div class="value" id="pubUserCount">-</div><div class="label">Users</div></div><div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div><div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div></div>
+    <div class="login-card"><h2>Sign In</h2><p>Access your CamBiz Market account</p><button class="btn btn-primary" onclick="showLogin()">Sign In</button><a href="/register" class="btn btn-success">Create Account</a><div class="login-form" id="loginForm"><input type="email" id="loginEmail" placeholder="Email Address"><input type="password" id="loginPassword" placeholder="Password"><button class="btn btn-primary" onclick="doLogin()">Log In Securely</button><p id="loginError" style="color:#e11d48;margin-top:10px;display:none;font-size:0.82rem;font-weight:600;"></p></div></div>
     <div class="section-title">💡 Why Choose CamBiz Market?</div>
-    <div class="about-grid">
-        <div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect securely with verified buyers and sellers across Cameroon.</p></div>
-        <div class="about-card"><div class="icon">📱</div><h3>Mobile Money</h3><p>Seamless integrations with MTN & Orange Mobile Money.</p></div>
-        <div class="about-card"><div class="icon">📈</div><h3>Boost Business</h3><p>Access premium seller tools to expand your customer reach.</p></div>
-        <div class="about-card"><div class="icon">🤖</div><h3>AI Negotiation</h3><p>Utilize Makola AI pricing for fair and automated bargaining.</p></div>
-        <div class="about-card"><div class="icon">🤝</div><h3>Njangi Groups</h3><p>Buy together with friends and community members to save.</p></div>
-        <div class="about-card"><div class="icon">⚡</div><h3>Flash Sales</h3><p>Score massive discounts during exclusive limited-time deals.</p></div>
-    </div>
-    <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne | Cameroon's Premier E-Commerce Platform</p></div>
+    <div class="about-grid"><div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect securely across Cameroon.</p></div><div class="about-card"><div class="icon">📱</div><h3>Mobile Money</h3><p>MTN & Orange Money.</p></div><div class="about-card"><div class="icon">📈</div><h3>Boost Business</h3><p>Premium seller tools.</p></div><div class="about-card"><div class="icon">🤖</div><h3>AI Negotiation</h3><p>Makola AI pricing.</p></div><div class="about-card"><div class="icon">🤝</div><h3>Njangi Groups</h3><p>Buy together, save.</p></div><div class="about-card"><div class="icon">⚡</div><h3>Flash Sales</h3><p>Limited-time deals.</p></div></div>
+    <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
 </div>
 
-<!-- LOGGED-IN VIEW -->
 <div id="userView" style="display:none;">
     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰ Menu</button>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <nav class="sidebar" id="sidebar"><div class="logo">⚡ cam<span>Biz</span> Market</div><div id="sidebarLinks"></div></nav>
     <div class="main">
         <div class="topbar"><h4 id="pageTitle">👋 Welcome!</h4><button class="btn btn-outline-danger btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button></div>
-
-        <!-- BUYER TABS -->
-        <div class="tab-panel" id="tab-bstore"><div class="card"><div class="card-header">🛍️ Store</div><div class="card-body text-center"><a href="/store" class="btn btn-primary btn-lg">Browse Store</a></div></div></div>
-        <div class="tab-panel" id="tab-bcart"><div class="card"><div class="card-header">🛒 My Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-borders"><div class="card"><div class="card-header">📋 My Orders</div><div class="card-body p-0" id="buyerOrdersContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-boffers"><div class="card"><div class="card-header">💬 Makola AI Offers</div><div class="card-body p-0" id="buyerOffersContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-bdisputes"><div class="card"><div class="card-header">⚖️ My Disputes</div><div class="card-body p-0" id="buyerDisputesContent">Loading...</div></div></div>
-
-        <!-- SELLER TABS -->
-        <div class="tab-panel" id="tab-soverview"><div class="stat-row" id="sellerStats"></div><div class="section-title">⚡ Quick Actions</div><div class="quick-actions" id="sellerActions"></div></div>
-        <div class="tab-panel" id="tab-sorders"><div class="card"><div class="card-header">📦 Customer Orders</div><div class="card-body p-0" id="sellerOrdersContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-soffers"><div class="card"><div class="card-header">💰 Customer Offers</div><div class="card-body p-0" id="sellerOffersContent">Loading...</div></div></div>
-        <div class="tab-panel" id="tab-sdisputes"><div class="card"><div class="card-header">⚖️ Disputes Against Me</div><div class="card-body p-0" id="sellerDisputesContent">Loading...</div></div></div>
-
-        <!-- ADMIN TABS -->
-        <div class="tab-panel" id="tab-adashboard"><div class="stat-row" id="dashStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div></div>
-        <div class="tab-panel" id="tab-ausers"><div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div></div>
-        <div class="tab-panel" id="tab-asellers"><div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div></div>
-        <div class="tab-panel" id="tab-aproducts"><div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-box me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div></div>
-        <div class="tab-panel" id="tab-adisputes"><div class="stat-row"><div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div><div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-gavel text-danger me-2"></i>Dispute Cases</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="disputesTable"></tbody></table></div></div></div></div>
-        <div class="tab-panel" id="tab-areviews"><div class="card"><div class="card-header"><span><i class="fas fa-star text-warning me-2"></i>Reviews Moderation</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Product</th><th>User</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reviewsTable"></tbody></table></div></div></div></div>
+        <div id="tab-content"></div>
     </div>
 </div>
 
@@ -168,7 +112,6 @@ var D=function(d){return d?new Date(d).toLocaleDateString('en-GB'):'N/A'};
 function showToast(t,i){Swal.fire({toast:true,position:'top-end',icon:i||'success',title:t,showConfirmButton:false,timer:2000,timerProgressBar:true})}
 function showLogin(){document.getElementById('loginForm').style.display='block'}
 function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');location.href='/dashboard'}
-
 async function doLogin(){
     var email=document.getElementById('loginEmail').value,password=document.getElementById('loginPassword').value,errorEl=document.getElementById('loginError');
     if(!email||!password){errorEl.textContent='Please enter email and password.';errorEl.style.display='block';return}
@@ -185,30 +128,12 @@ async function updateCartBadge(){
     try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items){var count=d.data.items.length;var badge=document.getElementById('cartBadge');if(count>0){badge.textContent=count;badge.style.display='flex'}else{badge.style.display='none'}}}catch(e){}
 }
 
-var userType='BUYER';
+var userType='BUYER',revenueChart=null,commissionChart=null,currentProductFilter='pending';
 if(token){
     try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];if(Array.isArray(roles)&&roles.indexOf('ROLE_ADMIN')!==-1)userType='ADMIN';else if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)userType='SELLER';else if(payload.userType==='SELLER')userType='SELLER';else if(payload.userType==='ADMIN')userType='ADMIN'}catch(e){}
-    document.getElementById('publicView').style.display='none';
-    document.getElementById('publicHeader').style.display='none';
-    document.getElementById('userView').style.display='block';
-    updateCartBadge();
-    buildSidebar();
-    if(userType==='ADMIN'){showTab('adashboard');loadAdminDashboard()}
-    else if(userType==='SELLER'){showTab('soverview');loadSellerOverview()}
-    else{showTab('bstore')}
+    document.getElementById('publicView').style.display='none';document.getElementById('publicHeader').style.display='none';
+    document.getElementById('userView').style.display='block';updateCartBadge();buildSidebar();loadDefaultTab();
 }else{init()}
-
-function showTab(t){
-    document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active')});
-    document.querySelectorAll('.sidebar .nav-link').forEach(function(l){l.classList.remove('active')});
-    var tab=document.getElementById('tab-'+t);if(tab)tab.classList.add('active');
-    var link=document.querySelector('.sidebar .nav-link[onclick*="'+t+'"]');if(link)link.classList.add('active');
-    if(window.innerWidth<768)toggleSidebar();
-    if(t==='adashboard')loadAdminDashboard(); if(t==='ausers')loadUsers(); if(t==='asellers')loadSellers();
-    if(t==='aproducts')loadProducts('pending'); if(t==='adisputes')loadDisputes(); if(t==='areviews')loadReviews();
-    if(t==='bcart')loadBuyerCart(); if(t==='borders')loadBuyerOrders(); if(t==='boffers')loadBuyerOffers(); if(t==='bdisputes')loadBuyerDisputes();
-    if(t==='soverview')loadSellerOverview(); if(t==='sorders')loadSellerOrders(); if(t==='soffers')loadSellerOffers(); if(t==='sdisputes')loadSellerDisputes();
-}
 
 function buildSidebar(){
     var html='';
@@ -229,16 +154,92 @@ function buildSidebar(){
         html='<a class="nav-link active" onclick="showTab(\'adashboard\')"><i class="fas fa-th-large"></i> Dashboard</a>';
         html+='<a class="nav-link" onclick="showTab(\'ausers\')"><i class="fas fa-users"></i> Users</a>';
         html+='<a class="nav-link" onclick="showTab(\'asellers\')"><i class="fas fa-store"></i> Sellers</a>';
+        html+='<a class="nav-link" onclick="showTab(\'acategories\')"><i class="fas fa-tags"></i> Categories</a>';
+        html+='<a class="nav-link" onclick="showTab(\'arevenue\')"><i class="fas fa-coins"></i> Revenue</a>';
         html+='<a class="nav-link" onclick="showTab(\'aproducts\')"><i class="fas fa-box"></i> Products <span class="badge-count" id="pendingBadge">0</span></a>';
+        html+='<a class="nav-link" onclick="showTab(\'aorders\')"><i class="fas fa-shopping-cart"></i> Orders</a>';
+        html+='<a class="nav-link" onclick="showTab(\'atransactions\')"><i class="fas fa-exchange-alt"></i> Transactions</a>';
         html+='<a class="nav-link" onclick="showTab(\'adisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
         html+='<a class="nav-link" onclick="showTab(\'areviews\')"><i class="fas fa-star"></i> Reviews</a>';
+        html+='<a class="nav-link" onclick="showTab(\'asettings\')"><i class="fas fa-cog"></i> Settings</a>';
+        html+='<a class="nav-link" onclick="showTab(\'ahealth\')"><i class="fas fa-heartbeat"></i> Health</a>';
         document.getElementById('pageTitle').innerHTML='🛡️ Admin Dashboard';
     }
     document.getElementById('sidebarLinks').innerHTML=html;
 }
 
-// ========== ADMIN FUNCTIONS ==========
-var revenueChart=null,currentProductFilter='pending';
+function loadDefaultTab(){
+    if(userType==='ADMIN')showTab('adashboard');
+    else if(userType==='SELLER')showTab('soverview');
+    else showTab('bstore');
+}
+
+function showTab(t){
+    document.querySelectorAll('.sidebar .nav-link').forEach(function(l){l.classList.remove('active')});
+    var link=document.querySelector('.sidebar .nav-link[onclick*="'+t+'"]');if(link)link.classList.add('active');
+    if(window.innerWidth<768)toggleSidebar();
+    var titles={adashboard:'📊 Dashboard',ausers:'👥 Users',asellers:'🏪 Sellers',acategories:'📁 Categories',arevenue:'💰 Revenue',aproducts:'📦 Products',aorders:'📋 Orders',atransactions:'💳 Transactions',adisputes:'⚖️ Disputes',areviews:'⭐ Reviews',asettings:'⚙️ Settings',ahealth:'❤️ Health',bstore:'🛍️ Store',bcart:'🛒 Cart',borders:'📋 Orders',boffers:'💬 Offers',bdisputes:'⚖️ Disputes',soverview:'🏪 Overview',sorders:'📦 Orders',soffers:'💰 Offers',sdisputes:'⚖️ Disputes'};
+    document.getElementById('pageTitle').innerHTML=titles[t]||t;
+    var content='';
+    if(t==='adashboard')content=adminDashboardHTML();
+    else if(t==='ausers')content=adminUsersHTML();
+    else if(t==='asellers')content=adminSellersHTML();
+    else if(t==='acategories')content=adminCategoriesHTML();
+    else if(t==='arevenue')content=adminRevenueHTML();
+    else if(t==='aproducts')content=adminProductsHTML();
+    else if(t==='aorders')content=adminOrdersHTML();
+    else if(t==='atransactions')content=adminTransactionsHTML();
+    else if(t==='adisputes')content=adminDisputesHTML();
+    else if(t==='areviews')content=adminReviewsHTML();
+    else if(t==='asettings')content=adminSettingsHTML();
+    else if(t==='ahealth')content=adminHealthHTML();
+    else if(t==='bstore')content='<div class="card"><div class="card-header">🛍️ Store</div><div class="card-body text-center"><a href="/store" class="btn btn-primary btn-lg">Browse Store</a></div></div>';
+    else if(t==='bcart')content='<div class="card"><div class="card-header">🛒 My Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div>';
+    else if(t==='borders')content='<div class="card"><div class="card-header">📋 My Orders</div><div class="card-body p-0" id="buyerOrdersContent">Loading...</div></div>';
+    else if(t==='boffers')content='<div class="card"><div class="card-header">💬 Makola AI Offers</div><div class="card-body p-0" id="buyerOffersContent">Loading...</div></div>';
+    else if(t==='bdisputes')content='<div class="card"><div class="card-header">⚖️ My Disputes</div><div class="card-body p-0" id="buyerDisputesContent">Loading...</div></div>';
+    else if(t==='soverview')content='<div id="sellerStats" class="stat-row"></div><div class="section-title">⚡ Quick Actions</div><div class="quick-actions" id="sellerActions"></div>';
+    else if(t==='sorders')content='<div class="card"><div class="card-header">📦 Customer Orders</div><div class="card-body p-0" id="sellerOrdersContent">Loading...</div></div>';
+    else if(t==='soffers')content='<div class="card"><div class="card-header">💰 Customer Offers</div><div class="card-body p-0" id="sellerOffersContent">Loading...</div></div>';
+    else if(t==='sdisputes')content='<div class="card"><div class="card-header">⚖️ Disputes Against Me</div><div class="card-body p-0" id="sellerDisputesContent">Loading...</div></div>';
+    document.getElementById('tab-content').innerHTML=content;
+    if(t==='adashboard')setTimeout(loadAdminDashboard,100);
+    if(t==='ausers')setTimeout(loadUsers,100);
+    if(t==='asellers')setTimeout(loadSellers,100);
+    if(t==='acategories')setTimeout(loadCategories,100);
+    if(t==='arevenue')setTimeout(loadRevenue,100);
+    if(t==='aproducts')setTimeout(loadProducts,100);
+    if(t==='aorders')setTimeout(loadAdminOrders,100);
+    if(t==='atransactions')setTimeout(loadAdminTransactions,100);
+    if(t==='adisputes')setTimeout(loadDisputes,100);
+    if(t==='areviews')setTimeout(loadReviews,100);
+    if(t==='asettings')setTimeout(loadSettings,100);
+    if(t==='ahealth')setTimeout(loadHealth,100);
+    if(t==='bcart')setTimeout(loadBuyerCart,100);
+    if(t==='borders')setTimeout(loadBuyerOrders,100);
+    if(t==='boffers')setTimeout(loadBuyerOffers,100);
+    if(t==='bdisputes')setTimeout(loadBuyerDisputes,100);
+    if(t==='soverview')setTimeout(loadSellerOverview,100);
+    if(t==='sorders')setTimeout(loadSellerOrders,100);
+    if(t==='soffers')setTimeout(loadSellerOffers,100);
+    if(t==='sdisputes')setTimeout(loadSellerDisputes,100);
+}
+
+// ADMIN HTML TEMPLATES
+function adminDashboardHTML(){return '<div class="stat-row" id="dashStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div>'}
+function adminUsersHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div>'}
+function adminSellersHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div>'}
+function adminCategoriesHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-tags text-info me-2"></i>Category Management</span><button class="btn btn-primary btn-sm" onclick="showCategoryModal()"><i class="fas fa-plus"></i> Add</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead><tbody id="categoriesTable"></tbody></table></div></div></div>'}
+function adminRevenueHTML(){return '<div class="stat-row" id="revenueStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-pie text-success me-2"></i>Commission Breakdown</span></div><div class="card-body"><canvas id="commissionChart" height="280"></canvas></div></div>'}
+function adminProductsHTML(){return '<div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-box me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div>'}
+function adminOrdersHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-shopping-cart me-2"></i>All Orders</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead><tbody id="ordersTable"></tbody></table></div></div></div>'}
+function adminTransactionsHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-exchange-alt me-2"></i>Transactions</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Ref</th><th>Type</th><th>Amount</th><th>Fee</th><th>Net</th><th>Status</th></tr></thead><tbody id="transactionsTable"></tbody></table></div></div></div>'}
+function adminDisputesHTML(){return '<div class="stat-row"><div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div><div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-gavel text-danger me-2"></i>Dispute Cases</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="disputesTable"></tbody></table></div></div></div>'}
+function adminReviewsHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-star text-warning me-2"></i>Reviews Moderation</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Product</th><th>User</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reviewsTable"></tbody></table></div></div></div>'}
+function adminSettingsHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-cog text-primary me-2"></i>Platform Settings</span></div><div class="card-body" id="settingsForm">Loading...</div></div>'}
+function adminHealthHTML(){return '<div class="stat-row" id="healthStats"></div>'}
+
+// ========== ADMIN DATA FUNCTIONS ==========
 async function loadAdminDashboard(){try{var r=await fetch('/api/admin/stats'),d=(await r.json()).data;document.getElementById('dashStats').innerHTML='<div class="stat-card"><h3>'+d.totalUsers+'</h3><small>👥 Users</small></div><div class="stat-card"><h3>'+d.totalSellers+'</h3><small>🏪 Sellers</small></div><div class="stat-card"><h3>'+d.totalProducts+'</h3><small>📦 Products</small></div><div class="stat-card"><h3>'+F(d.totalRevenue)+'</h3><small>💰 Revenue</small></div>';var cr=await fetch('/api/admin/revenue-chart'),cd=(await cr.json()).data;if(cd){var ctx=document.getElementById('revenueChart').getContext('2d');if(revenueChart)revenueChart.destroy();revenueChart=new Chart(ctx,{type:'line',data:{labels:Object.keys(cd),datasets:[{label:'Revenue',data:Object.values(cd),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',fill:true,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return F(v)}}}}}});}}catch(e){}}
 async function loadUsers(){try{var r=await fetch('/api/admin/users'),d=(await r.json()).data;document.getElementById('usersTable').innerHTML=d.map(function(u){var a='';if(u.status==='ACTIVE')a+='<button class="btn btn-outline-danger btn-sm me-1" onclick="toggleUser('+u.id+',\'SUSPENDED\')">Suspend</button>';else a+='<button class="btn btn-outline-success btn-sm me-1" onclick="toggleUser('+u.id+',\'ACTIVE\')">Activate</button>';a+='<button class="btn btn-outline-dark btn-sm" onclick="deleteUser('+u.id+',\''+u.firstName+' '+u.lastName+'\')"><i class="fas fa-trash"></i></button>';return '<tr><td>#'+u.id+'</td><td>'+u.firstName+' '+u.lastName+'</td><td>'+u.email+'</td><td><span class="badge bg-info">'+u.userType+'</span></td><td><span class="badge '+(u.status==='ACTIVE'?'bg-success':'bg-danger')+'">'+u.status+'</span></td><td>'+a+'</td></tr>'}).join('')}catch(e){}}
 async function toggleUser(id,s){await fetch('/api/admin/users/'+id+'/status?status='+s,{method:'PUT'});showToast(s==='SUSPENDED'?'Suspended':'Activated','success');loadUsers()}
@@ -246,19 +247,30 @@ async function deleteUser(id,n){var r=await Swal.fire({title:'Delete?',text:'Del
 async function loadSellers(){try{var r=await fetch('/api/admin/sellers'),d=(await r.json()).data;document.getElementById('sellersTable').innerHTML=d.map(function(s){var p=s.accountType==='PREMIUM';return '<tr><td>#'+s.id+'</td><td><strong>'+(s.businessName||'N/A')+'</strong></td><td>'+s.firstName+' '+s.lastName+'</td><td>'+s.email+'</td><td><span class="badge '+(p?'bg-warning text-dark':'bg-secondary')+'">'+(p?'🏆 ':'')+s.accountType+'</span></td><td>'+(!p?'<button class="btn btn-warning btn-sm" onclick="verifySeller('+s.id+')">Verify</button>':'<button class="btn btn-outline-danger btn-sm" onclick="revokeSeller('+s.id+')">Revoke</button>')+'</td></tr>'}).join('')}catch(e){}}
 async function verifySeller(id){await fetch('/api/admin/sellers/'+id+'/verify',{method:'PUT'});showToast('Verified','success');loadSellers()}
 async function revokeSeller(id){await fetch('/api/admin/sellers/'+id+'/revoke-premium',{method:'PUT'});showToast('Revoked','info');loadSellers()}
+async function loadCategories(){try{var r=await fetch('/api/admin/categories'),d=(await r.json()).data;document.getElementById('categoriesTable').innerHTML=(d||[]).map(function(c){return '<tr><td>#'+c.id+'</td><td>'+(c.name||'N/A')+'</td><td>'+(c.productCount||0)+'</td><td><span class="badge '+(c.active?'bg-success':'bg-secondary')+'">'+(c.active?'Active':'Disabled')+'</span></td><td><button class="btn btn-outline-primary btn-sm me-1" onclick="editCategory('+c.id+',\''+(c.name||'')+'\','+c.active+')"><i class="fas fa-edit"></i></button><button class="btn btn-outline-danger btn-sm" onclick="deleteCategory('+c.id+',\''+(c.name||'')+'\')"><i class="fas fa-trash"></i></button></td></tr>'}).join('')}catch(e){}}
+function showCategoryModal(id,name,active){var isEdit=arguments.length>0&&!!id;Swal.fire({title:isEdit?'Edit Category':'Add Category',html:'<input id="swalCatName" class="form-control" placeholder="Category name" value="'+(name||'')+'" style="border-radius:8px;">'+(isEdit?'<div class="form-check mt-3"><input id="swalCatActive" class="form-check-input" type="checkbox" '+(active?'checked':'')+'><label class="form-check-label">Active</label></div>':''),showCancelButton:true,confirmButtonText:isEdit?'Update':'Add',confirmButtonColor:'#3b82f6',preConfirm:function(){var n=document.getElementById('swalCatName').value.trim();if(!n){Swal.showValidationMessage('Name required');return false}return{name:n,active:isEdit?document.getElementById('swalCatActive').checked:true}}}).then(async function(r){if(r.isConfirmed){var u=isEdit?'/api/admin/categories/'+id:'/api/admin/categories',m=isEdit?'PUT':'POST',x=await fetch(u,{method:m,headers:{'Content-Type':'application/json'},body:JSON.stringify(r.value)}),d=await x.json();showToast(d.message,'success');loadCategories()}})}
+function editCategory(id,name,active){showCategoryModal(id,name,active)}
+async function deleteCategory(id,name){var r=await Swal.fire({title:'Delete?',text:'Delete '+name+'?',icon:'warning',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#ef4444'});if(r.isConfirmed){await fetch('/api/admin/categories/'+id,{method:'DELETE'});showToast('Deleted','success');loadCategories()}}
+async function loadRevenue(){try{var r=await fetch('/api/admin/revenue'),d=(await r.json()).data;document.getElementById('revenueStats').innerHTML='<div class="stat-card"><h3>'+F(d.totalRevenue)+'</h3><small>💰 Total Revenue</small></div><div class="stat-card"><h3>'+F(d.totalFees)+'</h3><small>📊 Platform Fees</small></div><div class="stat-card"><h3>'+F(d.totalPayouts)+'</h3><small>💸 Seller Payouts</small></div><div class="stat-card"><h3>'+d.commissionRate+'%</h3><small>🔧 Commission Rate</small></div>';var ctx=document.getElementById('commissionChart').getContext('2d');if(commissionChart)commissionChart.destroy();commissionChart=new Chart(ctx,{type:'doughnut',data:{labels:['Platform Fees','Seller Payouts'],datasets:[{data:[d.totalFees,d.totalPayouts],backgroundColor:['#3b82f6','#10b981']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}})}catch(e){}}
 async function loadProducts(f){currentProductFilter=f||currentProductFilter;try{var p=await fetch('/api/admin/products/pending').then(function(r){return r.json()});var a=await fetch('/api/admin/products/approved').then(function(r){return r.json()});var rj=await fetch('/api/admin/products/rejected').then(function(r){return r.json()});var all=await fetch('/api/admin/products/all').then(function(r){return r.json()});document.getElementById('prodPending').textContent=(p.data||[]).length;document.getElementById('prodApproved').textContent=(a.data||[]).length;document.getElementById('prodRejected').textContent=(rj.data||[]).length;document.getElementById('prodTotal').textContent=(all.data||[]).length;var badge=document.getElementById('pendingBadge');if(badge)badge.textContent=(p.data||[]).length;var data=currentProductFilter==='pending'?p.data:currentProductFilter==='approved'?a.data:currentProductFilter==='rejected'?rj.data:all.data;document.getElementById('productsTable').innerHTML=(data||[]).map(function(pr){var sb=currentProductFilter==='pending'?'bg-warning text-dark':currentProductFilter==='approved'?'bg-success':'bg-danger';var ac=currentProductFilter==='pending'?'<button class="btn btn-success btn-sm me-1" onclick="approveProduct('+pr.id+')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="showReject('+pr.id+',\''+(pr.name||'').replace(/'/g,"\\'")+'\')"><i class="fas fa-times"></i></button>':currentProductFilter==='rejected'?'<button class="btn btn-outline-success btn-sm" onclick="approveProduct('+pr.id+')"><i class="fas fa-redo"></i></button><br><small class="text-danger">'+(pr.rejectionReason||'')+'</small>':'<small class="text-muted">Approved</small>';return '<tr><td>'+(currentProductFilter==='pending'?'<input type="checkbox" class="prodCheck" value="'+pr.id+'">':'')+'</td><td><strong>'+(pr.name||'N/A')+'</strong></td><td>'+(pr.sellerBusinessName||pr.sellerName||'N/A')+'</td><td><strong>'+F(pr.price)+'</strong></td><td><span class="badge '+sb+'">'+currentProductFilter+'</span></td><td>'+ac+'</td></tr>'}).join('')}catch(e){}}
 async function approveProduct(id){await fetch('/api/admin/products/'+id+'/approve',{method:'PUT'});showToast('Approved','success');loadProducts()}
 function showReject(id,n){Swal.fire({title:'Reject?',html:'<textarea id="swalReason" class="form-control" rows="2" placeholder="Reason..."></textarea>',icon:'warning',showCancelButton:true,confirmButtonText:'Reject',confirmButtonColor:'#ef4444',preConfirm:function(){var r=document.getElementById('swalReason').value.trim();if(!r){Swal.showValidationMessage('Required');return false}return r}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/products/'+id+'/reject?reason='+encodeURIComponent(r.value),{method:'PUT'});showToast('Rejected','info');loadProducts()}})}
 function toggleAll(el){document.querySelectorAll('.prodCheck').forEach(function(c){c.checked=el.checked})}
 async function batchApprove(){var ids=Array.from(document.querySelectorAll('.prodCheck:checked')).map(function(c){return parseInt(c.value)});if(!ids.length){Swal.fire({icon:'info',title:'None selected'});return}var r=await Swal.fire({title:'Approve '+ids.length+'?',icon:'question',showCancelButton:true,confirmButtonText:'Yes',confirmButtonColor:'#10b981'});if(r.isConfirmed){var x=await fetch('/api/admin/products/batch-approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(ids)}),d=await x.json();showToast('Approved','success');loadProducts()}}
+async function loadAdminOrders(){try{var r=await fetch('/api/admin/orders'),d=(await r.json()).data;document.getElementById('ordersTable').innerHTML=(d||[]).map(function(o){return '<tr><td>#'+(o.id||o.orderId||'N/A')+'</td><td>'+(o.customerName||o.buyerEmail||'N/A')+'</td><td>'+F(o.totalAmount||o.amount)+'</td><td><span class="badge bg-info">'+(o.status||'PENDING')+'</span></td></tr>'}).join('')}catch(e){}}
+async function loadAdminTransactions(){try{var r=await fetch('/api/admin/transactions'),d=(await r.json()).data;document.getElementById('transactionsTable').innerHTML=(d||[]).map(function(t){return '<tr><td><small>'+(t.transactionRef||t.transaction_ref||'N/A')+'</small></td><td><span class="badge bg-primary">'+(t.type||'N/A')+'</span></td><td>'+F(t.amount)+'</td><td>'+F(t.platformFee||t.platform_fee)+'</td><td><strong>'+F(t.netAmount||t.net_amount)+'</strong></td><td><span class="badge '+(t.status==='COMPLETED'?'bg-success':'bg-warning')+'">'+(t.status||'N/A')+'</span></td></tr>'}).join('')}catch(e){}}
 async function loadDisputes(){try{var r=await fetch('/api/admin/disputes'),d=await r.json();document.getElementById('dispOpen').textContent=d.openCount||0;document.getElementById('dispResolved').textContent=d.resolvedCount||0;document.getElementById('disputesTable').innerHTML=(d.data||[]).map(function(ds){var isOpen=ds.status==='OPEN'||ds.status==='UNDER_REVIEW';var actions='';if(ds.status==='OPEN')actions='<button class="btn btn-info btn-sm me-1" onclick="reviewDispute('+ds.id+')"><i class="fas fa-search"></i></button>';else if(ds.status==='UNDER_REVIEW')actions='<button class="btn btn-success btn-sm me-1" onclick="resolveDispute('+ds.id+',\'RELEASED\',\''+ds.sellerName+'\')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm me-1" onclick="resolveDispute('+ds.id+',\'REFUNDED\',\''+ds.buyerName+'\')"><i class="fas fa-undo"></i></button>';actions+='<button class="btn btn-outline-secondary btn-sm" onclick="viewDisputeChat('+ds.id+')"><i class="fas fa-comments"></i></button>';return '<tr><td><strong>#'+ds.id+'</strong></td><td>'+ds.buyerName+'</td><td>'+ds.sellerName+'</td><td><strong>'+F(ds.amount)+'</strong></td><td><span class="badge '+(isOpen?'bg-warning text-dark':'bg-success')+'">'+ds.status+'</span></td><td>'+actions+'</td></tr>'}).join('')}catch(e){}}
 async function reviewDispute(id){await fetch('/api/admin/disputes/'+id+'/review',{method:'PUT'});showToast('Reviewing','success');loadDisputes()}
 async function resolveDispute(id,res,n){var isR=res==='RELEASED';Swal.fire({title:isR?'Release?':'Refund?',text:(isR?'Release to ':'Refund ')+n+'?',icon:'question',showCancelButton:true,confirmButtonText:isR?'Release':'Refund',confirmButtonColor:isR?'#10b981':'#ef4444'}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/disputes/'+id+'/resolve?resolution='+res,{method:'PUT'});showToast('Resolved','success');loadDisputes()}})}
 async function viewDisputeChat(id){var r=await fetch('/api/admin/disputes/'+id+'/comments'),d=await r.json();var html=(d.data||[]).map(function(c){return '<div style="background:#f8fafc;padding:8px;border-radius:6px;margin-bottom:6px;"><strong>'+c.userName+'</strong>: '+c.message+'</div>'}).join('')||'No messages';Swal.fire({title:'Chat',html:html+'<textarea id="newMsg" class="form-control mt-2" rows="2" placeholder="Message..."></textarea>',showCancelButton:true,confirmButtonText:'Send',confirmButtonColor:'#0d9488',preConfirm:function(){var msg=document.getElementById('newMsg').value.trim();if(!msg){Swal.showValidationMessage('Type a message');return false}return msg}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/disputes/'+id+'/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:0,userName:'Admin',userType:'ADMIN',message:r.value})});showToast('Sent','success')}})}
-async function loadReviews(){try{var r=await fetch('/api/admin/reviews'),d=(await r.json()).data;document.getElementById('reviewsTable').innerHTML=(d||[]).map(function(rv){var stars='';for(var i=1;i<=5;i++)stars+=i<=rv.rating?'⭐':'☆';var actions=rv.isHidden?'<button class="btn btn-outline-success btn-sm me-1" onclick="unhideReview('+rv.id+')"><i class="fas fa-eye"></i></button>':'<button class="btn btn-outline-warning btn-sm me-1" onclick="hideReview('+rv.id+')"><i class="fas fa-eye-slash"></i></button>';actions+='<button class="btn btn-outline-danger btn-sm" onclick="deleteReview('+rv.id+')"><i class="fas fa-trash"></i></button>';return '<tr><td>#'+rv.id+'</td><td>'+rv.productName+'</td><td>'+rv.userName+'</td><td>'+stars+'</td><td>'+(rv.comment||'').substring(0,50)+'</td><td><span class="badge '+(rv.isHidden?'bg-danger':'bg-success')+'">'+(rv.isHidden?'Hidden':'Visible')+'</span></td><td>'+actions+'</td></tr>'}).join('')}catch(e){}}
+async function loadReviews(){try{var r=await fetch('/api/admin/reviews'),d=(await r.json()).data;document.getElementById('reviewsTable').innerHTML=(d||[]).map(function(rv){var stars='';for(var i=1;i<=5;i++)stars+=i<=rv.rating?'⭐':'☆';var actions=rv.isHidden?'<button class="btn btn-outline-success btn-sm me-1" onclick="unhideReview('+rv.id+')"><i class="fas fa-eye"></i></button>':'<button class="btn btn-outline-warning btn-sm me-1" onclick="hideReview('+rv.id+')"><i class="fas fa-eye-slash"></i></button>';actions+='<button class="btn btn-outline-info btn-sm me-1" onclick="replyToReview('+rv.id+',\''+(rv.productName||'').replace(/'/g,"\\'")+'\')"><i class="fas fa-reply"></i> Reply</button>';actions+='<button class="btn btn-outline-danger btn-sm" onclick="deleteReview('+rv.id+')"><i class="fas fa-trash"></i></button>';var replyInfo=rv.adminReply?'<br><small class="text-success"><strong>↳ Reply:</strong> '+rv.adminReply.substring(0,50)+'</small>':'';return '<tr><td>#'+rv.id+'</td><td>'+rv.productName+'</td><td>'+rv.userName+'</td><td>'+stars+'</td><td>'+(rv.comment||'').substring(0,50)+replyInfo+'</td><td><span class="badge '+(rv.isHidden?'bg-danger':'bg-success')+'">'+(rv.isHidden?'Hidden':'Visible')+'</span></td><td>'+actions+'</td></tr>'}).join('')}catch(e){}}
 async function hideReview(id){await fetch('/api/admin/reviews/'+id+'/hide',{method:'PUT'});showToast('Hidden','success');loadReviews()}
 async function unhideReview(id){await fetch('/api/admin/reviews/'+id+'/unhide',{method:'PUT'});showToast('Visible','success');loadReviews()}
 async function deleteReview(id){var r=await Swal.fire({title:'Delete?',icon:'error',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});if(r.isConfirmed){await fetch('/api/admin/reviews/'+id,{method:'DELETE'});showToast('Deleted','success');loadReviews()}}
+async function replyToReview(id,productName){Swal.fire({title:'💬 Reply to Review',html:'<p>Product: <strong>'+productName+'</strong></p><textarea id="replyText" class="form-control" rows="3" placeholder="Write your reply..."></textarea>',showCancelButton:true,confirmButtonText:'Post Reply',confirmButtonColor:'#3b82f6',preConfirm:function(){var reply=document.getElementById('replyText').value.trim();if(!reply){Swal.showValidationMessage('Please write a reply');return false}return reply}}).then(async function(result){if(result.isConfirmed){await fetch('/api/admin/reviews/'+id+'/reply',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({reply:result.value})});showToast('Reply posted','success');loadReviews()}})}
+async function loadSettings(){try{var r=await fetch('/api/admin/settings'),d=(await r.json()).data;document.getElementById('settingsForm').innerHTML='<div class="row"><div class="col-md-6 mb-3"><label class="fw-bold">Site Name</label><input class="form-control" id="setSiteName" value="'+d.siteName+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Currency</label><input class="form-control" id="setCurrency" value="'+d.currency+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Commission Rate (%)</label><input type="number" step="0.1" class="form-control" id="setCommission" value="'+d.commissionRate+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Payout Threshold (XAF)</label><input type="number" class="form-control" id="setPayout" value="'+d.payoutThreshold+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Max Products - Regular</label><input type="number" class="form-control" id="setMaxRegular" value="'+d.maxProductsRegular+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Max Products - Premium 🏆</label><input type="number" class="form-control" id="setMaxPremium" value="'+d.maxProductsPremium+'"></div><div class="col-md-6 mb-3"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" id="setMaintenance" '+(d.maintenanceMode?'checked':'')+'><label class="form-check-label">Maintenance Mode</label></div><div class="form-check mt-2"><input class="form-check-input" type="checkbox" id="setRegistration" '+(d.allowRegistration?'checked':'')+'><label class="form-check-label">Allow Registration</label></div></div></div><button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Save Settings</button>'}catch(e){}}
+async function saveSettings(){var data={siteName:document.getElementById('setSiteName').value,currency:document.getElementById('setCurrency').value,commissionRate:parseFloat(document.getElementById('setCommission').value),payoutThreshold:parseFloat(document.getElementById('setPayout').value),maxProductsRegular:parseInt(document.getElementById('setMaxRegular').value),maxProductsPremium:parseInt(document.getElementById('setMaxPremium').value),maintenanceMode:document.getElementById('setMaintenance').checked,allowRegistration:document.getElementById('setRegistration').checked};var r=await fetch('/api/admin/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}),d=await r.json();showToast(d.message,'success')}
+async function loadHealth(){try{var r=await fetch('/api/admin/health'),d=(await r.json()).data;document.getElementById('healthStats').innerHTML='<div class="stat-card"><h3 style="color:#10b981"><i class="fas fa-check-circle"></i> '+d.apiStatus+'</h3><small>API Status</small></div><div class="stat-card"><h3 style="color:#3b82f6"><i class="fas fa-database"></i> '+d.databaseStatus+'</h3><small>Database</small></div><div class="stat-card"><h3>'+d.memoryUsagePercent+'%</h3><small>Memory</small></div><div class="stat-card"><h3><i class="fas fa-clock"></i> '+d.uptime+'</h3><small>Uptime</small></div>'}catch(e){}}
 
 // ========== BUYER FUNCTIONS ==========
 async function loadBuyerCart(){try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items&&d.data.items.length>0){var html='<div class="table-responsive"><table class="table table-hover"><tbody>';d.data.items.forEach(function(i){html+='<tr><td>'+i.productName+' x'+i.quantity+'</td><td>'+F(i.effectivePrice)+'</td></tr>'});html+='</tbody></table></div><div class="text-end fw-bold mt-2">Total: '+F(d.data.total)+'</div><a href="/cart" class="btn btn-warning btn-sm mt-2">Checkout</a>';document.getElementById('buyerCartContent').innerHTML=html}else{document.getElementById('buyerCartContent').innerHTML='<p class="text-muted">Cart empty</p>'}}catch(e){}}
