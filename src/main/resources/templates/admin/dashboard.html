@@ -75,38 +75,182 @@ font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.15);">
 </div>
 
 <script>
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
-var revenueChart=null,commissionChart=null,paymentMethodChart=null,paymentStatusChart=null,currentFilter='pending';
-var F=function(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'XAF',maximumFractionDigits:0}).format(v||0)};
-var D=function(d){return d?new Date(d).toLocaleDateString('en-GB'):'N/A'};
-function toast(t,i){Swal.fire({toast:true,position:'top-end',icon:i||'success',title:t,showConfirmButton:false,timer:2000,timerProgressBar:true})}
-function confirmLogout(){Swal.fire({title:'Sign Out?',text:'You will be redirected.',icon:'question',showCancelButton:true,confirmButtonText:'Sign Out',confirmButtonColor:'#ef4444'}).then(function(r){if(r.isConfirmed){localStorage.removeItem('token');window.location.href='/dashboard'}})}
+const tabs = {};
 
-var tabs={
-    dashboard:{title:'📊 Dashboard',html:'<div class="stat-row" id="dashStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div>',load:loadDashboard},
-    users:{title:'👥 Users',html:'<div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div>',load:loadUsers},
-    sellers:{title:'🏪 Sellers',html:'<div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div>',load:loadSellers},
-    categories:{title:'📁 Categories',html:'<div class="card"><div class="card-header"><span><i class="fas fa-tags text-info me-2"></i>Category Management</span><button class="btn btn-primary btn-sm" onclick="showCategoryModal()"><i class="fas fa-plus"></i> Add</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead><tbody id="categoriesTable"></tbody></table></div></div></div>',load:loadCategories},
-    revenue:{title:'💰 Revenue',html:'<div class="stat-row" id="revenueStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-pie text-success me-2"></i>Commission Breakdown</span></div><div class="card-body"><canvas id="commissionChart" height="280"></canvas></div></div>',load:loadRevenue},
-    payments:{title:'💳 Payments',html:'<div class="stat-row" id="paymentStats"></div><div class="row"><div class="col-md-6"><div class="card"><div class="card-header">Payment Methods</div><div class="card-body"><canvas id="paymentMethodChart" height="250"></canvas></div></div></div><div class="col-md-6"><div class="card"><div class="card-header">Payment Status</div><div class="card-body"><canvas id="paymentStatusChart" height="250"></canvas></div></div></div></div><div class="card mt-3"><div class="card-header"><span><i class="fas fa-credit-card me-2"></i>Transactions</span><div><select class="form-select form-select-sm d-inline w-auto me-2" onchange="loadPayments(this.value)"><option value="all">All</option><option value="SUCCESS">Success</option><option value="FAILED">Failed</option><option value="PENDING">Pending</option></select><button class="btn btn-sm btn-outline-success" onclick="exportCSV()"><i class="fas fa-download"></i> CSV</button></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Order</th><th>Method</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div></div>',load:function(){loadPayments('all')}},
-    products:{title:'📦 Products',html:'<div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-box me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div>',load:function(){loadProducts('pending')}},
-    orders:{title:'📋 Orders',html:'<div class="card"><div class="card-header">All Orders</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead><tbody id="ordersTable"></tbody></table></div></div></div>',load:loadOrders},
-    transactions:{title:'💳 Transactions',html:'<div class="card"><div class="card-header">Transactions</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Ref</th><th>Type</th><th>Amount</th><th>Fee</th><th>Net</th><th>Status</th></tr></thead><tbody id="txTable"></tbody></table></div></div></div>',load:loadTransactions},
-    disputes:{title:'⚖️ Disputes',html:'<div class="stat-row"><div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div><div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div></div><div class="card"><div class="card-header">Dispute Cases</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="disputesTable"></tbody></table></div></div></div>',load:loadDisputes},
-    reviews:{title:'⭐ Reviews',html:'<div class="card"><div class="card-header">Reviews Moderation</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Product</th><th>User</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reviewsTable"></tbody></table></div></div></div>',load:loadReviews},
-    settings:{title:'⚙️ Settings',html:'<div class="card"><div class="card-header">Platform Settings</div><div class="card-body" id="settingsForm">Loading...</div></div>',load:loadSettings},
-    health:{title:'❤️ Health',html:'<div class="stat-row" id="healthStats"></div>',load:loadHealth}
-};
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
 
-function showTab(t){
-    document.querySelectorAll('.sidebar a').forEach(function(l){l.classList.remove('active')});
-    var link=document.querySelector('.sidebar a[onclick*="'+t+'"]');if(link)link.classList.add('active');
-    if(window.innerWidth<768)toggleSidebar();
-    var tab=tabs[t];if(!tab)return;
-    document.getElementById('pageTitle').innerHTML=tab.title;
-    document.getElementById('tab-content').innerHTML=tab.html;
-    setTimeout(function(){if(tab.load)tab.load()},100);
+    if (sidebar) sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('show');
 }
+
+function confirmLogout() {
+    Swal.fire({
+        title: 'Logout?',
+        text: 'You will be redirected',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'Logout'
+    }).then((r) => {
+        if (r.isConfirmed) {
+            localStorage.removeItem('token');
+            window.location.href = '/dashboard';
+        }
+    });
+}
+
+function showTab(tabName) {
+
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.classList.remove('active');
+    });
+
+    const activeLink = document.querySelector(
+        `.sidebar a[onclick*="${tabName}"]`
+    );
+
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+
+    const pageTitle = document.getElementById('pageTitle');
+    const tabContent = document.getElementById('tab-content');
+
+    if (!pageTitle || !tabContent) return;
+
+    switch(tabName) {
+
+        case 'dashboard':
+            pageTitle.innerHTML = '📊 Dashboard';
+
+            tabContent.innerHTML = `
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h3>1,245</h3>
+                                <small>Total Users</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 bg-success text-white">
+                            <div class="card-body text-center">
+                                <h3>342</h3>
+                                <small>Sellers</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 bg-warning text-dark">
+                            <div class="card-body text-center">
+                                <h3>112</h3>
+                                <small>Products</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h3>2.5M XAF</h3>
+                                <small>Revenue</small>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card mt-4 shadow-sm border-0">
+                    <div class="card-body">
+                        <h5>Platform Overview</h5>
+                        <p class="text-muted">
+                            CamBiz Market admin analytics dashboard.
+                        </p>
+                    </div>
+                </div>
+            `;
+            break;
+
+        case 'users':
+            pageTitle.innerHTML = '👥 Users';
+
+            tabContent.innerHTML = `
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5>User Management</h5>
+                        <p class="text-muted">
+                            Manage buyers and sellers here.
+                        </p>
+                    </div>
+                </div>
+            `;
+            break;
+
+        case 'sellers':
+            pageTitle.innerHTML = '🏪 Sellers';
+
+            tabContent.innerHTML = `
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5>Seller Management</h5>
+                        <p class="text-muted">
+                            Verify, suspend and monitor sellers.
+                        </p>
+                    </div>
+                </div>
+            `;
+            break;
+
+        case 'payments':
+            pageTitle.innerHTML = '💳 Payments';
+
+            tabContent.innerHTML = `
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5>Payment Monitoring</h5>
+                        <p class="text-muted">
+                            MTN MoMo and Orange Money transactions.
+                        </p>
+                    </div>
+                </div>
+            `;
+            break;
+
+        case 'products':
+            pageTitle.innerHTML = '📦 Products';
+
+            tabContent.innerHTML = `
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5>Products</h5>
+                        <p class="text-muted">
+                            Review and approve products.
+                        </p>
+                    </div>
+                </div>
+            `;
+            break;
+
+        default:
+            pageTitle.innerHTML = 'CamBiz Admin';
+            tabContent.innerHTML = `
+                <div class="alert alert-info">
+                    Tab Loaded Successfully
+                </div>
+            `;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    showTab('dashboard');
+});
+</script>
 
 // ========== DATA FUNCTIONS ==========
 async function loadDashboard(){try{var r=await fetch('/api/admin/stats'),d=(await r.json()).data;document.getElementById('dashStats').innerHTML='<div class="stat-card"><h3>'+d.totalUsers+'</h3><small>👥 Users</small></div><div class="stat-card"><h3>'+d.totalSellers+'</h3><small>🏪 Sellers</small></div><div class="stat-card"><h3>'+d.totalProducts+'</h3><small>📦 Products</small></div><div class="stat-card"><h3>'+F(d.totalRevenue)+'</h3><small>💰 Revenue</small></div>';var cr=await fetch('/api/admin/revenue-chart'),cd=(await cr.json()).data;if(cd){var ctx=document.getElementById('revenueChart').getContext('2d');if(revenueChart)revenueChart.destroy();revenueChart=new Chart(ctx,{type:'line',data:{labels:Object.keys(cd),datasets:[{label:'Revenue',data:Object.values(cd),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',fill:true,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return F(v)}}}}}});}}catch(e){}}
