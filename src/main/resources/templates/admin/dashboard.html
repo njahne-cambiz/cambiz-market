@@ -47,28 +47,28 @@
 </head>
 <body>
 
-<button class="mobile-menu-btn" onclick="toggleSidebar()">☰ Menu</button>
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<button class="mobile-menu-btn" onclick="window.toggleSidebar()">☰ Menu</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
 
 <nav class="sidebar" id="sidebar">
     <div class="logo">⚡ cam<span>Biz</span> Admin</div>
-    <a class="nav-link active" onclick="showTab('adashboard')"><i class="fas fa-th-large"></i> Dashboard</a>
-    <a class="nav-link" onclick="showTab('ausers')"><i class="fas fa-users"></i> Users</a>
-    <a class="nav-link" onclick="showTab('asellers')"><i class="fas fa-store"></i> Sellers</a>
-    <a class="nav-link" onclick="showTab('acategories')"><i class="fas fa-tags"></i> Categories</a>
-    <a class="nav-link" onclick="showTab('arevenue')"><i class="fas fa-coins"></i> Revenue</a>
-    <a class="nav-link" onclick="showTab('apayments')"><i class="fas fa-credit-card"></i> Payments</a>
-    <a class="nav-link" onclick="showTab('aproducts')"><i class="fas fa-box"></i> Products <span class="badge-count" id="pendingBadge">0</span></a>
-    <a class="nav-link" onclick="showTab('aorders')"><i class="fas fa-shopping-cart"></i> Orders</a>
-    <a class="nav-link" onclick="showTab('atransactions')"><i class="fas fa-exchange-alt"></i> Transactions</a>
-    <a class="nav-link" onclick="showTab('adisputes')"><i class="fas fa-gavel"></i> Disputes</a>
-    <a class="nav-link" onclick="showTab('areviews')"><i class="fas fa-star"></i> Reviews</a>
-    <a class="nav-link" onclick="showTab('asettings')"><i class="fas fa-cog"></i> Settings</a>
-    <a class="nav-link" onclick="showTab('ahealth')"><i class="fas fa-heartbeat"></i> Health</a>
+    <a class="nav-link active" onclick="window.showTab('adashboard')"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a class="nav-link" onclick="window.showTab('ausers')"><i class="fas fa-users"></i> Users</a>
+    <a class="nav-link" onclick="window.showTab('asellers')"><i class="fas fa-store"></i> Sellers</a>
+    <a class="nav-link" onclick="window.showTab('acategories')"><i class="fas fa-tags"></i> Categories</a>
+    <a class="nav-link" onclick="window.showTab('arevenue')"><i class="fas fa-coins"></i> Revenue</a>
+    <a class="nav-link" onclick="window.showTab('apayments')"><i class="fas fa-credit-card"></i> Payments</a>
+    <a class="nav-link" onclick="window.showTab('aproducts')"><i class="fas fa-box"></i> Products <span class="badge-count" id="pendingBadge">0</span></a>
+    <a class="nav-link" onclick="window.showTab('aorders')"><i class="fas fa-shopping-cart"></i> Orders</a>
+    <a class="nav-link" onclick="window.showTab('atransactions')"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a class="nav-link" onclick="window.showTab('adisputes')"><i class="fas fa-gavel"></i> Disputes</a>
+    <a class="nav-link" onclick="window.showTab('areviews')"><i class="fas fa-star"></i> Reviews</a>
+    <a class="nav-link" onclick="window.showTab('asettings')"><i class="fas fa-cog"></i> Settings</a>
+    <a class="nav-link" onclick="window.showTab('ahealth')"><i class="fas fa-heartbeat"></i> Health</a>
 </nav>
 
 <div class="main">
-    <div class="topbar"><h4 id="pageTitle">📊 Dashboard Overview</h4><button class="btn btn-outline-danger btn-logout" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button></div>
+    <div class="topbar"><h4 id="pageTitle">📊 Dashboard Overview</h4><button class="btn btn-outline-danger btn-logout" onclick="window.confirmLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button></div>
 
     <div id="tab-content"></div>
 </div>
@@ -126,7 +126,7 @@ function showTab(t){
 function adminDashboardHTML(){return '<div class="stat-row" id="dashStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div>'}
 function adminUsersHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div>'}
 function adminSellersHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div>'}
-function adminCategoriesHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-tags text-info me-2"></i>Category Management</span><button class="btn btn-primary btn-sm" onclick="showCategoryModal()"><i class="fas fa-plus"></i> Add</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead><tbody id="categoriesTable"></tbody></table></div></div></div>'}
+function adminCategoriesHTML(){return '<div class="card"><div class="card-header"><span><i class="fas fa-tags text-info me-2"></i>Category Management</span><button class="btn btn-primary btn-sm" onclick="window.showCategoryModal()"><i class="fas fa-plus"></i> Add</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead><tbody id="categoriesTable"></tbody></table></div></div></div>'}
 function adminRevenueHTML(){return '<div class="stat-row" id="revenueStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-pie text-success me-2"></i>Commission Breakdown</span></div><div class="card-body"><canvas id="commissionChart" height="280"></canvas></div></div>'}
 function adminPaymentsHTML(){return '<div class="stat-row" id="paymentStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-credit-card text-info me-2"></i>Payment Transactions</span><select class="form-select form-select-sm d-inline w-auto" onchange="loadPayments(this.value)"><option value="all">All</option><option value="SUCCESS">Successful</option><option value="FAILED">Failed</option><option value="PENDING">Pending</option></select></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Order</th><th>Method</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div></div>'}
 function adminProductsHTML(){return '<div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-box me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div>'}
