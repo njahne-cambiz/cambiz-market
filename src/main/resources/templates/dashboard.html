@@ -7,206 +7,312 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/i18n.js"></script>
     <style>
-        :root{
---sidebar-w:240px;
---bg:#0b2545;
---accent:#f5b700;
---buyer:#10b981;
---seller:#7c3aed;
---cambiz-blue:#0b2545;
---cambiz-gold:#f5b700;
-}
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f1f5f9; min-height: 100vh; color: #334155; }
-        .header { background: linear-gradient(135deg,#0b2545,#1d4e89); color: white; padding: 0.9rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .header .logo { font-size: 1.35rem; font-weight: 700; color: white; text-decoration: none; }
-        .header .logo span { color: #d4a853; }
-        .cart-icon { position: relative; text-decoration: none; color: white; font-size: 1.15rem; }
-        .cart-badge { position: absolute; top: -7px; right: -9px; background: #d4a853; color: #1a3a5c; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
-        .container { max-width: 1050px; margin: 2rem auto; padding: 0 1.5rem; }
-        .hero { text-align: center; margin-bottom: 2.5rem; padding: 1.5rem 0; }
-        .hero .icon { font-size: 3.5rem; margin-bottom: 0.8rem; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        .hero h1 { font-size: 2.2rem; font-weight: 800; color: #1a3a5c; }
-        .hero p { color: #64748b; font-size: 1.05rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background:#fff;border-radius:18px;padding:1rem;box-shadow:0 8px 24px rgba(0,0,0,.08); text-align: center; border: 1px solid #e2e8f0; }
-        .stat-card .value { font-size: 1.7rem; font-weight: 800; color: #1a3a5c; }
-        .stat-card .label { color: #64748b; font-size: 0.7rem; margin-top: 0.3rem; font-weight: 600; text-transform: uppercase; }
-        .login-card { background: #fff; border-radius: 10px; padding: 2.5rem 2rem; text-align: center; border: 1px solid #e2e8f0; max-width: 420px; margin: 0 auto 2.5rem auto; position: relative; overflow: hidden; }
-        .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg,#d4a853,#0d9488); }
-        .login-card h2 { font-size: 1.4rem; font-weight: 700; color: #1a3a5c; }
-        .login-card p { color: #64748b; margin-bottom: 1.5rem; }
-        .btn { padding: 7px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; font-size: 13px; margin: 5px; min-width: 180px; }
-        .btn-primary { background: #d4a853; color: #1a3a5c; }
-        .btn-success { background: #fff; color: #334155; border: 1px solid #cbd5e1; }
-        .login-form { display: none; margin-top: 1.2rem; padding: 1.3rem; background: #f8fafc; border-radius: 6px; text-align: left; border: 1px solid #e2e8f0; }
-        .login-form input { display: block; width: 100%; padding: 10px 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 13px; }
-        .login-form input:focus { border-color: #d4a853; outline: none; }
-        .login-form button { width: 100%; margin: 0; }
-        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: #0f172a; color: #fff; overflow-y: auto; z-index: 1000; box-shadow: 2px 0 15px rgba(0,0,0,0.1); transition: left 0.3s; }
-        .sidebar .logo { padding: 22px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 800; font-size: 1.3rem; }
-        .sidebar .logo span { color: #f59e0b; }
-        .sidebar .nav-link { color: rgba(255,255,255,0.65); padding: 12px 20px; display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 0.88rem; border-left: 3px solid transparent; cursor: pointer; transition: all 0.2s; font-weight: 500; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,0.04); border-left-color: #f59e0b; }
-        .sidebar .nav-link i { width: 20px; text-align: center; font-size: 0.95rem; }
-        .main { margin-left: var(--sidebar-w); padding: 25px 30px; min-height: 100vh; transition: margin-left 0.3s; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: #fff; padding: 16px 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); flex-wrap: wrap; gap: 10px; }
-        .topbar h4 { font-weight: 700; color: #0f172a; font-size: 1.2rem; }
-        .btn-logout { padding: 9px 22px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; }
-        .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px; border: 1px solid #e2e8f0; }
-        .card-header { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
-        .card-body { padding: 24px; } .card-body.p-0 { padding: 0; }
-        .table { margin: 0; } .table th { font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700; padding: 14px 16px; background: #f8fafc; }
-        .table td { padding: 14px 16px; vertical-align: middle; font-size: 0.88rem; }
-        .badge { font-weight: 600; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; }
-        .btn-sm { padding: 6px 14px; font-size: 0.78rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
-        .section-title { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 1rem 0; display: flex; align-items: center; gap: 0.6rem; }
-        .section-title::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
-        .order-row { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; align-items: center; font-size: 0.85rem; }
-        .order-row.header-row { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.78rem; text-transform: uppercase; }
-        .status-PENDING { color: #d97706; } .status-CONFIRMED { color: #2563eb; } .status-DELIVERED { color: #0d9488; }
-        .btn-confirm { background: #f59e0b; color: #0f172a; } .btn-ship { background: #334155; color: white; } .btn-reject { background: #fee2e2; color: #e11d48; } .btn-add-cart { background: #0d9488; color: white; }
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .action-card { background: #fff; border-radius: 10px; padding: 1.2rem 0.8rem; border: 1px solid #e2e8f0; text-align: center; text-decoration: none; color: #0f172a; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
-        .action-card:hover { border-color: #f59e0b; transform: translateY(-2px); }
-        .action-card .icon { font-size: 1.5rem; } .action-card .title { font-weight: 700; font-size: 0.82rem; } .action-card .sub { font-size: 0.7rem; color: #64748b; }
-        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; margin: 2rem 0; }
-        .about-card { background: #fff; border-radius: 10px; padding: 1.6rem; text-align: center; border: 1px solid #e2e8f0; }
-        .about-card:hover { transform: translateY(-3px); }
-        .about-card .icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
-        .about-card h3 { color: #1a3a5c; font-size: 0.95rem; font-weight: 700; }
-        .about-card p { color: #64748b; font-size: 0.82rem; line-height: 1.4; }
-        .footer { text-align: center; padding: 1.5rem; color: #64748b; font-size: 0.8rem; margin-top: 1.5rem; }
-        .mobile-menu-btn { display: none; position: fixed; top: 10px; left: 10px; z-index: 1001; background: #0f172a; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
-        .sidebar-overlay.show { display: block; }
-        @media (max-width: 768px) { .mobile-menu-btn { display: block; } .sidebar { left: -260px; } .sidebar.open { left: 0; } .main { margin-left: 0 !important; padding: 60px 10px 15px 10px !important; } .stats-grid { grid-template-columns: repeat(2,1fr); } .hero h1 { font-size: 1.8rem; } .quick-actions { grid-template-columns: repeat(2,1fr); } }
+        :root {
+            --sidebar-w: 240px;
+            --seller-bg: #2d1b69;
+            --seller-accent: #a855f7;
+            --seller-light: #f5f3ff;
+            --seller-card: #7c3aed;
+            --seller-gold: #f59e0b;
+            --cambiz-blue: #1a3a5c;
+            --cambiz-gold: #d4a853;
+            --cambiz-teal: #0d9488;
+            --cambiz-rose: #e11d48;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+        body{background:#f5f3ff;min-height:100vh;color:#334155}
+        .header{background:var(--cambiz-blue);color:white;padding:0.7rem 1.5rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+        .header .logo{font-size:1.2rem;font-weight:700;color:white;text-decoration:none}
+        .header .logo span{color:var(--cambiz-gold)}
+        .cart-icon{position:relative;text-decoration:none;color:white;font-size:1rem}
+        .cart-badge{position:absolute;top:-6px;right:-8px;background:var(--cambiz-gold);color:var(--cambiz-blue);border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700}
+        .container{max-width:1050px;margin:1.5rem auto;padding:0 1rem}
+        .hero{text-align:center;margin-bottom:2rem;padding:1rem 0}
+        .hero .icon{font-size:3rem;margin-bottom:0.5rem;animation:float 3s ease-in-out infinite}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+        .hero h1{font-size:2rem;font-weight:800;color:var(--cambiz-blue)}
+        .hero p{color:#64748b;font-size:1rem}
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;margin-bottom:1.5rem}
+        .stat-card{background:#fff;border-radius:10px;padding:1rem;text-align:center;border:1px solid #e2e8f0}
+        .stat-card .value{font-size:1.5rem;font-weight:800;color:var(--cambiz-blue)}
+        .stat-card .label{color:#64748b;font-size:0.65rem;margin-top:0.2rem;font-weight:600;text-transform:uppercase}
+        .login-card{background:#fff;border-radius:10px;padding:2rem 1.5rem;text-align:center;border:1px solid #e2e8f0;max-width:400px;margin:0 auto 2rem auto;position:relative;overflow:hidden}
+        .login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cambiz-gold),var(--cambiz-teal))}
+        .login-card h2{font-size:1.3rem;font-weight:700;color:var(--cambiz-blue)}
+        .login-card p{color:#64748b;margin-bottom:1.2rem;font-size:0.85rem}
+        .btn{padding:8px 22px;border:none;border-radius:6px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;font-size:12px;margin:4px;min-width:150px;transition:all 0.2s}
+        .btn:hover{transform:translateY(-1px)}
+        .btn-primary{background:var(--cambiz-gold);color:var(--cambiz-blue)}
+        .btn-success{background:#fff;color:#334155;border:1px solid #cbd5e1}
+        .login-form{display:none;margin-top:1rem;padding:1rem;background:#f8fafc;border-radius:6px;text-align:left;border:1px solid #e2e8f0}
+        .login-form input{display:block;width:100%;padding:8px 10px;margin-bottom:10px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px}
+        .login-form input:focus{border-color:var(--cambiz-gold);outline:none}
+        .login-form button{width:100%;margin:0}
+        .sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:linear-gradient(180deg,#2d1b69,#4c1d95);color:#fff;overflow-y:auto;z-index:1000;box-shadow:2px 0 15px rgba(0,0,0,.1);transition:left .3s}
+        .sidebar .logo{padding:18px 16px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08);font-weight:800;font-size:1.1rem}
+        .sidebar .logo span{color:var(--seller-accent)}
+        .sidebar a{color:rgba(255,255,255,.65);padding:9px 16px;display:flex;align-items:center;gap:8px;text-decoration:none;font-size:.78rem;border-left:3px solid transparent;cursor:pointer;transition:.2s;font-weight:500}
+        .sidebar a:hover,.sidebar a.active{color:#fff;background:rgba(255,255,255,.04);border-left-color:var(--seller-accent)}
+        .sidebar a i{width:18px;text-align:center;font-size:.85rem}
+        .main{margin-left:var(--sidebar-w);padding:20px 25px;min-height:100vh;transition:margin-left .3s}
+        .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;background:#fff;padding:14px 20px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);flex-wrap:wrap;gap:8px}
+        .topbar h4{font-weight:700;color:#0f172a;font-size:1.1rem}
+        .btn-logout{padding:7px 16px;border-radius:6px;font-weight:600;font-size:.78rem}
+        .card{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:18px;border:1px solid #e2e8f0}
+        .card-header{padding:12px 18px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#0f172a;font-size:.88rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+        .card-body{padding:16px}.card-body.p-0{padding:0}
+        .table{margin:0}.table th{font-size:.7rem;text-transform:uppercase;color:#64748b;font-weight:700;padding:10px 14px;background:#f8fafc}
+        .table td{padding:10px 14px;vertical-align:middle;font-size:.8rem}
+        .badge{font-weight:600;padding:4px 8px;border-radius:5px;font-size:.7rem}
+        .btn-sm{padding:5px 10px;font-size:.72rem;border-radius:5px;font-weight:600;cursor:pointer;border:none}
+        .section-title{font-size:.95rem;font-weight:700;color:#0f172a;margin:1.2rem 0 .8rem 0;display:flex;align-items:center;gap:.5rem}
+        .section-title::after{content:'';flex:1;height:1px;background:#e2e8f0}
+        .order-row{display:grid;grid-template-columns:1fr 2fr 1fr 1fr 1fr;gap:10px;padding:10px 14px;border-bottom:1px solid #f1f5f9;align-items:center;font-size:.8rem}
+        .order-row.header-row{background:#f8fafc;font-weight:700;color:#64748b;font-size:.72rem;text-transform:uppercase}
+        .status-PENDING{color:#d97706}.status-CONFIRMED{color:#2563eb}.status-DELIVERED{color:#0d9488}
+        .btn-confirm{background:#a855f7;color:white}.btn-ship{background:#2d1b69;color:white}.btn-reject{background:#fee2e2;color:#e11d48}.btn-add-cart{background:#0d9488;color:white}
+        .quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-bottom:1.2rem}
+        .action-card{background:#fff;border-radius:8px;padding:1rem .6rem;border:1px solid #e2e8f0;text-align:center;text-decoration:none;color:#0f172a;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.2rem}
+        .action-card:hover{border-color:var(--seller-accent);background:var(--seller-light);transform:translateY(-2px)}
+        .action-card .icon{font-size:1.3rem}.action-card .title{font-weight:700;font-size:.75rem}.action-card .sub{font-size:.65rem;color:#64748b}
+        .seller-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;margin-bottom:1.2rem}
+        .seller-stat{background:#fff;border-radius:8px;padding:1rem .8rem;text-align:center;border:2px solid #e2e8f0}
+        .seller-stat.revenue{border-color:#10b981}.seller-stat.orders{border-color:#a855f7}.seller-stat.products{border-color:#f59e0b}.seller-stat.wallet{border-color:#3b82f6}.seller-stat.premium{border-color:#e11d48}
+        .seller-stat .value{font-size:1.4rem;font-weight:800;color:#0f172a}
+        .seller-stat .label{color:#64748b;font-size:.65rem;margin-top:.2rem;font-weight:600;text-transform:uppercase}
+        .about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0}
+        .about-card{background:#fff;border-radius:8px;padding:1.2rem;text-align:center;border:1px solid #e2e8f0}
+        .about-card:hover{transform:translateY(-2px)}
+        .about-card .icon{font-size:1.8rem;margin-bottom:.5rem}
+        .about-card h3{color:var(--cambiz-blue);font-size:.85rem;font-weight:700}
+        .about-card p{color:#64748b;font-size:.72rem;line-height:1.3}
+        .footer{text-align:center;padding:1rem;color:#64748b;font-size:.72rem;margin-top:1rem}
+        .mobile-menu-btn{display:none;position:fixed;top:8px;left:8px;z-index:1001;background:#2d1b69;color:#fff;border:none;padding:8px 12px;border-radius:6px;font-size:1rem;cursor:pointer}
+        .sidebar-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:999}
+        .sidebar-overlay.show{display:block}
+        @media(max-width:768px){
+            .mobile-menu-btn{display:block}.sidebar{left:-260px}.sidebar.open{left:0}.main{margin-left:0!important;padding:50px 8px 10px 8px!important}
+            .stats-grid,.seller-stats{grid-template-columns:repeat(2,1fr);gap:.5rem}
+            .stat-card,.seller-stat{padding:.8rem}
+            .hero h1{font-size:1.5rem}
+            .quick-actions{grid-template-columns:repeat(3,1fr)}
+            .order-row{grid-template-columns:1fr 1fr;gap:4px;font-size:.7rem;padding:8px}.order-row.header-row{display:none}
+            .table th,.table td{padding:6px 4px;font-size:.65rem}.btn-sm{padding:3px 6px;font-size:.6rem}
+        }
     </style>
 </head>
 <body>
-<div id="publicHeader" class="header"><a href="/store" class="logo">cam<span>Biz</span> Market</a><div class="nav-right"><a href="/cart" class="cart-icon">🛒<span class="cart-badge" id="cartBadge" style="display:none;">0</span></a></div></div>
+
+<!-- PUBLIC HEADER -->
+<div id="publicHeader" class="header">
+    <a href="/store" class="logo">cam<span>Biz</span> Market</a>
+    <div style="display:flex;align-items:center;gap:10px;">
+        <div id="langSwitcherHeader"></div>
+        <a href="/cart" class="cart-icon">🛒<span class="cart-badge" id="cartBadge" style="display:none">0</span></a>
+    </div>
+</div>
+
+<!-- PUBLIC VIEW -->
 <div id="publicView" class="container">
-    <div class="hero"><div class="icon">🚀</div><h1>Welcome to CamBiz Market</h1><p>Cameroon's Premier E-Commerce Platform</p></div>
-    <div class="stats-grid"><div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label">Products</div></div><div class="stat-card"><div class="value" id="pubUserCount">-</div><div class="label">Users</div></div><div class="stat-card"><div class="value">20</div><div class="label">Categories</div></div><div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div></div>
-    <div class="login-card"><h2>Sign In</h2><p>Access your CamBiz Market account</p><button class="btn btn-primary" onclick="showLogin()">Sign In</button><a href="/register" class="btn btn-success">Create Account</a><div class="login-form" id="loginForm"><input type="email" id="loginEmail" placeholder="Email Address"><input type="password" id="loginPassword" placeholder="Password"><button class="btn btn-primary" onclick="doLogin()">Log In Securely</button><p id="loginError" style="color:#e11d48;margin-top:10px;display:none;font-size:0.82rem;"></p></div></div>
-    <div class="section-title">💡 Why Choose CamBiz Market?</div>
-    <div class="about-grid"><div class="about-card"><div class="icon">🛍️</div><h3>Buy & Sell Locally</h3><p>Connect securely across Cameroon.</p></div><div class="about-card"><div class="icon">📱</div><h3>Mobile Money</h3><p>MTN & Orange Money.</p></div><div class="about-card"><div class="icon">📈</div><h3>Boost Business</h3><p>Premium seller tools.</p></div><div class="about-card"><div class="icon">🤖</div><h3>AI Negotiation</h3><p>Makola AI pricing.</p></div><div class="about-card"><div class="icon">🤝</div><h3>Njangi Groups</h3><p>Buy together, save.</p></div><div class="about-card"><div class="icon">⚡</div><h3>Flash Sales</h3><p>Limited-time deals.</p></div></div>
+    <div class="hero"><div class="icon">🚀</div><h1 data-i18n="welcome_title">Welcome to CamBiz Market</h1><p data-i18n="welcome_subtitle">Cameroon's Premier E-Commerce Platform</p></div>
+    <div class="stats-grid">
+        <div class="stat-card"><div class="value" id="pubProductCount">-</div><div class="label" data-i18n="products">Products</div></div>
+        <div class="stat-card"><div class="value" id="pubUserCount">-</div><div class="label" data-i18n="users">Users</div></div>
+        <div class="stat-card"><div class="value">20</div><div class="label" data-i18n="categories">Categories</div></div>
+        <div class="stat-card"><div class="value" data-i18n="available">24/7</div><div class="label" data-i18n="available">Available</div></div>
+    </div>
+    <div class="login-card">
+        <h2 data-i18n="sign_in">Sign In</h2><p data-i18n="sign_in">Access your CamBiz Market account</p>
+        <button class="btn btn-primary" onclick="window.showLogin()"><span data-i18n="sign_in">Sign In</span></button>
+        <a href="/register" class="btn btn-success"><span data-i18n="create_account">Create Account</span></a>
+        <div class="login-form" id="loginForm">
+            <input type="email" id="loginEmail" data-i18n-placeholder="enter_email" placeholder="Email Address">
+            <input type="password" id="loginPassword" data-i18n-placeholder="enter_password" placeholder="Password">
+            <button class="btn btn-primary" onclick="window.doLogin()"><span data-i18n="log_in_securely">Log In Securely</span></button>
+            <p id="loginError" style="color:#e11d48;margin-top:8px;display:none;font-size:.75rem;font-weight:600"></p>
+        </div>
+    </div>
+    <div class="section-title"><span data-i18n="why_choose">💡 Why Choose CamBiz Market?</span></div>
+    <div class="about-grid">
+        <div class="about-card"><div class="icon">🛍️</div><h3 data-i18n="buy_sell_locally">Buy & Sell Locally</h3><p data-i18n="buy_sell_desc">Connect securely across Cameroon.</p></div>
+        <div class="about-card"><div class="icon">📱</div><h3 data-i18n="mobile_money">Mobile Money</h3><p data-i18n="mobile_money_desc">MTN & Orange Money.</p></div>
+        <div class="about-card"><div class="icon">📈</div><h3 data-i18n="boost_business">Boost Business</h3><p data-i18n="boost_business_desc">Premium seller tools.</p></div>
+        <div class="about-card"><div class="icon">🤖</div><h3 data-i18n="ai_negotiation">AI Negotiation</h3><p data-i18n="ai_negotiation_desc">Makola AI pricing.</p></div>
+        <div class="about-card"><div class="icon">🤝</div><h3 data-i18n="njangi_groups_title">Njangi Groups</h3><p data-i18n="njangi_groups_desc">Buy together, save.</p></div>
+        <div class="about-card"><div class="icon">⚡</div><h3 data-i18n="flash_sales_title">Flash Sales</h3><p data-i18n="flash_sales_desc">Limited-time deals.</p></div>
+    </div>
     <div class="footer"><p>© 2026 CamBiz Market | Built by Mohammad Musa Njahne</p></div>
 </div>
 
-<div id="userView" style="display:none;">
-    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰ Menu</button>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-    <nav class="sidebar" id="sidebar"><div class="logo">⚡ cam<span>Biz</span> Market</div><div id="sidebarLinks"></div></nav>
+<!-- LOGGED-IN VIEW -->
+<div id="userView" style="display:none">
+    <button class="mobile-menu-btn" onclick="window.toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar"><div class="logo">⚡ cam<span>Biz</span> <span id="userTypeLabel"></span></div><div id="sidebarLinks"></div></nav>
     <div class="main">
-        <div class="topbar"><h4 id="pageTitle">👋 Welcome!</h4><button class="btn btn-outline-danger btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button></div>
+        <div class="topbar">
+            <h4 id="pageTitle">👋 <span data-i18n="welcome">Welcome!</span></h4>
+            <div style="display:flex;gap:8px;align-items:center">
+                <div id="langSwitcherUser"></div>
+                <button class="btn btn-outline-danger btn-logout" onclick="window.logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="sign_out">Sign Out</span></button>
+            </div>
+        </div>
         <div id="tab-content"></div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show')}
-var token=localStorage.getItem('token')||sessionStorage.getItem('token');
-var F=function(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'XAF',maximumFractionDigits:0}).format(v||0)};
-var D=function(d){return d?new Date(d).toLocaleDateString('en-GB'):'N/A'};
-function showToast(t,i){Swal.fire({toast:true,position:'top-end',icon:i||'success',title:t,showConfirmButton:false,timer:2000,timerProgressBar:true})}
-function showLogin(){document.getElementById('loginForm').style.display='block'}
-function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');location.href='/dashboard'}
-async function doLogin(){
-    var email=document.getElementById('loginEmail').value,password=document.getElementById('loginPassword').value,errorEl=document.getElementById('loginError');
+// ========== GLOBALS ==========
+window.toggleSidebar = function() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+};
+window.showLogin = function() { document.getElementById('loginForm').style.display = 'block'; };
+window.logout = function() { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; };
+
+var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+var F = function(v) { return new Intl.NumberFormat('fr-FR', {style:'currency', currency:'XAF', maximumFractionDigits:0}).format(v||0); };
+var D = function(d) { return d ? new Date(d).toLocaleDateString('en-GB') : 'N/A'; };
+function toast(t,i) { Swal.fire({toast:true, position:'top-end', icon:i||'success', title:t, showConfirmButton:false, timer:2000, timerProgressBar:true}); }
+
+// ========== AUTH ==========
+window.doLogin = async function() {
+    var email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value, errorEl = document.getElementById('loginError');
     if(!email||!password){errorEl.textContent='Please enter email and password.';errorEl.style.display='block';return}
     try{var r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})}),d=await r.json();
         if(d.success&&d.data&&d.data.token){localStorage.setItem('token',d.data.token);location.reload()}else{errorEl.textContent=d.message||'Login failed.';errorEl.style.display='block'}
     }catch(e){errorEl.textContent='Network error.';errorEl.style.display='block'}
-}
-async function init(){
+};
+
+// ========== INIT ==========
+async function init() {
     try{var r=await fetch('/api/products?page=0&size=200'),d=await r.json();if(d.data)document.getElementById('pubProductCount').textContent=d.data.length}catch(e){}
     try{var ur=await fetch('/api/admin/stats'),ud=await ur.json();if(ud.success&&ud.data)document.getElementById('pubUserCount').textContent=ud.data.totalUsers+'+'}catch(e){document.getElementById('pubUserCount').textContent='2k+'}
-}
-async function updateCartBadge(){
-    if(!token)return;
-    try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items){var count=d.data.items.length;var badge=document.getElementById('cartBadge');if(count>0){badge.textContent=count;badge.style.display='flex'}else{badge.style.display='none'}}}catch(e){}
+    document.getElementById('langSwitcherHeader').innerHTML = i18n.createSwitcher();
 }
 
-var userType='BUYER';
-if(token){
+var userType = 'BUYER';
+if(token) {
     try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];
-    if(Array.isArray(roles)&&roles.indexOf('ROLE_ADMIN')!==-1){window.location.href='/admin/dashboard'}
+    if(Array.isArray(roles)&&roles.indexOf('ROLE_ADMIN')!==-1){location.href='/admin/dashboard'}
     if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)userType='SELLER';else if(payload.userType==='SELLER')userType='SELLER'}catch(e){}
     document.getElementById('publicView').style.display='none';document.getElementById('publicHeader').style.display='none';
-    document.getElementById('userView').style.display='block';updateCartBadge();buildSidebar();loadDefaultTab();
-}else{init()}
+    document.getElementById('userView').style.display='block';
+    document.getElementById('langSwitcherUser').innerHTML = i18n.createSwitcher();
+    updateCartBadge();buildSidebar();loadDefaultTab();
+} else { init(); }
 
-function buildSidebar(){
-    var html='';
-    if(userType==='BUYER'){
-        html='<a class="nav-link active" onclick="showTab(\'bstore\')"><i class="fas fa-store"></i> Store</a>';
-        html+='<a class="nav-link" onclick="showTab(\'bcart\')"><i class="fas fa-shopping-cart"></i> Cart</a>';
-        html+='<a class="nav-link" onclick="showTab(\'borders\')"><i class="fas fa-list"></i> My Orders</a>';
-        html+='<a class="nav-link" onclick="showTab(\'bwishlist\')"><i class="fas fa-heart"></i> Wishlist</a>';
-        html+='<a class="nav-link" onclick="showTab(\'bnjangi\')"><i class="fas fa-users"></i> Njangi Groups</a>';
-        html+='<a class="nav-link" onclick="showTab(\'boffers\')"><i class="fas fa-comments"></i> AI Offers</a>';
-        html+='<a class="nav-link" onclick="showTab(\'breferral\')"><i class="fas fa-gift"></i> Refer & Earn</a>';
-        html+='<a class="nav-link" onclick="showTab(\'bdisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
-        document.getElementById('pageTitle').innerHTML='🛒 Buyer Dashboard';
-    }else if(userType==='SELLER'){
-        html='<a class="nav-link active" onclick="showTab(\'soverview\')"><i class="fas fa-th-large"></i> Overview</a>';
-        html+='<a class="nav-link" onclick="showTab(\'sorders\')"><i class="fas fa-shopping-cart"></i> Orders</a>';
-        html+='<a class="nav-link" onclick="showTab(\'soffers\')"><i class="fas fa-tags"></i> Offers</a>';
-        html+='<a class="nav-link" onclick="showTab(\'sdisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
-        document.getElementById('pageTitle').innerHTML='🏪 Seller Dashboard';
-    }
-    document.getElementById('sidebarLinks').innerHTML=html;
+function updateCartBadge() {
+    if(!token)return;
+    try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items){var c=d.data.items.length;var b=document.getElementById('cartBadge');if(c>0){b.textContent=c;b.style.display='flex'}else{b.style.display='none'}}}catch(e){}
 }
 
-function loadDefaultTab(){if(userType==='SELLER')showTab('soverview');else showTab('bstore')}
+// ========== SIDEBAR ==========
+function buildSidebar() {
+    var html = '';
+    if(userType === 'BUYER') {
+        document.getElementById('userTypeLabel').textContent = 'Buyer';
+        html = '<a class="nav-link active" onclick="window.showTab(\'bstore\')"><i class="fas fa-store"></i> Store</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'bcart\')"><i class="fas fa-shopping-cart"></i> Cart</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'borders\')"><i class="fas fa-list"></i> Orders</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'bwishlist\')"><i class="fas fa-heart"></i> Wishlist</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'bnjangi\')"><i class="fas fa-users"></i> Njangi</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'boffers\')"><i class="fas fa-comments"></i> Offers</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'breferral\')"><i class="fas fa-gift"></i> Refer</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'bdisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
+        document.getElementById('pageTitle').innerHTML = '🛒 Buyer Dashboard';
+    } else if(userType === 'SELLER') {
+        document.getElementById('userTypeLabel').textContent = 'Seller';
+        document.getElementById('sidebar').style.background = 'linear-gradient(180deg,#2d1b69,#4c1d95)';
+        html = '<a class="nav-link active" onclick="window.showTab(\'soverview\')"><i class="fas fa-th-large"></i> Overview</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'sorders\')"><i class="fas fa-shopping-cart"></i> Orders</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'soffers\')"><i class="fas fa-tags"></i> Offers</a>';
+        html += '<a class="nav-link" onclick="window.showTab(\'sdisputes\')"><i class="fas fa-gavel"></i> Disputes</a>';
+        document.getElementById('pageTitle').innerHTML = '🏪 <span data-i18n="seller_overview">Seller Dashboard</span>';
+    }
+    document.getElementById('sidebarLinks').innerHTML = html;
+}
 
-function showTab(t){
-    document.querySelectorAll('.sidebar .nav-link').forEach(function(l){l.classList.remove('active')});
-    var link=document.querySelector('.sidebar .nav-link[onclick*="'+t+'"]');if(link)link.classList.add('active');
-    if(window.innerWidth<768)toggleSidebar();
-    var titles={bstore:'🛍️ Store',bcart:'🛒 Cart',borders:'📋 My Orders',bwishlist:'❤️ Wishlist',bnjangi:'🤝 Njangi Groups',boffers:'💬 AI Offers',breferral:'🎁 Refer & Earn',bdisputes:'⚖️ Disputes',soverview:'🏪 Overview',sorders:'📦 Orders',soffers:'💰 Offers',sdisputes:'⚖️ Disputes'};
-    document.getElementById('pageTitle').innerHTML=titles[t]||t;
-    var content='';
-    if(t==='bstore')content='<div class="card"><div class="card-header">🛍️ Store</div><div class="card-body text-center"><a href="/store" class="btn btn-primary btn-lg">Browse Store</a></div></div>';
+function loadDefaultTab() { if(userType==='SELLER')window.showTab('soverview');else window.showTab('bstore'); }
+
+// ========== TAB SWITCHING ==========
+window.showTab = function(t) {
+    document.querySelectorAll('.sidebar a').forEach(function(l){l.classList.remove('active')});
+    var link = document.querySelector('.sidebar a[onclick*="'+t+'"]');if(link)link.classList.add('active');
+    if(window.innerWidth<768)window.toggleSidebar();
+    var titles = {bstore:'🛍️ Store',bcart:'🛒 Cart',borders:'📋 Orders',bwishlist:'❤️ Wishlist',bnjangi:'🤝 Njangi',boffers:'💬 Offers',breferral:'🎁 Refer',bdisputes:'⚖️ Disputes',soverview:'🏪 Seller Overview',sorders:'📦 Orders',soffers:'💰 Offers',sdisputes:'⚖️ Disputes'};
+    document.getElementById('pageTitle').innerHTML = titles[t] || t;
+    var content = '';
+    if(t==='bstore')content='<div class="card"><div class="card-header">🛍️ Store</div><div class="card-body text-center"><a href="/store" class="btn btn-primary">Browse Store</a></div></div>';
     else if(t==='bcart')content='<div class="card"><div class="card-header">🛒 My Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div>';
     else if(t==='borders')content='<div class="card"><div class="card-header">📋 My Orders</div><div class="card-body p-0" id="buyerOrdersContent">Loading...</div></div>';
     else if(t==='bwishlist')content='<div class="card"><div class="card-header">❤️ Wishlist</div><div class="card-body text-center"><a href="/wishlist" class="btn btn-primary">View Wishlist</a></div></div>';
-    else if(t==='bnjangi')content='<div class="card"><div class="card-header">🤝 Njangi Groups</div><div class="card-body text-center"><a href="/njangi" class="btn btn-primary">Browse Njangi Groups</a></div></div>';
-    else if(t==='boffers')content='<div class="card"><div class="card-header">💬 Makola AI Offers</div><div class="card-body p-0" id="buyerOffersContent">Loading...</div></div>';
+    else if(t==='bnjangi')content='<div class="card"><div class="card-header">🤝 Njangi Groups</div><div class="card-body text-center"><a href="/njangi" class="btn btn-primary">Browse Groups</a></div></div>';
+    else if(t==='boffers')content='<div class="card"><div class="card-header">💬 AI Offers</div><div class="card-body p-0" id="buyerOffersContent">Loading...</div></div>';
     else if(t==='breferral')content='<div class="card"><div class="card-header">🎁 Refer & Earn</div><div class="card-body text-center"><a href="/referral" class="btn btn-primary">View Referrals</a></div></div>';
     else if(t==='bdisputes')content='<div class="card"><div class="card-header">⚖️ My Disputes</div><div class="card-body p-0" id="buyerDisputesContent">Loading...</div></div>';
-    else if(t==='soverview')content='<div id="sellerStats" class="stat-row"></div><div class="section-title">⚡ Quick Actions</div><div class="quick-actions" id="sellerActions"></div>';
+    else if(t==='soverview')content= sellerOverviewHTML();
     else if(t==='sorders')content='<div class="card"><div class="card-header">📦 Customer Orders</div><div class="card-body p-0" id="sellerOrdersContent">Loading...</div></div>';
     else if(t==='soffers')content='<div class="card"><div class="card-header">💰 Customer Offers</div><div class="card-body p-0" id="sellerOffersContent">Loading...</div></div>';
     else if(t==='sdisputes')content='<div class="card"><div class="card-header">⚖️ Disputes Against Me</div><div class="card-body p-0" id="sellerDisputesContent">Loading...</div></div>';
-    document.getElementById('tab-content').innerHTML=content;
+    document.getElementById('tab-content').innerHTML = content;
     setTimeout(function(){if(t==='bcart')loadBuyerCart();if(t==='borders')loadBuyerOrders();if(t==='boffers')loadBuyerOffers();if(t==='bdisputes')loadBuyerDisputes();if(t==='soverview')loadSellerOverview();if(t==='sorders')loadSellerOrders();if(t==='soffers')loadSellerOffers();if(t==='sdisputes')loadSellerDisputes()},100);
+};
+
+// ========== SELLER OVERVIEW HTML ==========
+function sellerOverviewHTML() {
+    return '<div class="seller-stats" id="sellerStats"></div>' +
+        '<div class="section-title">⚡ Quick Actions</div>' +
+        '<div class="quick-actions" id="sellerActions"></div>';
 }
 
-// ========== BUYER ==========
-async function loadBuyerCart(){try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items&&d.data.items.length>0){var html='<div class="table-responsive"><table class="table table-hover"><tbody>';d.data.items.forEach(function(i){html+='<tr><td>'+i.productName+' x'+i.quantity+'</td><td>'+F(i.effectivePrice)+'</td></tr>'});html+='</tbody></table></div><div class="text-end fw-bold mt-2">Total: '+F(d.data.total)+'</div><a href="/cart" class="btn btn-warning btn-sm mt-2">Checkout</a>';document.getElementById('buyerCartContent').innerHTML=html}else{document.getElementById('buyerCartContent').innerHTML='<p class="text-muted">Cart empty</p>'}}catch(e){}}
-async function loadBuyerOrders(){try{var r=await fetch('/api/orders/my-orders',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var sid=o.sellerId||0;html+='<tr><td>#'+(o.orderNumber||o.id)+'</td><td>'+F(o.totalAmount||o.amount)+'</td><td><span class="status-'+o.status+'">'+o.status+'</span></td><td>'+(o.status==='DELIVERED'||o.status==='SHIPPED'?'<button class="btn btn-sm btn-outline-danger" onclick="fileDispute(\''+(o.orderNumber||o.id)+'\','+(o.totalAmount||o.amount)+','+sid+')">Report</button>':'')+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('buyerOrdersContent').innerHTML=html}else{document.getElementById('buyerOrdersContent').innerHTML='<p class="text-muted">No orders</p>'}}catch(e){}}
-async function fileDispute(oid,amt,sid){var tp=JSON.parse(atob(token.split('.')[1]));Swal.fire({title:'Report Problem',html:'<textarea id="dReason" class="form-control" rows="3" placeholder="Describe..."></textarea>',icon:'warning',showCancelButton:true,confirmButtonText:'Submit',confirmButtonColor:'#ef4444',preConfirm:function(){var r=document.getElementById('dReason').value.trim();if(!r){Swal.showValidationMessage('Required');return false}return r}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/disputes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:parseInt(String(oid).replace(/[^0-9]/g,''))||oid,buyerId:tp.userId,sellerId:sid,amount:amt,reason:r.value})});showToast('Filed','success')}})}
-async function loadBuyerOffers(){try{var r=await fetch('/api/makola/my-offers',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Offer</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var action='';if(o.status==='ACCEPTED')action='<button class="btn btn-sm btn-add-cart" onclick="addToCart('+o.negotiationId+')">Add to Cart</button>';else if(o.status==='REJECTED')action='<button class="btn btn-sm btn-reject" onclick="dismissOffer('+o.negotiationId+')">Dismiss</button>';else action='<span style="color:#d97706">Waiting</span>';html+='<tr><td>'+o.productName+'</td><td>'+F(o.buyerOffer)+'</td><td>'+o.status+'</td><td>'+action+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('buyerOffersContent').innerHTML=html}else{document.getElementById('buyerOffersContent').innerHTML='<p class="text-muted">No offers</p>'}}catch(e){}}
-async function addToCart(nid){await fetch('/api/makola/add-to-cart/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});showToast('Added','success');loadBuyerCart();loadBuyerOffers()}
-async function dismissOffer(nid){await fetch('/api/makola/reject/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});showToast('Dismissed','info');loadBuyerOffers()}
-async function loadBuyerDisputes(){try{var tp=JSON.parse(atob(token.split('.')[1]));var r=await fetch('/api/admin/disputes'),d=await r.json();var my=d.data?d.data.filter(function(ds){return ds.buyerId===tp.userId}):[];if(my.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Seller</th><th>Amount</th><th>Status</th><th>Resolution</th></tr></thead><tbody>';my.forEach(function(ds){html+='<tr><td>#'+ds.id+'</td><td>'+ds.sellerName+'</td><td>'+F(ds.amount)+'</td><td>'+ds.status+'</td><td>'+(ds.resolution||'Pending')+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('buyerDisputesContent').innerHTML=html}else{document.getElementById('buyerDisputesContent').innerHTML='<p class="text-muted">No disputes</p>'}}catch(e){}}
+// ========== BUYER FUNCTIONS ==========
+async function loadBuyerCart(){try{var r=await fetch('/api/cart',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.items&&d.data.items.length>0){var h='<div class="table-responsive"><table class="table table-hover"><tbody>';d.data.items.forEach(function(i){h+='<tr><td>'+i.productName+' x'+i.quantity+'</td><td>'+F(i.effectivePrice)+'</td></tr>'});h+='</tbody></table></div><div class="text-end fw-bold mt-2">Total: '+F(d.data.total)+'</div><a href="/cart" class="btn btn-primary btn-sm mt-2">Checkout</a>';document.getElementById('buyerCartContent').innerHTML=h}else{document.getElementById('buyerCartContent').innerHTML='<p class="text-muted">Cart empty</p>'}}catch(e){}}
+async function loadBuyerOrders(){try{var r=await fetch('/api/orders/my-orders',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var h='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var sid=o.sellerId||0;h+='<tr><td>#'+(o.orderNumber||o.id)+'</td><td>'+F(o.totalAmount||o.amount)+'</td><td><span class="status-'+o.status+'">'+o.status+'</span></td><td>'+(o.status==='DELIVERED'||o.status==='SHIPPED'?'<button class="btn btn-sm btn-outline-danger" onclick="fileDispute(\''+(o.orderNumber||o.id)+'\','+(o.totalAmount||o.amount)+','+sid+')">Report</button>':'')+'</td></tr>'});h+='</tbody></table></div>';document.getElementById('buyerOrdersContent').innerHTML=h}else{document.getElementById('buyerOrdersContent').innerHTML='<p class="text-muted">No orders</p>'}}catch(e){}}
+async function fileDispute(oid,amt,sid){var tp=JSON.parse(atob(token.split('.')[1]));Swal.fire({title:'Report Problem',html:'<textarea id="dReason" class="form-control" rows="3" placeholder="Describe..."></textarea>',icon:'warning',showCancelButton:true,confirmButtonText:'Submit',confirmButtonColor:'#ef4444',preConfirm:function(){var r=document.getElementById('dReason').value.trim();if(!r){Swal.showValidationMessage('Required');return false}return r}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/disputes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:parseInt(String(oid).replace(/[^0-9]/g,''))||oid,buyerId:tp.userId,sellerId:sid,amount:amt,reason:r.value})});toast('Filed','success')}})}
+async function loadBuyerOffers(){try{var r=await fetch('/api/makola/my-offers',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var h='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Offer</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var a='';if(o.status==='ACCEPTED')a='<button class="btn btn-sm btn-add-cart" onclick="addToCart('+o.negotiationId+')">Add to Cart</button>';else if(o.status==='REJECTED')a='<button class="btn btn-sm btn-reject" onclick="dismissOffer('+o.negotiationId+')">Dismiss</button>';else a='<span style="color:#d97706">Waiting</span>';h+='<tr><td>'+o.productName+'</td><td>'+F(o.buyerOffer)+'</td><td>'+o.status+'</td><td>'+a+'</td></tr>'});h+='</tbody></table></div>';document.getElementById('buyerOffersContent').innerHTML=h}else{document.getElementById('buyerOffersContent').innerHTML='<p class="text-muted">No offers</p>'}}catch(e){}}
+async function addToCart(nid){await fetch('/api/makola/add-to-cart/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});toast('Added','success');loadBuyerCart();loadBuyerOffers()}
+async function dismissOffer(nid){await fetch('/api/makola/reject/'+nid,{method:'POST',headers:{'Authorization':'Bearer '+token}});toast('Dismissed','info');loadBuyerOffers()}
+async function loadBuyerDisputes(){try{var tp=JSON.parse(atob(token.split('.')[1]));var r=await fetch('/api/admin/disputes'),d=await r.json();var my=d.data?d.data.filter(function(ds){return ds.buyerId===tp.userId}):[];if(my.length>0){var h='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Seller</th><th>Amount</th><th>Status</th><th>Resolution</th></tr></thead><tbody>';my.forEach(function(ds){h+='<tr><td>#'+ds.id+'</td><td>'+ds.sellerName+'</td><td>'+F(ds.amount)+'</td><td>'+ds.status+'</td><td>'+(ds.resolution||'Pending')+'</td></tr>'});h+='</tbody></table></div>';document.getElementById('buyerDisputesContent').innerHTML=h}else{document.getElementById('buyerDisputesContent').innerHTML='<p class="text-muted">No disputes</p>'}}catch(e){}}
 
-// ========== SELLER ==========
-async function loadSellerOverview(){
-    document.getElementById('sellerActions').innerHTML='<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a><a href="/create-flash-sale" class="action-card"><div class="icon">⚡</div><div class="title">Flash Sale</div><div class="sub">Limited deal</div></a><a href="/create-coupon" class="action-card"><div class="icon">🏷️</div><div class="title">Coupon</div><div class="sub">Discount</div></a><a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi</div><div class="sub">Group deal</div></a><a href="/transactions" class="action-card"><div class="icon">💰</div><div class="title">Transactions</div><div class="sub">History</div></a><a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer</div><div class="sub">Earn</div></a><a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse</div></a><a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Premium</div><div class="sub">Upgrade</div></a>';
-    try{var pr=await fetch('/api/products/my-products',{headers:{'Authorization':'Bearer '+token}}),pd=await pr.json();var pc=pd.success&&pd.data?pd.data.length:0;var or=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}}),od=await or.json();var oc=od.success&&od.data?od.data.length:0;var rev=0;if(od.success&&od.data){for(var i=0;i<od.data.length;i++)rev+=od.data[i].sellerPayout||0}document.getElementById('sellerStats').innerHTML='<div class="stat-card"><h3>'+pc+'</h3><small>My Products</small></div><div class="stat-card"><h3>'+oc+'</h3><small>Orders</small></div><div class="stat-card"><h3>'+F(rev)+'</h3><small>Revenue</small></div><div class="stat-card"><h3>🏪</h3><small>Seller</small></div>'}catch(e){}
+// ========== SELLER FUNCTIONS ==========
+async function loadSellerOverview() {
+    document.getElementById('sellerActions').innerHTML =
+        '<a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="sub">List item</div></a>' +
+        '<a href="/create-flash-sale" class="action-card"><div class="icon">⚡</div><div class="title">Flash Sale</div><div class="sub">Limited deal</div></a>' +
+        '<a href="/create-coupon" class="action-card"><div class="icon">🏷️</div><div class="title">Coupon</div><div class="sub">Discount</div></a>' +
+        '<a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi</div><div class="sub">Group deal</div></a>' +
+        '<a href="/transactions" class="action-card"><div class="icon">💰</div><div class="title">Transactions</div><div class="sub">History</div></a>' +
+        '<a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer</div><div class="sub">Earn</div></a>' +
+        '<a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="sub">Browse</div></a>' +
+        '<a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Premium</div><div class="sub">Upgrade</div></a>';
+    try {
+        var pr = await fetch('/api/products/my-products', {headers:{'Authorization':'Bearer '+token}}), pd = await pr.json();
+        var pc = pd.success && pd.data ? pd.data.length : 0;
+        var or = await fetch('/api/orders/seller-orders', {headers:{'Authorization':'Bearer '+token}}), od = await or.json();
+        var oc = od.success && od.data ? od.data.length : 0;
+        var rev = 0; if(od.success&&od.data){for(var i=0;i<od.data.length;i++)rev+=od.data[i].sellerPayout||0}
+        var isPremium = false;
+        try{var premR=await fetch('/api/premium/my-status',{headers:{'Authorization':'Bearer '+token}}),premD=await premR.json();if(premD.success&&premD.data)isPremium=premD.data.isPremium}catch(e){}
+        var wallet = 0;
+        try{var wR=await fetch('/api/wallet/balance',{headers:{'Authorization':'Bearer '+token}}),wD=await wR.json();if(wD.success&&wD.data)wallet=wD.data.balance||0}catch(e){}
+        document.getElementById('sellerStats').innerHTML =
+            '<div class="seller-stat revenue"><div class="value">'+F(rev)+'</div><div class="label">💰 Revenue</div></div>' +
+            '<div class="seller-stat orders"><div class="value">'+oc+'</div><div class="label">📦 Orders</div></div>' +
+            '<div class="seller-stat products"><div class="value">'+pc+'</div><div class="label">📋 Products</div></div>' +
+            '<div class="seller-stat wallet"><div class="value">'+F(wallet)+'</div><div class="label">💳 Wallet</div></div>' +
+            '<div class="seller-stat premium"><div class="value">'+(isPremium?'🏆':'⭐')+'</div><div class="label">'+(isPremium?'Premium':'Regular')+'</div></div>';
+    } catch(e) {}
 }
-async function loadSellerOrders(){try{var r=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Items</th><th>Qty</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var items=o.items?o.items.map(function(i){return i.productName}).join(', '):'N/A';var qty=o.items?o.items.reduce(function(s,i){return s+i.quantity},0):0;var action='';if(o.status==='PENDING')action='<button class="btn btn-sm btn-confirm" onclick="updateOrder(\''+o.sellerOrderId+'\',\'CONFIRMED\')">Confirm</button>';else if(o.status==='CONFIRMED')action='<button class="btn btn-sm btn-ship" onclick="updateOrder(\''+o.sellerOrderId+'\',\'SHIPPED\')">Ship</button>';else if(o.status==='SHIPPED')action='<button class="btn btn-sm btn-confirm" onclick="updateOrder(\''+o.sellerOrderId+'\',\'DELIVERED\')">Deliver</button>';else action='✅ Done';html+='<tr><td>#'+String(o.sellerOrderId).slice(-6)+'</td><td>'+items+'</td><td>'+qty+'</td><td><span class="status-'+o.status+'">'+o.status+'</span></td><td>'+action+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('sellerOrdersContent').innerHTML=html}else{document.getElementById('sellerOrdersContent').innerHTML='<p class="text-muted">No orders</p>'}}catch(e){}}
-async function updateOrder(oid,s){await fetch('/api/orders/'+oid+'/update-status?status='+s,{method:'PUT',headers:{'Authorization':'Bearer '+token}});showToast(s,'success');loadSellerOrders();loadSellerOverview()}
-async function loadSellerOffers(){try{var r=await fetch('/api/makola/seller/offers',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Offer</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){html+='<tr><td>'+o.productName+'</td><td>'+F(o.buyerOffer)+'</td><td><button class="btn btn-sm btn-confirm me-1" onclick="acceptOffer('+o.negotiationId+')">Accept</button><button class="btn btn-sm btn-reject" onclick="rejectOffer('+o.negotiationId+')">Reject</button></td></tr>'});html+='</tbody></table></div>';document.getElementById('sellerOffersContent').innerHTML=html}else{document.getElementById('sellerOffersContent').innerHTML='<p class="text-muted">No offers</p>'}}catch(e){}}
-async function acceptOffer(id){await fetch('/api/makola/accept/'+id,{method:'POST',headers:{'Authorization':'Bearer '+token}});showToast('Accepted','success');loadSellerOffers()}
-async function rejectOffer(id){var r=await Swal.fire({title:'Reject?',text:'Reason (optional):',input:'text',showCancelButton:true,confirmButtonText:'Reject',confirmButtonColor:'#e11d48'});if(r.isConfirmed){var url='/api/makola/reject/'+id;if(r.value)url+='?reason='+encodeURIComponent(r.value);await fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+token}});showToast('Rejected','info');loadSellerOffers()}}
-async function loadSellerDisputes(){try{var tp=JSON.parse(atob(token.split('.')[1]));var r=await fetch('/api/admin/disputes'),d=await r.json();var my=d.data?d.data.filter(function(ds){return ds.sellerId===tp.userId}):[];if(my.length>0){var html='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Amount</th><th>Status</th><th>Resolution</th></tr></thead><tbody>';my.forEach(function(ds){html+='<tr><td>#'+ds.id+'</td><td>'+ds.buyerName+'</td><td>'+F(ds.amount)+'</td><td>'+ds.status+'</td><td>'+(ds.resolution||'Pending')+'</td></tr>'});html+='</tbody></table></div>';document.getElementById('sellerDisputesContent').innerHTML=html}else{document.getElementById('sellerDisputesContent').innerHTML='<p class="text-muted">No disputes</p>'}}catch(e){}}
+async function loadSellerOrders(){try{var r=await fetch('/api/orders/seller-orders',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var h='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Items</th><th>Qty</th><th>Status</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){var items=o.items?o.items.map(function(i){return i.productName}).join(', '):'N/A';var qty=o.items?o.items.reduce(function(s,i){return s+i.quantity},0):0;var a='';if(o.status==='PENDING')a='<button class="btn btn-sm btn-confirm" onclick="updateOrder(\''+o.sellerOrderId+'\',\'CONFIRMED\')">Confirm</button>';else if(o.status==='CONFIRMED')a='<button class="btn btn-sm btn-ship" onclick="updateOrder(\''+o.sellerOrderId+'\',\'SHIPPED\')">Ship</button>';else if(o.status==='SHIPPED')a='<button class="btn btn-sm btn-confirm" onclick="updateOrder(\''+o.sellerOrderId+'\',\'DELIVERED\')">Deliver</button>';else a='✅ Done';h+='<tr><td>#'+String(o.sellerOrderId).slice(-6)+'</td><td>'+items+'</td><td>'+qty+'</td><td><span class="status-'+o.status+'">'+o.status+'</span></td><td>'+a+'</td></tr>'});h+='</tbody></table></div>';document.getElementById('sellerOrdersContent').innerHTML=h}else{document.getElementById('sellerOrdersContent').innerHTML='<p class="text-muted">No orders</p>'}}catch(e){}}
+async function updateOrder(oid,s){await fetch('/api/orders/'+oid+'/update-status?status='+s,{method:'PUT',headers:{'Authorization':'Bearer '+token}});toast(s,'success');loadSellerOrders();loadSellerOverview()}
+async function loadSellerOffers(){try{var r=await fetch('/api/makola/seller/offers',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();if(d.success&&d.data&&d.data.length>0){var h='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Offer</th><th>Action</th></tr></thead><tbody>';d.data.forEach(function(o){h+='<tr><td>'+o.productName+'</td><td>'+F(o.buyerOffer)+'</td><td><button class="btn btn-sm btn-confirm me-1" onclick="acceptOffer('+o.negotiationId+')">Accept</button><button class="btn btn-sm btn-reject" onclick="rejectOffer('+o.negotiationId+')">Reject</button></td></tr>'});h+='</tbody></table></div>';document.getElementById('sellerOffersContent').innerHTML=h}else{document.getElementById('sellerOffersContent').innerHTML='<p class="text-muted">No offers</p>'}}catch(e){}}
+async function acceptOffer(id){await fetch('/api/makola/accept/'+id,{method:'POST',headers:{'Authorization':'Bearer '+token}});toast('Accepted','success');loadSellerOffers()}
+async function rejectOffer(id){var r=await Swal.fire({title:'Reject?',text:'Reason (optional):',input:'text',showCancelButton:true,confirmButtonText:'Reject',confirmButtonColor:'#e11d48'});if(r.isConfirmed){var url='/api/makola/reject/'+id;if(r.value)url+='?reason='+encodeURIComponent(r.value);await fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+token}});toast('Rejected','info');loadSellerOffers()}}
+async function loadSellerDisputes(){try{var tp=JSON.parse(atob(token.split('.')[1]));var r=await fetch('/api/admin/disputes'),d=await r.json();var my=d.data?d.data.filter(function(ds){return ds.sellerId===tp.userId}):[];if(my.length>0){var h='<div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Amount</th><th>Status</th><th>Resolution</th></tr></thead><tbody>';my.forEach(function(ds){h+='<tr><td>#'+ds.id+'</td><td>'+ds.buyerName+'</td><td>'+F(ds.amount)+'</td><td>'+ds.status+'</td><td>'+(ds.resolution||'Pending')+'</td></tr>'});h+='</tbody></table></div>';document.getElementById('sellerDisputesContent').innerHTML=h}else{document.getElementById('sellerDisputesContent').innerHTML='<p class="text-muted">No disputes</p>'}}catch(e){}}
 </script>
 </body>
 </html>
