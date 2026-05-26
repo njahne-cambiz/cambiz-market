@@ -8,7 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="/js/i18n.js"></script>
+    
     <style>
         :root{--w:240px;--bg:#7f1d1d;--ac:#ef4444}
         *{margin:0;padding:0;box-sizing:border-box}
@@ -71,7 +71,7 @@
     <div class="topbar">
         <h4 id="pageTitle">📊 Dashboard Overview</h4>
         <div style="display:flex;gap:8px;align-items:center">
-            <div id="langSwitcher"></div>
+            
             <button class="btn btn-outline-danger btn-logout" onclick="window.confirmLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
         </div>
     </div>
@@ -155,7 +155,7 @@ async function loadHealth(){try{var r=await fetch('/api/admin/health'),d=(await 
 
 // ========== INIT ==========
 window.showTab('dashboard');
-document.getElementById('langSwitcher').innerHTML = i18n.createSwitcher();
+
 setInterval(async function(){try{var r=await fetch('/api/admin/products/pending-count'),d=await r.json();var pb=document.getElementById('pendingBadge');if(d.success&&pb)pb.textContent=d.count}catch(e){}},30000);
 </script>
 </body>
