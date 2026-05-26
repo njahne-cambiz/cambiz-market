@@ -157,7 +157,7 @@ window.doLogin=async function(){
     }catch(e){errorEl.textContent='Network error.';errorEl.style.display='block'}
 };
 
-async function init(){try{var r=await fetch('/api/products?page=0&size=200'),d=await r.json();if(d.data)document.getElementById('pubProductCount').textContent=d.data.length}catch(e){}try{var ur=await fetch('/api/admin/stats'),ud=await ur.json();if(ud.success&&ud.data)document.getElementById('pubUserCount').textContent=ud.data.totalUsers+'+'}catch(e){document.getElementById('pubUserCount').textContent='2k+'}document.getElementById('langSwitcherHeader').innerHTML=i18n.createSwitcher()}
+async function init(){try{var r=await fetch('/api/products?page=0&size=200'),d=await r.json();if(d.data)document.getElementById('pubProductCount').textContent=d.data.length}catch(e){}try{var ur=await fetch('/api/admin/stats'),ud=await ur.json();if(ud.success&&ud.data)document.getElementById('pubUserCount').textContent=ud.data.totalUsers+'+'}catch(e){document.getElementById('pubUserCount').textContent='2k+'}document.getElementById('langSwitcherHeader').innerHTML=''}
 
 var userType='BUYER';
 if(token){try{var payload=JSON.parse(atob(token.split('.')[1]));var roles=payload.roles||[];if(Array.isArray(roles)&&roles.indexOf('ROLE_ADMIN')!==-1){location.href='/admin/dashboard'}if(Array.isArray(roles)&&roles.indexOf('ROLE_SELLER')!==-1)userType='SELLER';else if(payload.userType==='SELLER')userType='SELLER'}catch(e){}
