@@ -10,7 +10,7 @@
     
     <style>
         :root {
-            --sidebar-w: 240px;
+            --sidebar-w: 260px;
             --primary: #7c3aed;
             --primary-dark: #2e1065;
             --primary-light: #f5f3ff;
@@ -18,6 +18,8 @@
             --text-dark: #1e1b4b;
             --text-muted: #64748b;
             --gold: #fbbf24;
+            --success: #10b981;
+            --danger: #ef4444;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
@@ -48,58 +50,60 @@
         /* Login Card */
         .login-card { background: #fff; border-radius: 12px; padding: 2.5rem 2rem; text-align: center; border: 1px solid #e2e8f0; max-width: 420px; margin: 0 auto 3rem auto; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--primary), var(--accent)); }
-        .login-card h2 { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); margin-bottom: 0.5rem; }
-        .login-card p { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
         
         /* Buttons */
         .btn-custom { padding: 10px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; font-size: 0.9rem; transition: all 0.2s; width: 100%; margin-bottom: 10px; }
-        .btn-custom:hover { transform: translateY(-2px); }
         .btn-primary-theme { background: var(--primary); color: white; }
-        .btn-primary-theme:hover { background: #6d28d9; color: white; }
         .btn-outline-theme { background: #fff; color: var(--primary); border: 2px solid var(--primary); }
-        .btn-outline-theme:hover { background: var(--primary-light); color: var(--primary); }
         
-        /* Login Form Setup */
+        /* Login Form */
         .login-form { display: none; text-align: left; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .login-form input { display: block; width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; transition: 0.2s; }
-        .login-form input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); outline: none; }
+        .login-form input { display: block; width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; }
         
-        /* Private View: Sidebar & Main */
-        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--primary-dark); color: #fff; overflow-y: auto; z-index: 1000; box-shadow: 2px 0 15px rgba(0,0,0,0.1); transition: left 0.3s; }
+        /* Sidebar */
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--primary-dark); color: #fff; overflow-y: auto; z-index: 1000; transition: left 0.3s; }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         .sidebar .logo { padding: 22px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 800; font-size: 1.2rem; }
         .sidebar .logo span { color: var(--gold); }
-        .sidebar a { color: #ddd6fe; padding: 14px 20px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 0.9rem; border-left: 3px solid transparent; cursor: pointer; transition: 0.2s; font-weight: 500; }
+        .nav-category { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #a78bfa; padding: 1.5rem 20px 0.5rem 20px; font-weight: 700; }
+        .sidebar a { color: #ddd6fe; padding: 12px 20px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 0.9rem; border-left: 3px solid transparent; cursor: pointer; transition: 0.2s; font-weight: 500; }
         .sidebar a:hover, .sidebar a.active { color: #fff; background: rgba(255,255,255,0.05); border-left-color: var(--gold); }
         .sidebar a i { width: 20px; text-align: center; font-size: 1rem; }
+        .sidebar a .badge { margin-left: auto; background: var(--gold); color: var(--primary-dark); font-size: 0.7rem; }
         
         .main { margin-left: var(--sidebar-w); padding: 2rem; min-height: 100vh; transition: margin-left 0.3s; }
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: #fff; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
         .topbar h4 { font-weight: 800; color: var(--text-dark); margin: 0; font-size: 1.2rem; }
         
-        /* Cards & Tables */
         .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 1.5rem; border: 1px solid #e2e8f0; overflow: hidden; }
-        .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: var(--text-dark); background: #fff; }
+        .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: var(--text-dark); background: #fff; display: flex; justify-content: space-between; align-items: center; }
         .card-body { padding: 1.5rem; }
         .table { margin: 0; }
         .table th { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; padding: 12px 1.5rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
         .table td { padding: 12px 1.5rem; vertical-align: middle; font-size: 0.9rem; border-bottom: 1px solid #f1f5f9; }
         
-        /* Seller Quick Actions Grid */
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .action-card { background: #fff; border-radius: 10px; padding: 1.2rem; border: 1px solid #e2e8f0; text-align: center; text-decoration: none; color: var(--text-dark); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
-        .action-card:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-3px); box-shadow: 0 4px 12px rgba(124,58,237,0.1); }
-        .action-card .icon { font-size: 1.8rem; }
-        .action-card .title { font-weight: 700; font-size: 0.85rem; }
+        .premium-banner { background: linear-gradient(135deg, #1e1b4b, #4c1d95); color: white; border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1.5rem; border: 1px solid #8b5cf6; }
+        .premium-banner h3 { color: var(--gold); font-weight: 800; }
         
-        /* Responsive */
-        .mobile-menu-btn { display: none; position: fixed; top: 12px; left: 12px; z-index: 1001; background: var(--primary-dark); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+        .action-card { background: #fff; border-radius: 10px; padding: 1.5rem; border: 1px solid #e2e8f0; text-align: center; text-decoration: none; color: var(--text-dark); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .action-card:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-3px); box-shadow: 0 4px 12px rgba(124,58,237,0.1); }
+        .action-card .icon { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .action-card .title { font-weight: 700; font-size: 1rem; }
+        .action-card .desc { font-size: 0.75rem; color: var(--text-muted); }
+        
+        .mobile-menu-btn { display: none; position: fixed; top: 12px; left: 12px; z-index: 1001; background: var(--primary-dark); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; }
+        .btn-sm { padding: 5px 10px; font-size: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
+        .status-PENDING { color: #d97706; } .status-CONFIRMED { color: #2563eb; } .status-SHIPPED { color: #7e22ce; } .status-DELIVERED { color: #10b981; }
+        .btn-confirm { background: #7c3aed; color: white; } .btn-ship { background: #2e1065; color: white; }
+        
         @media(max-width: 768px) {
             .mobile-menu-btn { display: block; }
-            .sidebar { left: -260px; }
+            .sidebar { left: -280px; }
             .sidebar.open { left: 0; }
             .main { margin-left: 0; padding: 4rem 1rem 1rem 1rem; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -129,13 +133,10 @@
     
     <div class="login-card">
         <h2>Sign In</h2>
-        <p>Access your CamBiz Market account</p>
-        
         <div id="loginButtons">
             <button class="btn-custom btn-primary-theme" onclick="window.showLogin()">Sign In</button>
             <a href="/register" class="btn-custom btn-outline-theme">Create Account</a>
         </div>
-
         <div class="login-form" id="loginForm">
             <input type="email" id="loginEmail" placeholder="Email Address">
             <input type="password" id="loginPassword" placeholder="Password">
@@ -163,32 +164,21 @@
 </div>
 
 <script>
-// Formatters
+// ========== GLOBAL UTILS ==========
 const F = v => new Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'XAF', maximumFractionDigits: 0}).format(v || 0);
+const D = d => d ? new Date(d).toLocaleDateString('en-GB') : 'N/A';
 const toast = (t, i = 'success') => Swal.fire({toast: true, position: 'top-end', icon: i, title: t, showConfirmButton: false, timer: 2000});
 
-// Global UI Toggles
 window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('open');
-window.showLogin = () => {
-    document.getElementById('loginButtons').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'block';
-};
-window.hideLogin = () => {
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('loginButtons').style.display = 'block';
-    document.getElementById('loginError').style.display = 'none';
-};
+window.showLogin = () => { document.getElementById('loginButtons').style.display = 'none'; document.getElementById('loginForm').style.display = 'block'; };
+window.hideLogin = () => { document.getElementById('loginForm').style.display = 'none'; document.getElementById('loginButtons').style.display = 'block'; document.getElementById('loginError').style.display = 'none'; };
 
-// Auth & Setup
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
 let userType = 'BUYER';
 
-window.logout = () => {
-    localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
-    location.reload();
-};
+window.logout = () => { localStorage.removeItem('token'); sessionStorage.removeItem('token'); location.href = '/dashboard'; };
 
+// ========== REAL LOGIN ==========
 window.doLogin = async () => {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
@@ -216,12 +206,12 @@ window.doLogin = async () => {
             errorEl.style.display = 'block';
         }
     } catch (e) {
-        errorEl.textContent = 'Network error. Backend might be unreachable.';
+        errorEl.textContent = 'Network error. Please try again.';
         errorEl.style.display = 'block';
     }
 };
 
-// --- FIX: The previously truncated Cart function is now fully restored ---
+// ========== CART BADGE ==========
 async function updateCartBadge() {
     if (!token) return;
     try {
@@ -234,118 +224,391 @@ async function updateCartBadge() {
         } else {
             badge.style.display = 'none';
         }
-    } catch (e) { console.error("Cart fetch error:", e); }
+    } catch (e) {}
 }
 
+// ========== PUBLIC STATS ==========
 async function initPublicStats() {
     try {
         const pr = await fetch('/api/products?page=0&size=200');
         const pd = await pr.json();
         if (pd.data) document.getElementById('pubProductCount').textContent = pd.data.length;
-    } catch (e) {}
-    
+    } catch(e) {}
     try {
         const ur = await fetch('/api/admin/stats');
         const ud = await ur.json();
         if (ud.success && ud.data) document.getElementById('pubUserCount').textContent = ud.data.totalUsers + '+';
-    } catch (e) { document.getElementById('pubUserCount').textContent = '2k+'; }
+    } catch(e) { document.getElementById('pubUserCount').textContent = '2k+'; }
 }
 
-// Layout Builders
+// ========== SIDEBAR ==========
 function buildSidebar() {
     let html = '';
     if (userType === 'BUYER') {
-        document.getElementById('userTypeLabel').textContent = 'Buyer Account';
-        html += `<a class="nav-link active" onclick="window.showTab('bstore')"><i class="fas fa-store"></i> Store</a>`;
-        html += `<a class="nav-link" onclick="window.showTab('bcart')"><i class="fas fa-shopping-cart"></i> Cart</a>`;
-        html += `<a class="nav-link" onclick="window.showTab('borders')"><i class="fas fa-list"></i> Orders</a>`;
-        html += `<a class="nav-link" onclick="window.showTab('boffers')"><i class="fas fa-comments"></i> Offers</a>`;
+        document.getElementById('userTypeLabel').textContent = 'Buyer Dashboard';
+        html += `<div class="nav-category">Main</div>`;
+        html += `<a class="nav-link active" onclick="window.showTab('bstore')"><i class="fas fa-store"></i> Browse Store</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('bcart')"><i class="fas fa-shopping-cart"></i> Shopping Cart <span class="badge" id="sideCartBadge">0</span></a>`;
+        html += `<a class="nav-link" onclick="window.showTab('borders')"><i class="fas fa-box-open"></i> My Orders</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('boffers')"><i class="fas fa-robot"></i> AI Offers</a>`;
+        html += `<div class="nav-category">Explore</div>`;
+        html += `<a class="nav-link" onclick="window.showTab('bwishlist')"><i class="fas fa-heart"></i> Wishlist</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('bnjangi')"><i class="fas fa-users"></i> Njangi Groups</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('bpromos')"><i class="fas fa-bolt"></i> Flash Sales & Coupons</a>`;
+        html += `<div class="nav-category">Account</div>`;
+        html += `<a class="nav-link" onclick="window.showTab('breviews')"><i class="fas fa-star"></i> My Reviews</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('bdisputes')"><i class="fas fa-scale-balanced"></i> Disputes</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('brefer')"><i class="fas fa-gift"></i> Refer & Earn</a>`;
     } else if (userType === 'SELLER') {
-        document.getElementById('userTypeLabel').textContent = 'Seller Dashboard';
-        html += `<a class="nav-link active" onclick="window.showTab('soverview')"><i class="fas fa-th-large"></i> Overview</a>`;
-        html += `<a class="nav-link" onclick="window.showTab('sorders')"><i class="fas fa-box"></i> Orders</a>`;
-        html += `<a class="nav-link" onclick="window.showTab('soffers')"><i class="fas fa-tags"></i> Offers</a>`;
+        document.getElementById('userTypeLabel').textContent = 'Seller Central';
+        html += `<div class="nav-category">Overview</div>`;
+        html += `<a class="nav-link active" onclick="window.showTab('soverview')"><i class="fas fa-chart-pie"></i> Dashboard</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('sorders')"><i class="fas fa-box"></i> Order Management</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('soffers')"><i class="fas fa-comments-dollar"></i> Customer Offers</a>`;
+        html += `<div class="nav-category">Finance</div>`;
+        html += `<a class="nav-link" onclick="window.showTab('swallet')"><i class="fas fa-wallet"></i> Wallet & Revenue</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('stransactions')"><i class="fas fa-file-invoice-dollar"></i> Transactions</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('sdisputes')"><i class="fas fa-scale-balanced"></i> Disputes</a>`;
+        html += `<div class="nav-category">Growth</div>`;
+        html += `<a class="nav-link" onclick="window.showTab('smarketing')"><i class="fas fa-bullhorn"></i> Marketing Hub</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('srefer')"><i class="fas fa-gift"></i> Referrals</a>`;
+        html += `<a class="nav-link" onclick="window.showTab('spremium')" style="color: var(--gold);"><i class="fas fa-crown"></i> Premium Upgrade</a>`;
     }
     document.getElementById('sidebarLinks').innerHTML = html;
 }
 
+// ========== TAB SWITCHING ==========
 window.showTab = function(t) {
     document.querySelectorAll('.sidebar a').forEach(l => l.classList.remove('active'));
     const link = document.querySelector(`.sidebar a[onclick*="${t}"]`);
     if (link) link.classList.add('active');
-    
     if (window.innerWidth < 768) window.toggleSidebar();
     
     const titles = {
-        bstore: '🛍️ Store', bcart: '🛒 Cart', borders: '📋 Orders', boffers: '💬 Offers',
-        soverview: '🏪 Seller Overview', sorders: '📦 Orders', soffers: '💰 Offers'
+        bstore:'🛍️ Browse Store', bcart:'🛒 Shopping Cart', borders:'📋 My Orders', boffers:'💬 Makola AI Offers',
+        bwishlist:'❤️ My Wishlist', bnjangi:'🤝 Njangi Group Deals', bpromos:'⚡ Flash Sales & Coupons',
+        breviews:'⭐ My Reviews', bdisputes:'⚖️ Order Disputes', brefer:'🎁 Refer & Earn',
+        soverview:'🏪 Dashboard Overview', sorders:'📦 Order Management', soffers:'💰 AI Customer Offers',
+        swallet:'💳 Wallet & Revenue', stransactions:'💸 Transaction History', sdisputes:'⚖️ Manage Disputes',
+        smarketing:'📈 Marketing & Promotions', srefer:'🎁 Referral Earnings', spremium:'🏆 Premium Upgrade'
     };
     document.getElementById('pageTitle').innerHTML = titles[t] || t;
     
     let content = '';
-    // Buyer Views
-    if (t === 'bstore') content = `<div class="card"><div class="card-body text-center"><a href="/store" class="btn btn-primary" style="background:var(--primary); border:none;">Browse Store</a></div></div>`;
-    else if (t === 'bcart') content = `<div class="card"><div class="card-header">🛒 My Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div>`;
+    
+    // ========== BUYER VIEWS ==========
+    if (t === 'bstore') {
+        content = `<div class="card"><div class="card-body text-center"><a href="/store" class="btn btn-primary-theme btn-lg">Browse Store</a></div></div>`;
+    }
+    else if (t === 'bcart') content = `<div class="card"><div class="card-header">🛒 Shopping Cart</div><div class="card-body" id="buyerCartContent">Loading...</div></div>`;
     else if (t === 'borders') content = `<div class="card"><div class="card-header">📋 My Orders</div><div class="card-body p-0" id="buyerOrdersContent">Loading...</div></div>`;
     else if (t === 'boffers') content = `<div class="card"><div class="card-header">💬 AI Offers</div><div class="card-body p-0" id="buyerOffersContent">Loading...</div></div>`;
+    else if (t === 'bwishlist') content = `<div class="card"><div class="card-header">❤️ Saved Items</div><div class="card-body text-center"><a href="/wishlist" class="btn btn-primary-theme">View Wishlist</a></div></div>`;
+    else if (t === 'bnjangi') content = `<div class="card"><div class="card-header">🤝 Active Njangi Groups</div><div class="card-body text-center"><a href="/njangi" class="btn btn-primary-theme">Browse Groups</a></div></div>`;
+    else if (t === 'bpromos') {
+        content = `<div class="row"><div class="col-md-6"><div class="premium-banner" style="background: linear-gradient(135deg, #ef4444, #991b1b);"><h3>⚡ Flash Sales</h3><p>Limited-time deals</p><a href="/store" class="btn btn-light mt-2">View Deals</a></div></div><div class="col-md-6"><div class="premium-banner" style="background: linear-gradient(135deg, #10b981, #047857);"><h3>🏷️ Coupons</h3><p>Apply at checkout</p><a href="/store" class="btn btn-light mt-2">View Coupons</a></div></div></div>`;
+    }
+    else if (t === 'brefer') content = `<div class="premium-banner"><h3>🎁 Invite Friends, Earn Cash</h3><p>Share your link and earn XAF 500 per signup!</p><a href="/referral" class="btn btn-light mt-3">View Referrals</a></div>`;
+    else if (t === 'breviews') content = `<div class="card"><div class="card-header">⭐ My Reviews</div><div class="card-body text-center text-muted">No reviews yet.</div></div>`;
+    else if (t === 'bdisputes') content = `<div class="card"><div class="card-header">⚖️ My Disputes</div><div class="card-body p-0" id="buyerDisputesContent">Loading...</div></div>`;
     
-    // Seller Views
+    // ========== SELLER VIEWS ==========
     else if (t === 'soverview') {
-        content = `
-            <div class="stats-grid" id="sellerStats">
-                <div class="stat-card"><div class="value">...</div><div class="label">Loading</div></div>
-            </div>
-            <h5 class="mb-3" style="font-weight:700;">⚡ Quick Actions</h5>
-            <div class="quick-actions">
-                <a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div></a>
-                <a href="/create-flash-sale" class="action-card"><div class="icon">⚡</div><div class="title">Flash Sale</div></a>
-                <a href="/create-coupon" class="action-card"><div class="icon">🏷️</div><div class="title">Coupon</div></a>
-                <a href="/transactions" class="action-card"><div class="icon">💰</div><div class="title">Wallet</div></a>
-            </div>`;
+        content = `<div class="stats-grid" id="sellerStats"><div class="stat-card"><div class="value">...</div><div class="label">Loading</div></div></div>
+        <h5 class="fw-bold mb-3">⚡ Quick Actions</h5>
+        <div class="feature-grid">
+            <a href="/create-product" class="action-card"><div class="icon">➕</div><div class="title">New Product</div><div class="desc">List item</div></a>
+            <a href="/create-flash-sale" class="action-card"><div class="icon">⚡</div><div class="title">Flash Sale</div><div class="desc">Limited deal</div></a>
+            <a href="/create-coupon" class="action-card"><div class="icon">🏷️</div><div class="title">Coupon</div><div class="desc">Discount code</div></a>
+            <a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi</div><div class="desc">Group deal</div></a>
+            <a href="/transactions" class="action-card"><div class="icon">💰</div><div class="title">Transactions</div><div class="desc">History</div></a>
+            <a href="/referral" class="action-card"><div class="icon">🎁</div><div class="title">Refer</div><div class="desc">Earn</div></a>
+            <a href="/store" class="action-card"><div class="icon">🛍️</div><div class="title">Store</div><div class="desc">Browse</div></a>
+            <a href="/premium" class="action-card"><div class="icon">🏆</div><div class="title">Premium</div><div class="desc">Upgrade</div></a>
+        </div>`;
     }
     else if (t === 'sorders') content = `<div class="card"><div class="card-header">📦 Customer Orders</div><div class="card-body p-0" id="sellerOrdersContent">Loading...</div></div>`;
     else if (t === 'soffers') content = `<div class="card"><div class="card-header">💰 Customer Offers</div><div class="card-body p-0" id="sellerOffersContent">Loading...</div></div>`;
+    else if (t === 'sdisputes') content = `<div class="card"><div class="card-header">⚖️ Disputes Against Me</div><div class="card-body p-0" id="sellerDisputesContent">Loading...</div></div>`;
+    else if (t === 'swallet') content = `<div class="premium-banner" style="background: linear-gradient(135deg, #0f172a, #1e293b); border-color:#334155;"><h6 class="text-uppercase text-muted">Available Balance</h6><h1 class="text-white mb-4" id="walletBalance">0 XAF</h1><a href="/transactions" class="btn btn-success fw-bold px-4">View Transactions</a></div>`;
+    else if (t === 'stransactions') content = `<div class="card"><div class="card-header">💸 Transaction History</div><div class="card-body text-center"><a href="/transactions" class="btn btn-primary-theme">View All Transactions</a></div></div>`;
+    else if (t === 'smarketing') {
+        content = `<h5 class="mb-3 fw-bold">Grow Your Sales</h5><div class="feature-grid">
+            <a href="/create-flash-sale" class="action-card"><div class="icon">⚡</div><div class="title">Flash Sales</div><div class="desc">Create time-limited deals</div></a>
+            <a href="/create-coupon" class="action-card"><div class="icon">🏷️</div><div class="title">Coupons</div><div class="desc">Generate discount codes</div></a>
+            <a href="/create-njangi" class="action-card"><div class="icon">🤝</div><div class="title">Njangi Deals</div><div class="desc">Create group buying offers</div></a>
+            <a href="/premium" class="action-card"><div class="icon">⭐</div><div class="title">Feature Products</div><div class="desc">Pay to boost visibility</div></a>
+        </div>`;
+    }
+    else if (t === 'spremium') {
+        content = `<div class="premium-banner"><h3><i class="fas fa-crown"></i> CamBiz Premium Seller</h3><p class="mb-4">Unlock advanced analytics, lower commission fees, and priority placement.</p>
+            <div class="d-flex justify-content-center gap-3"><a href="/premium" class="btn btn-light fw-bold text-dark">Monthly (5,000 XAF)</a><a href="/premium" class="btn btn-warning fw-bold text-dark">Yearly (50,000 XAF)</a></div></div>`;
+    }
+    else if (t === 'srefer') content = `<div class="premium-banner"><h3>🎁 Seller Referral Program</h3><p>Invite other vendors and earn 5% of their first month's sales.</p><a href="/referral" class="btn btn-light mt-3">View Referrals</a></div>`;
+    else { content = `<div class="card"><div class="card-body text-center text-muted">Feature active. No data to display yet.</div></div>`; }
     
     document.getElementById('tab-content').innerHTML = content;
     
-    // Trigger Data loads
+    // Load real data
     setTimeout(() => {
-        if(t === 'soverview') loadSellerOverview();
-        if(t === 'sorders') loadSellerOrders();
-        // Add other load triggers as needed based on your backend
+        if (t === 'bcart') loadBuyerCart();
+        if (t === 'borders') loadBuyerOrders();
+        if (t === 'boffers') loadBuyerOffers();
+        if (t === 'bdisputes') loadBuyerDisputes();
+        if (t === 'soverview') loadSellerOverview();
+        if (t === 'sorders') loadSellerOrders();
+        if (t === 'soffers') loadSellerOffers();
+        if (t === 'sdisputes') loadSellerDisputes();
+        if (t === 'swallet') loadWallet();
     }, 100);
 };
 
-// Data Loading Mocks (Update with actual API calls if they differ)
+// ========== BUYER DATA LOADERS ==========
+async function loadBuyerCart() {
+    try {
+        const r = await fetch('/api/cart', {headers: {'Authorization': 'Bearer ' + token}});
+        const d = await r.json();
+        if (d.success && d.data && d.data.items && d.data.items.length > 0) {
+            let h = '<div class="table-responsive"><table class="table table-hover"><tbody>';
+            d.data.items.forEach(i => h += `<tr><td>${i.productName} x${i.quantity}</td><td>${F(i.effectivePrice)}</td></tr>`);
+            h += `</tbody></table></div><div class="text-end fw-bold mt-2">Total: ${F(d.data.total)}</div><a href="/cart" class="btn btn-primary-theme btn-sm mt-2">Checkout</a>`;
+            document.getElementById('buyerCartContent').innerHTML = h;
+        } else {
+            document.getElementById('buyerCartContent').innerHTML = '<p class="text-muted">Cart empty</p>';
+        }
+    } catch(e) {}
+}
+
+async function loadBuyerOrders() {
+    try {
+        const r = await fetch('/api/orders/my-orders', {headers: {'Authorization': 'Bearer ' + token}});
+        const d = await r.json();
+        if (d.success && d.data && d.data.length > 0) {
+            let h = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+            d.data.forEach(o => {
+                const sid = o.sellerId || 0;
+                h += `<tr><td>#${o.orderNumber || o.id}</td><td>${F(o.totalAmount || o.amount)}</td><td><span class="status-${o.status}">${o.status}</span></td><td>${o.status === 'DELIVERED' || o.status === 'SHIPPED' ? `<button class="btn btn-sm btn-outline-danger" onclick="fileDispute('${o.orderNumber || o.id}',${o.totalAmount || o.amount},${sid})">Report</button>` : ''}</td></tr>`;
+            });
+            h += '</tbody></table></div>';
+            document.getElementById('buyerOrdersContent').innerHTML = h;
+        } else {
+            document.getElementById('buyerOrdersContent').innerHTML = '<p class="text-muted">No orders</p>';
+        }
+    } catch(e) {}
+}
+
+async function fileDispute(oid, amt, sid) {
+    const tp = JSON.parse(atob(token.split('.')[1]));
+    Swal.fire({
+        title: 'Report Problem',
+        html: '<textarea id="dReason" class="form-control" rows="3" placeholder="Describe..."></textarea>',
+        icon: 'warning', showCancelButton: true, confirmButtonText: 'Submit', confirmButtonColor: '#ef4444',
+        preConfirm: () => {
+            const r = document.getElementById('dReason').value.trim();
+            if (!r) { Swal.showValidationMessage('Required'); return false; }
+            return r;
+        }
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            await fetch('/api/admin/disputes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({orderId: parseInt(String(oid).replace(/[^0-9]/g,'')) || oid, buyerId: tp.userId, sellerId: sid, amount: amt, reason: result.value})
+            });
+            toast('Filed', 'success');
+        }
+    });
+}
+
+async function loadBuyerOffers() {
+    try {
+        const r = await fetch('/api/makola/my-offers', {headers: {'Authorization': 'Bearer ' + token}});
+        const d = await r.json();
+        if (d.success && d.data && d.data.length > 0) {
+            let h = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Offer</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+            d.data.forEach(o => {
+                let a = '';
+                if (o.status === 'ACCEPTED') a = `<button class="btn btn-sm btn-success" onclick="addToCart(${o.negotiationId})">Add to Cart</button>`;
+                else if (o.status === 'REJECTED') a = `<button class="btn btn-sm btn-outline-danger" onclick="dismissOffer(${o.negotiationId})">Dismiss</button>`;
+                else a = '<span style="color:#d97706">Waiting</span>';
+                h += `<tr><td>${o.productName}</td><td>${F(o.buyerOffer)}</td><td>${o.status}</td><td>${a}</td></tr>`;
+            });
+            h += '</tbody></table></div>';
+            document.getElementById('buyerOffersContent').innerHTML = h;
+        } else {
+            document.getElementById('buyerOffersContent').innerHTML = '<p class="text-muted">No offers</p>';
+        }
+    } catch(e) {}
+}
+
+async function addToCart(nid) {
+    await fetch('/api/makola/add-to-cart/' + nid, {method: 'POST', headers: {'Authorization': 'Bearer ' + token}});
+    toast('Added', 'success');
+    loadBuyerCart();
+    loadBuyerOffers();
+}
+
+async function dismissOffer(nid) {
+    await fetch('/api/makola/reject/' + nid, {method: 'POST', headers: {'Authorization': 'Bearer ' + token}});
+    toast('Dismissed', 'info');
+    loadBuyerOffers();
+}
+
+async function loadBuyerDisputes() {
+    try {
+        const tp = JSON.parse(atob(token.split('.')[1]));
+        const r = await fetch('/api/admin/disputes');
+        const d = await r.json();
+        const my = d.data ? d.data.filter(ds => ds.buyerId === tp.userId) : [];
+        if (my.length > 0) {
+            let h = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Seller</th><th>Amount</th><th>Status</th><th>Resolution</th></tr></thead><tbody>';
+            my.forEach(ds => h += `<tr><td>#${ds.id}</td><td>${ds.sellerName}</td><td>${F(ds.amount)}</td><td>${ds.status}</td><td>${ds.resolution || 'Pending'}</td></tr>`);
+            h += '</tbody></table></div>';
+            document.getElementById('buyerDisputesContent').innerHTML = h;
+        } else {
+            document.getElementById('buyerDisputesContent').innerHTML = '<p class="text-muted">No disputes</p>';
+        }
+    } catch(e) {}
+}
+
+// ========== SELLER DATA LOADERS ==========
 async function loadSellerOverview() {
     try {
         const pr = await fetch('/api/products/my-products', {headers: {'Authorization': 'Bearer ' + token}});
         const pd = await pr.json();
         const pc = pd.success && pd.data ? pd.data.length : 0;
         
+        const or = await fetch('/api/orders/seller-orders', {headers: {'Authorization': 'Bearer ' + token}});
+        const od = await or.json();
+        const oc = od.success && od.data ? od.data.length : 0;
+        let rev = 0;
+        if (od.success && od.data) od.data.forEach(o => rev += o.sellerPayout || 0);
+        
+        let wallet = 0;
+        try {
+            const wr = await fetch('/api/wallet/balance', {headers: {'Authorization': 'Bearer ' + token}});
+            const wd = await wr.json();
+            if (wd.success && wd.data) wallet = wd.data.balance || 0;
+        } catch(e) {}
+        
+        let isPremium = false;
+        try {
+            const premR = await fetch('/api/premium/my-status', {headers: {'Authorization': 'Bearer ' + token}});
+            const premD = await premR.json();
+            if (premD.success && premD.data) isPremium = premD.data.isPremium;
+        } catch(e) {}
+        
         document.getElementById('sellerStats').innerHTML = `
             <div class="stat-card"><div class="value">${pc}</div><div class="label">Products</div></div>
-            <div class="stat-card"><div class="value">0</div><div class="label">Pending Orders</div></div>
-            <div class="stat-card"><div class="value">${F(0)}</div><div class="label">Wallet</div></div>
+            <div class="stat-card"><div class="value">${oc}</div><div class="label">Orders</div></div>
+            <div class="stat-card"><div class="value">${F(rev)}</div><div class="label">Revenue</div></div>
+            <div class="stat-card"><div class="value">${F(wallet)}</div><div class="label">Wallet</div></div>
+            <div class="stat-card"><div class="value">${isPremium ? '🏆' : '⭐'}</div><div class="label">${isPremium ? 'Premium' : 'Regular'}</div></div>
         `;
     } catch(e) {
-        document.getElementById('sellerStats').innerHTML = `<p class="text-muted w-100 text-center">Unable to load stats</p>`;
+        document.getElementById('sellerStats').innerHTML = '<p class="text-muted w-100 text-center">Unable to load stats</p>';
     }
 }
 
 async function loadSellerOrders() {
-    document.getElementById('sellerOrdersContent').innerHTML = `<div class="p-3 text-muted text-center">No orders found.</div>`;
+    try {
+        const r = await fetch('/api/orders/seller-orders', {headers: {'Authorization': 'Bearer ' + token}});
+        const d = await r.json();
+        if (d.success && d.data && d.data.length > 0) {
+            let h = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Order</th><th>Items</th><th>Qty</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+            d.data.forEach(o => {
+                const items = o.items ? o.items.map(i => i.productName).join(', ') : 'N/A';
+                const qty = o.items ? o.items.reduce((s, i) => s + i.quantity, 0) : 0;
+                let a = '';
+                if (o.status === 'PENDING') a = `<button class="btn btn-sm btn-confirm" onclick="updateOrder('${o.sellerOrderId}','CONFIRMED')">Confirm</button>`;
+                else if (o.status === 'CONFIRMED') a = `<button class="btn btn-sm btn-ship" onclick="updateOrder('${o.sellerOrderId}','SHIPPED')">Ship</button>`;
+                else if (o.status === 'SHIPPED') a = `<button class="btn btn-sm btn-confirm" onclick="updateOrder('${o.sellerOrderId}','DELIVERED')">Deliver</button>`;
+                else a = '✅ Done';
+                h += `<tr><td>#${String(o.sellerOrderId).slice(-6)}</td><td>${items}</td><td>${qty}</td><td><span class="status-${o.status}">${o.status}</span></td><td>${a}</td></tr>`;
+            });
+            h += '</tbody></table></div>';
+            document.getElementById('sellerOrdersContent').innerHTML = h;
+        } else {
+            document.getElementById('sellerOrdersContent').innerHTML = '<p class="text-muted">No orders</p>';
+        }
+    } catch(e) {}
 }
 
-// Initialization Logic
+async function updateOrder(oid, s) {
+    await fetch('/api/orders/' + oid + '/update-status?status=' + s, {method: 'PUT', headers: {'Authorization': 'Bearer ' + token}});
+    toast(s, 'success');
+    loadSellerOrders();
+    loadSellerOverview();
+}
+
+async function loadSellerOffers() {
+    try {
+        const r = await fetch('/api/makola/seller/offers', {headers: {'Authorization': 'Bearer ' + token}});
+        const d = await r.json();
+        if (d.success && d.data && d.data.length > 0) {
+            let h = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>Offer</th><th>Action</th></tr></thead><tbody>';
+            d.data.forEach(o => h += `<tr><td>${o.productName}</td><td>${F(o.buyerOffer)}</td><td><button class="btn btn-sm btn-confirm me-1" onclick="acceptOffer(${o.negotiationId})">Accept</button><button class="btn btn-sm btn-outline-danger" onclick="rejectOffer(${o.negotiationId})">Reject</button></td></tr>`);
+            h += '</tbody></table></div>';
+            document.getElementById('sellerOffersContent').innerHTML = h;
+        } else {
+            document.getElementById('sellerOffersContent').innerHTML = '<p class="text-muted">No offers</p>';
+        }
+    } catch(e) {}
+}
+
+async function acceptOffer(id) {
+    await fetch('/api/makola/accept/' + id, {method: 'POST', headers: {'Authorization': 'Bearer ' + token}});
+    toast('Accepted', 'success');
+    loadSellerOffers();
+}
+
+async function rejectOffer(id) {
+    const r = await Swal.fire({title:'Reject?', text:'Reason (optional):', input:'text', showCancelButton:true, confirmButtonText:'Reject', confirmButtonColor:'#e11d48'});
+    if (r.isConfirmed) {
+        let url = '/api/makola/reject/' + id;
+        if (r.value) url += '?reason=' + encodeURIComponent(r.value);
+        await fetch(url, {method:'POST', headers:{'Authorization':'Bearer '+token}});
+        toast('Rejected', 'info');
+        loadSellerOffers();
+    }
+}
+
+async function loadSellerDisputes() {
+    try {
+        const tp = JSON.parse(atob(token.split('.')[1]));
+        const r = await fetch('/api/admin/disputes');
+        const d = await r.json();
+        const my = d.data ? d.data.filter(ds => ds.sellerId === tp.userId) : [];
+        if (my.length > 0) {
+            let h = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Amount</th><th>Status</th><th>Resolution</th></tr></thead><tbody>';
+            my.forEach(ds => h += `<tr><td>#${ds.id}</td><td>${ds.buyerName}</td><td>${F(ds.amount)}</td><td>${ds.status}</td><td>${ds.resolution || 'Pending'}</td></tr>`);
+            h += '</tbody></table></div>';
+            document.getElementById('sellerDisputesContent').innerHTML = h;
+        } else {
+            document.getElementById('sellerDisputesContent').innerHTML = '<p class="text-muted">No disputes</p>';
+        }
+    } catch(e) {}
+}
+
+async function loadWallet() {
+    try {
+        const wr = await fetch('/api/wallet/balance', {headers: {'Authorization': 'Bearer ' + token}});
+        const wd = await wr.json();
+        if (wd.success && wd.data && document.getElementById('walletBalance')) {
+            document.getElementById('walletBalance').textContent = F(wd.data.balance || 0);
+        }
+    } catch(e) {}
+}
+
+// ========== INIT ==========
 if (token) {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const roles = payload.roles || [];
         if (roles.includes('ROLE_ADMIN')) location.href = '/admin/dashboard';
         if (roles.includes('ROLE_SELLER') || payload.userType === 'SELLER') userType = 'SELLER';
-    } catch (e) {}
-
+    } catch(e) {}
+    
     document.getElementById('publicView').style.display = 'none';
     document.getElementById('publicHeader').style.display = 'none';
     document.getElementById('userView').style.display = 'block';
