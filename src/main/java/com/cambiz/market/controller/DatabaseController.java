@@ -56,4 +56,66 @@ public class DatabaseController {
 
     @PostMapping("/add-review-reply")
     public ResponseEntity<Map<String, Object>> addReviewReply() { List<String> r = new ArrayList<>(); try { jdbcTemplate.execute("ALTER TABLE reviews ADD COLUMN IF NOT EXISTS admin_reply TEXT"); r.add("admin_reply"); } catch (Exception e) { r.add("err: " + e.getMessage()); } try { jdbcTemplate.execute("ALTER TABLE reviews ADD COLUMN IF NOT EXISTS replied_at TIMESTAMP"); r.add("replied_at"); } catch (Exception e) { r.add("err: " + e.getMessage()); } return ResponseEntity.ok(Map.of("success", true, "results", r)); }
+
+    // ========== SEARCH MIGRATION ==========
+    @PostMapping("/migrate-search")
+    public ResponseEntity<Map<String, Object>> migrateSearch() { 
+        List<String> r = new ArrayList<>(); 
+        try { 
+            jdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm"); 
+            r.add("pg_trgm extension"); 
+        } catch (Exception e) { 
+            r.add("pg_trgm err: " + e.getMessage()); 
+        } 
+        try { 
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS search_vector tsvector"); 
+            r.add("search_vector column"); 
+        } catch (Exception e) { 
+            r.add("search_vector err: " + e.getMessage()); 
+        } 
+        try { 
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS brand VARCHAR(100)"); 
+            r.add("brand column"); 
+        } catch (Exception e) { 
+            r.add("brand err: " + e.getMessage()); 
+        } 
+        try { 
+            jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS free_delivery BOOLEAN DEFAULT false"); 
+            r.add("free_delivery column"); 
+        } catch (Exception e) { 
+            r.add("free_delivery err: " + e.getMessage()); 
+        } 
+        try { 
+            jdbcTemplate.execute("CREATE OR REPLACE FUNCTION update_product_search_vector() RETURNS TRIGGER AS $$ BEGIN NEW.search_vector := setweight(to_tsvector('english', COALESCE(NEW.name, '')), 'A') || setweight(to_tsvector('english', COALESCE(NEW.description, '')), 'B') || setweight(to_tsvector('english', COALESCE(NEW.brand, '')), 'C'); RETURN NEW; END; $$ LANGUAGE plpgsql"); 
+            r.add("search function"); 
+        } catch (Exception e) { 
+            r.add("function err: " + e.getMessage()); 
+        } 
+        try { 
+            jdbcTemplate.execute("DROP TRIGGER IF EXISTS update_product_search_vector_trigger ON products"); 
+            jdbcTemplate.execute("CREATE TRIGGER update_product_search_vector_trigger BEFORE INSERT OR UPDATE ON products FOR EACH ROW EXECUTE FUNCTION update_product_search_vector()"); 
+            r.add("search trigger"); 
+        } catch (Exception e) { 
+            r.add("trigger err: " + e.getMessage()); 
+        } 
+        try { 
+            jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_product_search ON products USING GIN(search_vector)"); 
+            r.add("search index"); 
+        } catch (Exception e) { 
+            r.add("search index err: " + e.getMessage()); 
+        } 
+        try { 
+            jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_product_name_trgm ON products USING GIN(name gin_trgm_ops)"); 
+            r.add("trgm index"); 
+        } catch (Exception e) { 
+            r.add("trgm index err: " + e.getMessage()); 
+        } 
+        try { 
+            int updated = jdbcTemplate.update("UPDATE products SET search_vector = setweight(to_tsvector('english', COALESCE(name, '')), 'A') || setweight(to_tsvector('english', COALESCE(description, '')), 'B') || setweight(to_tsvector('english', COALESCE(brand, '')), 'C') WHERE search_vector IS NULL"); 
+            r.add("updated " + updated + " products"); 
+        } catch (Exception e) { 
+            r.add("update err: " + e.getMessage()); 
+        } 
+        return ResponseEntity.ok(Map.of("success", true, "results", r)); 
+    }
 }

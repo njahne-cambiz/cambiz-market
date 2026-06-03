@@ -69,14 +69,14 @@ public class Product {
     private Boolean isActive = true;
     
     @Column(name = "is_approved")
-    private Boolean isApproved = false;  // Changed to false - requires admin approval
+    private Boolean isApproved = false;
     
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private ProductStatus status = ProductStatus.PENDING_APPROVAL;  // NEW: Status tracking
+    private ProductStatus status = ProductStatus.PENDING_APPROVAL;
     
     @Column(name = "approved_by")
-    private String approvedBy;  // Changed from Long to String - stores admin email
+    private String approvedBy;
     
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
@@ -85,9 +85,19 @@ public class Product {
     private String rejectionReason;
     
     @Column(name = "rejected_at")
-    private LocalDateTime rejectedAt;  // NEW: When product was rejected
+    private LocalDateTime rejectedAt;
     
     private Integer viewCount = 0;
+    
+    // ========== NEW FIELDS FOR ADVANCED SEARCH ==========
+    @Column(name = "search_vector", columnDefinition = "tsvector")
+    private String searchVector;
+    
+    @Column(name = "brand")
+    private String brand;
+    
+    @Column(name = "free_delivery")
+    private Boolean freeDelivery = false;
     
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -112,6 +122,7 @@ public class Product {
         updatedAt = LocalDateTime.now();
         if (isApproved == null) isApproved = false;
         if (status == null) status = ProductStatus.PENDING_APPROVAL;
+        if (freeDelivery == null) freeDelivery = false;
     }
     
     @PreUpdate

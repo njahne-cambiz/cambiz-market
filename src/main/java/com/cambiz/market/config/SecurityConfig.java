@@ -75,6 +75,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/coupons/validate/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/featured/**").permitAll()
 
+                // SEARCH - PUBLIC
+                .requestMatchers("/search", "/search/**").permitAll()
+                .requestMatchers("/api/search/**").permitAll()
+
                 // STATIC & PAGES
                 .requestMatchers("/", "/dashboard/**", "/store/**", "/shop/**", "/product", "/home", "/index", "/about", "/contact").permitAll()
                 .requestMatchers("/premium").permitAll()
