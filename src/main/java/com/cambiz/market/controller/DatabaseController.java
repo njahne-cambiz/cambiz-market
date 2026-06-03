@@ -57,7 +57,8 @@ public class DatabaseController {
     @PostMapping("/add-review-reply")
     public ResponseEntity<Map<String, Object>> addReviewReply() { List<String> r = new ArrayList<>(); try { jdbcTemplate.execute("ALTER TABLE reviews ADD COLUMN IF NOT EXISTS admin_reply TEXT"); r.add("admin_reply"); } catch (Exception e) { r.add("err: " + e.getMessage()); } try { jdbcTemplate.execute("ALTER TABLE reviews ADD COLUMN IF NOT EXISTS replied_at TIMESTAMP"); r.add("replied_at"); } catch (Exception e) { r.add("err: " + e.getMessage()); } return ResponseEntity.ok(Map.of("success", true, "results", r)); }
 
-    // ========== SEARCH MIGRATION ==========
+    // ========== SEARCH MIGRATION (GET + POST) ==========
+    @GetMapping("/migrate-search")
     @PostMapping("/migrate-search")
     public ResponseEntity<Map<String, Object>> migrateSearch() { 
         List<String> r = new ArrayList<>(); 
