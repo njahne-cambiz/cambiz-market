@@ -135,9 +135,28 @@ public class AdvancedSearchService {
         @SuppressWarnings("unchecked")
         List<Object[]> results = query.getResultList();
         
-        List<ProductCardDTO> products = results.stream()
-            .map(this::mapToProductCardDTO)
-            .collect(Collectors.toList());
+        List<ProductCardDTO> products = new ArrayList<>();
+        for (Object[] row : results) {
+            ProductCardDTO dto = ProductCardDTO.builder()
+                .id(row[0] != null ? ((Number) row[0]).longValue() : null)
+                .name((String) row[1])
+                .description((String) row[2])
+                .price((Double) row[3])
+                .discountedPrice((Double) row[4])
+                .productCondition((String) row[5])
+                .isFeatured((Boolean) row[6])
+                .inStock(row[7] != null && ((Integer) row[7]) > 0)
+                .freeDelivery((Boolean) row[8])
+                .categoryName((String) row[9])
+                .categoryEmoji((String) row[10])
+                .sellerName((String) row[11])
+                .sellerLocation((String) row[12])
+                .rating(row[13] != null ? (Double) row[13] : 0.0)
+                .reviewCount(row[14] != null ? ((Number) row[14]).intValue() : 0)
+                .imageUrl(null)
+                .build();
+            products.add(dto);
+        }
         
         result.setProducts(products);
         result.setTotalResults(totalResults);
@@ -155,72 +174,20 @@ public class AdvancedSearchService {
         return result;
     }
     
-    private ProductCardDTO mapToProductCardDTO(Object[] row) {
-        String imageUrl = null;
-        try {
-            if (row.length > 15 && row[15] != null) {
-                imageUrl = extractFirstImage(row[15]);
-            }
-        } catch (Exception e) {
-            imageUrl = null;
-        }
-        
-        return ProductCardDTO.builder()
-            .id(row[0] != null ? ((Number) row[0]).longValue() : null)
-            .name((String) row[1])
-            .description((String) row[2])
-            .price((Double) row[3])
-            .discountedPrice((Double) row[4])
-            .productCondition((String) row[5])
-            .isFeatured((Boolean) row[6])
-            .inStock(row[7] != null && ((Integer) row[7]) > 0)
-            .freeDelivery((Boolean) row[8])
-            .categoryName((String) row[9])
-            .categoryEmoji((String) row[10])
-            .sellerName((String) row[11])
-            .sellerLocation((String) row[12])
-            .rating(row[13] != null ? (Double) row[13] : 0.0)
-            .reviewCount(row[14] != null ? ((Number) row[14]).intValue() : 0)
-            .imageUrl(imageUrl)
-            .build();
-    }
-    
-    private String extractFirstImage(Object imageUrls) {
-        if (imageUrls == null) return null;
-        String urls = imageUrls.toString();
-        if (urls.startsWith("{") && urls.endsWith("}")) {
-            String[] parts = urls.substring(1, urls.length() - 1).split(",");
-            if (parts.length > 0) {
-                return parts[0].replace("\"", "").trim();
-            }
-        }
-        return urls;
-    }
-    
     private Map<String, Long> getCategoryFacets() {
         String sql = "SELECT c.name, COUNT(p.id) FROM products p JOIN categories c ON p.category_id = c.id WHERE p.is_approved = true AND p.is_active = true GROUP BY c.name ORDER BY COUNT(p.id) DESC LIMIT 10";
-        
         Map<String, Long> facets = new LinkedHashMap<>();
         jdbcTemplate.query(sql, (rs) -> {
-            try {
-                facets.put(rs.getString(1), rs.getLong(2));
-            } catch (Exception e) {
-                // skip
-            }
+            try { facets.put(rs.getString(1), rs.getLong(2)); } catch (Exception e) {}
         });
         return facets;
     }
     
     private Map<String, Long> getLocationFacets() {
         String sql = "SELECT u.city, COUNT(p.id) FROM products p JOIN users u ON p.seller_id = u.id WHERE p.is_approved = true AND u.city IS NOT NULL GROUP BY u.city ORDER BY COUNT(p.id) DESC LIMIT 10";
-        
         Map<String, Long> facets = new LinkedHashMap<>();
         jdbcTemplate.query(sql, (rs) -> {
-            try {
-                facets.put(rs.getString(1), rs.getLong(2));
-            } catch (Exception e) {
-                // skip
-            }
+            try { facets.put(rs.getString(1), rs.getLong(2)); } catch (Exception e) {}
         });
         return facets;
     }
@@ -229,41 +196,27 @@ public class AdvancedSearchService {
         Map<String, Long> facets = new LinkedHashMap<>();
         int[][] ranges = {{0, 5000}, {5001, 10000}, {10001, 25000}, {25001, 50000}, {50001, 100000}, {100001, Integer.MAX_VALUE}};
         String[] labels = {"Under 5k", "5k-10k", "10k-25k", "25k-50k", "50k-100k", "100k+"};
-        
         for (int i = 0; i < ranges.length; i++) {
             try {
-                Long count = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM products WHERE is_approved=true AND is_active=true AND COALESCE(discounted_price, price) BETWEEN ? AND ?",
-                    Long.class, ranges[i][0], ranges[i][1]);
-                if (count != null && count > 0) {
-                    facets.put(labels[i], count);
-                }
-            } catch (Exception e) {
-                // skip
-            }
+                Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products WHERE is_approved=true AND is_active=true AND COALESCE(discounted_price, price) BETWEEN ? AND ?", Long.class, ranges[i][0], ranges[i][1]);
+                if (count != null && count > 0) { facets.put(labels[i], count); }
+            } catch (Exception e) {}
         }
         return facets;
     }
     
     private Map<String, Long> getConditionFacets() {
         String sql = "SELECT product_condition, COUNT(id) FROM products WHERE is_approved = true AND is_active = true AND product_condition IS NOT NULL GROUP BY product_condition";
-        
         Map<String, Long> facets = new LinkedHashMap<>();
         jdbcTemplate.query(sql, (rs) -> {
-            try {
-                facets.put(rs.getString(1), rs.getLong(2));
-            } catch (Exception e) {
-                // skip
-            }
+            try { facets.put(rs.getString(1), rs.getLong(2)); } catch (Exception e) {}
         });
         return facets;
     }
     
     private List<String> getSearchSuggestions(String keyword) {
         try {
-            return jdbcTemplate.queryForList(
-                "SELECT DISTINCT name FROM products WHERE is_approved = true AND (LOWER(name) LIKE LOWER(?) OR search_vector @@ plainto_tsquery('english', ?)) LIMIT ?",
-                String.class, "%" + keyword + "%", keyword, MAX_SUGGESTIONS);
+            return jdbcTemplate.queryForList("SELECT DISTINCT name FROM products WHERE is_approved = true AND (LOWER(name) LIKE LOWER(?) OR search_vector @@ plainto_tsquery('english', ?)) LIMIT ?", String.class, "%" + keyword + "%", keyword, MAX_SUGGESTIONS);
         } catch (Exception e) {
             return Collections.emptyList();
         }
@@ -271,9 +224,7 @@ public class AdvancedSearchService {
     
     private String getSpellingSuggestion(String keyword) {
         try {
-            return jdbcTemplate.queryForObject(
-                "SELECT name FROM products WHERE is_approved = true AND similarity(name, ?) > 0.3 ORDER BY similarity(name, ?) DESC LIMIT 1",
-                String.class, keyword, keyword);
+            return jdbcTemplate.queryForObject("SELECT name FROM products WHERE is_approved = true AND similarity(name, ?) > 0.3 ORDER BY similarity(name, ?) DESC LIMIT 1", String.class, keyword, keyword);
         } catch (Exception e) {
             return null;
         }
