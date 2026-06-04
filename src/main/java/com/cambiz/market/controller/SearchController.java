@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Collections;
 
 @Controller
 public class SearchController {
@@ -18,20 +18,18 @@ public class SearchController {
     
     @GetMapping("/search")
     public String search(@ModelAttribute SearchCriteria criteria, Model model) {
-        SearchResultDTO results = searchService.search(criteria);
-        
-        model.addAttribute("results", results);
-        model.addAttribute("criteria", criteria);
-        
+        try {
+            if (criteria == null) {
+                criteria = new SearchCriteria();
+            }
+            SearchResultDTO results = searchService.search(criteria);
+            model.addAttribute("results", results);
+            model.addAttribute("criteria", criteria);
+        } catch (Exception e) {
+            model.addAttribute("results", new SearchResultDTO());
+            model.addAttribute("criteria", new SearchCriteria());
+            model.addAttribute("error", e.getMessage());
+        }
         return "search/results";
-    }
-    
-    @GetMapping("/api/search/suggestions")
-    @ResponseBody
-    public List<String> getSuggestions(@RequestParam String q) {
-        SearchCriteria criteria = new SearchCriteria();
-        criteria.setKeyword(q);
-        criteria.setSize(5);
-        return searchService.search(criteria).getSuggestedKeywords();
     }
 }
