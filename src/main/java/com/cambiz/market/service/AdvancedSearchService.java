@@ -14,8 +14,6 @@ public class AdvancedSearchService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     
-    private static final int MAX_SUGGESTIONS = 5;
-    
     public SearchResultDTO search(SearchCriteria criteria) {
         SearchResultDTO result = new SearchResultDTO();
         
@@ -47,14 +45,6 @@ public class AdvancedSearchService {
             whereClause.append("AND p.stock_quantity > 0 ");
         }
         
-        if (criteria.getIsFeatured() != null && criteria.getIsFeatured()) {
-            whereClause.append("AND p.is_featured = true ");
-        }
-        
-        if (criteria.getOnDiscount() != null && criteria.getOnDiscount()) {
-            whereClause.append("AND p.discounted_price IS NOT NULL ");
-        }
-        
         if (criteria.getFreeDelivery() != null && criteria.getFreeDelivery()) {
             whereClause.append("AND p.free_delivery = true ");
         }
@@ -74,29 +64,22 @@ public class AdvancedSearchService {
         String sortBy = criteria.getSortBy() != null ? criteria.getSortBy() : "relevance";
         if ("price_asc".equals(sortBy)) orderBy = "ORDER BY COALESCE(p.discounted_price, p.price) ASC";
         else if ("price_desc".equals(sortBy)) orderBy = "ORDER BY COALESCE(p.discounted_price, p.price) DESC";
-        else if ("newest".equals(sortBy)) orderBy = "ORDER BY p.created_at DESC";
-        else if ("popular".equals(sortBy)) orderBy = "ORDER BY p.view_count DESC";
         
-        // Pagination
         int page = criteria.getPage();
         int size = criteria.getSize();
         
-        // Main query - no aliases with dots
-        String sql = "SELECT p.id, p.name, p.description, p.price, p.discounted_price, " +
-                     "p.product_condition, p.is_featured, p.stock_quantity, p.free_delivery, " +
-                     "c.name as cat_name, c.emoji as cat_emoji, " +
-                     "u.full_name as seller_name, u.city as seller_city, " +
-                     "CAST(COALESCE(AVG(r.rating), 0) AS DOUBLE PRECISION) as avg_rating, " +
-                     "CAST(COUNT(DISTINCT r.id) AS INTEGER) as review_count " +
+        // Main query - NO GROUP BY
+        String sql = "SELECT p.id, p.name, COALESCE(p.description,'') as description, p.price, " +
+                     "COALESCE(p.discounted_price,0) as discounted_price, " +
+                     "COALESCE(p.product_condition,'') as product_condition, " +
+                     "p.is_featured, p.stock_quantity, COALESCE(p.free_delivery,false) as free_delivery, " +
+                     "COALESCE(c.name,'') as cat_name, COALESCE(c.emoji,'') as cat_emoji, " +
+                     "COALESCE(u.full_name,'') as seller_name, COALESCE(u.city,'') as seller_city " +
                      "FROM products p " +
                      "LEFT JOIN categories c ON p.category_id = c.id " +
                      "LEFT JOIN users u ON p.seller_id = u.id " +
-                     "LEFT JOIN reviews r ON p.id = r.product_id " +
                      whereClause.toString() +
-                     " GROUP BY p.id, p.name, p.description, p.price, p.discounted_price, " +
-                     "p.product_condition, p.is_featured, p.stock_quantity, p.free_delivery, " +
-                     "c.name, c.emoji, u.full_name, u.city " +
-                     orderBy + " LIMIT ? OFFSET ?";
+                     " " + orderBy + " LIMIT ? OFFSET ?";
         
         params.add(size);
         params.add(page * size);
@@ -119,8 +102,8 @@ public class AdvancedSearchService {
                     .categoryEmoji(toString(row.get("cat_emoji")))
                     .sellerName(toString(row.get("seller_name")))
                     .sellerLocation(toString(row.get("seller_city")))
-                    .rating(toDouble(row.get("avg_rating")))
-                    .reviewCount(toInt(row.get("review_count")))
+                    .rating(0.0)
+                    .reviewCount(0)
                     .imageUrl(null)
                     .build();
                 products.add(dto);
