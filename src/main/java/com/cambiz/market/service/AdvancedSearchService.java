@@ -14,12 +14,13 @@ public class AdvancedSearchService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     
+    private static final int MAX_SUGGESTIONS = 5;
+    
     public SearchResultDTO search(SearchCriteria criteria) {
         SearchResultDTO result = new SearchResultDTO();
         
         String keyword = criteria.getKeyword() != null ? criteria.getKeyword().trim() : "";
         
-        // Simple search query without full-text (more stable)
         StringBuilder whereClause = new StringBuilder("WHERE p.is_approved = true AND p.is_active = true ");
         List<Object> params = new ArrayList<>();
         
@@ -94,10 +95,12 @@ public class AdvancedSearchService {
         int size = criteria.getSize();
         
         // Main query
-        String sql = "SELECT p.id, p.name, COALESCE(p.description, ''), p.price, p.discounted_price, " +
-                     "COALESCE(p.product_condition, ''), p.is_featured, p.stock_quantity, COALESCE(p.free_delivery, false), " +
-                     "COALESCE(c.name, ''), COALESCE(c.emoji, ''), " +
-                     "COALESCE(u.full_name, ''), COALESCE(u.city, ''), " +
+        String sql = "SELECT p.id as p_id, p.name as p_name, p.description as p_description, p.price as p_price, " +
+                     "p.discounted_price as p_discounted_price, " +
+                     "p.product_condition as p_product_condition, p.is_featured as p_is_featured, " +
+                     "p.stock_quantity as p_stock_quantity, p.free_delivery as p_free_delivery, " +
+                     "c.name as c_name, c.emoji as c_emoji, " +
+                     "u.full_name as u_full_name, u.city as u_city, " +
                      "COALESCE(AVG(r.rating), 0) as avg_rating, COUNT(DISTINCT r.id) as review_count " +
                      "FROM products p " +
                      "LEFT JOIN categories c ON p.category_id = c.id " +
@@ -115,19 +118,19 @@ public class AdvancedSearchService {
             List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, params.toArray());
             for (Map<String, Object> row : rows) {
                 ProductCardDTO dto = ProductCardDTO.builder()
-                    .id(getLong(row, "id"))
-                    .name(getString(row, "name"))
-                    .description(getString(row, "description"))
-                    .price(getDouble(row, "price"))
-                    .discountedPrice(getDouble(row, "discounted_price"))
-                    .productCondition(getString(row, "product_condition"))
-                    .isFeatured(getBoolean(row, "is_featured"))
-                    .inStock(getInt(row, "stock_quantity") > 0)
-                    .freeDelivery(getBoolean(row, "free_delivery"))
-                    .categoryName(getString(row, "name"))
-                    .categoryEmoji(getString(row, "emoji"))
-                    .sellerName(getString(row, "full_name"))
-                    .sellerLocation(getString(row, "city"))
+                    .id(getLong(row, "p_id"))
+                    .name(getString(row, "p_name"))
+                    .description(getString(row, "p_description"))
+                    .price(getDouble(row, "p_price"))
+                    .discountedPrice(getDouble(row, "p_discounted_price"))
+                    .productCondition(getString(row, "p_product_condition"))
+                    .isFeatured(getBoolean(row, "p_is_featured"))
+                    .inStock(getInt(row, "p_stock_quantity") > 0)
+                    .freeDelivery(getBoolean(row, "p_free_delivery"))
+                    .categoryName(getString(row, "c_name"))
+                    .categoryEmoji(getString(row, "c_emoji"))
+                    .sellerName(getString(row, "u_full_name"))
+                    .sellerLocation(getString(row, "u_city"))
                     .rating(getDouble(row, "avg_rating"))
                     .reviewCount(getInt(row, "review_count"))
                     .imageUrl(null)
@@ -142,6 +145,14 @@ public class AdvancedSearchService {
         result.setTotalResults(totalResults);
         result.setTotalPages((int) Math.ceil((double) totalResults / size));
         result.setCurrentPage(page);
+        result.setCategoryFacets(getCategoryFacets());
+        result.setLocationFacets(getLocationFacets());
+        result.setPriceRangeFacets(getPriceRangeFacets());
+        result.setConditionFacets(getConditionFacets());
+        
+        if (!keyword.isEmpty()) {
+            result.setSuggestedKeywords(getSearchSuggestions(keyword));
+        }
         
         return result;
     }
@@ -175,11 +186,57 @@ public class AdvancedSearchService {
         return false;
     }
     
+    private Map<String, Long> getCategoryFacets() {
+        String sql = "SELECT c.name, COUNT(p.id) FROM products p JOIN categories c ON p.category_id = c.id WHERE p.is_approved = true AND p.is_active = true GROUP BY c.name ORDER BY COUNT(p.id) DESC LIMIT 10";
+        Map<String, Long> facets = new LinkedHashMap<>();
+        jdbcTemplate.query(sql, (rs) -> {
+            try { facets.put(rs.getString(1), rs.getLong(2)); } catch (Exception e) {}
+        });
+        return facets;
+    }
+    
+    private Map<String, Long> getLocationFacets() {
+        String sql = "SELECT u.city, COUNT(p.id) FROM products p JOIN users u ON p.seller_id = u.id WHERE p.is_approved = true AND u.city IS NOT NULL GROUP BY u.city ORDER BY COUNT(p.id) DESC LIMIT 10";
+        Map<String, Long> facets = new LinkedHashMap<>();
+        jdbcTemplate.query(sql, (rs) -> {
+            try { facets.put(rs.getString(1), rs.getLong(2)); } catch (Exception e) {}
+        });
+        return facets;
+    }
+    
+    private Map<String, Long> getPriceRangeFacets() {
+        Map<String, Long> facets = new LinkedHashMap<>();
+        int[][] ranges = {{0, 5000}, {5001, 10000}, {10001, 25000}, {25001, 50000}, {50001, 100000}, {100001, Integer.MAX_VALUE}};
+        String[] labels = {"Under 5k", "5k-10k", "10k-25k", "25k-50k", "50k-100k", "100k+"};
+        for (int i = 0; i < ranges.length; i++) {
+            try {
+                Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products WHERE is_approved=true AND is_active=true AND COALESCE(discounted_price, price) BETWEEN ? AND ?", Long.class, ranges[i][0], ranges[i][1]);
+                if (count != null && count > 0) { facets.put(labels[i], count); }
+            } catch (Exception e) {}
+        }
+        return facets;
+    }
+    
+    private Map<String, Long> getConditionFacets() {
+        String sql = "SELECT product_condition, COUNT(id) FROM products WHERE is_approved = true AND is_active = true AND product_condition IS NOT NULL GROUP BY product_condition";
+        Map<String, Long> facets = new LinkedHashMap<>();
+        jdbcTemplate.query(sql, (rs) -> {
+            try { facets.put(rs.getString(1), rs.getLong(2)); } catch (Exception e) {}
+        });
+        return facets;
+    }
+    
+    private List<String> getSearchSuggestions(String keyword) {
+        try {
+            return jdbcTemplate.queryForList("SELECT DISTINCT name FROM products WHERE is_approved = true AND LOWER(name) LIKE LOWER(?) LIMIT ?", String.class, "%" + keyword + "%", MAX_SUGGESTIONS);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+    
     private String getSpellingSuggestion(String keyword) {
         try {
-            return jdbcTemplate.queryForObject(
-                "SELECT name FROM products WHERE is_approved = true AND similarity(name, ?) > 0.3 ORDER BY similarity(name, ?) DESC LIMIT 1",
-                String.class, keyword, keyword);
+            return jdbcTemplate.queryForObject("SELECT name FROM products WHERE is_approved = true AND similarity(name, ?) > 0.3 ORDER BY similarity(name, ?) DESC LIMIT 1", String.class, keyword, keyword);
         } catch (Exception e) {
             return null;
         }

@@ -1,162 +1,650 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | CamBiz Market</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
-    <style>
-        :root{--w:240px;--bg:#7f1d1d;--ac:#ef4444}
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;min-height:100vh}
-        .sidebar{position:fixed;top:0;left:0;width:var(--w);height:100vh;background:linear-gradient(180deg,#7f1d1d,#991b1b);color:#fff;overflow-y:auto;z-index:1000;box-shadow:2px 0 15px rgba(0,0,0,.1);transition:left .3s}
-        .sidebar .logo{padding:22px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08);font-weight:800;font-size:1.3rem}
-        .sidebar .logo span{color:var(--ac)}
-        .sidebar a{color:rgba(255,255,255,.65);padding:10px 18px;display:flex;align-items:center;gap:10px;text-decoration:none;font-size:.80rem;border-left:3px solid transparent;cursor:pointer;transition:.2s;font-weight:500}
-        .sidebar a:hover,.sidebar a.active{color:#fff;background:rgba(255,255,255,.04);border-left-color:var(--ac)}
-        .sidebar a i{width:20px;text-align:center;font-size:.95rem}
-        .badge-count{background:#ef4444;color:#fff;border-radius:12px;padding:2px 9px;font-size:.7rem;font-weight:700;margin-left:auto;animation:pulse 2s infinite}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-        .main{margin-left:var(--w);padding:25px 30px;min-height:100vh;transition:margin-left .3s}
-        .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;background:#fff;padding:16px 24px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);flex-wrap:wrap;gap:10px}
-        .topbar h4{font-weight:700;color:#0f172a;font-size:1.2rem}
-        .btn-logout{padding:9px 22px;border-radius:8px;font-weight:600;font-size:.85rem}
-        .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px}
-        .stat-card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid #e2e8f0}
-        .stat-card h3{font-size:2rem;font-weight:800;margin:0 0 4px;color:#0f172a}
-        .stat-card small{color:#64748b;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
-        .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:24px;border:1px solid #e2e8f0}
-        .card-header{padding:16px 24px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#0f172a;font-size:.95rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-        .card-body{padding:24px}.card-body.p-0{padding:0}
-        .table{margin:0}.table th{font-size:.75rem;text-transform:uppercase;color:#64748b;font-weight:700;padding:14px 16px;background:#f8fafc}
-        .table td{padding:14px 16px;vertical-align:middle;font-size:.80rem}
-        .badge{font-weight:600;padding:5px 10px;border-radius:6px;font-size:.75rem}
-        .btn-sm{padding:6px 14px;font-size:.78rem;border-radius:6px;font-weight:600;cursor:pointer;border:none}
-        .mobile-menu-btn{display:none;position:fixed;top:10px;left:10px;z-index:1001;background:#0f172a;color:#fff;border:none;padding:10px 15px;border-radius:8px;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.3)}
-        .sidebar-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:999}
-        .sidebar-overlay.show{display:block}
-        @media(max-width:768px){.mobile-menu-btn{display:block}.sidebar{left:-260px}.sidebar.open{left:0}.main{margin-left:0!important;padding:60px 10px 15px 10px!important}.stat-row{grid-template-columns:repeat(2,1fr);gap:10px}.stat-card{padding:15px}.stat-card h3{font-size:1.4rem}.table th,.table td{padding:8px 6px;font-size:.7rem}.btn-sm{padding:4px 8px;font-size:.65rem}}
-    </style>
-</head>
-<body>
+import React, { useState, useEffect } from 'react';
+import { 
+  LayoutDashboard, Users, Store, FolderTree, DollarSign, 
+  CreditCard, ShoppingCart, ShieldAlert, PackageCheck, 
+  Sparkles, Award, BarChart3, ShieldCheck, FileSpreadsheet, 
+  HeartPulse, Settings, Check, X, AlertTriangle, RefreshCw
+} from 'lucide-react';
 
-<button class="mobile-menu-btn" onclick="window.toggleSidebar()">☰</button>
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
+const API_BASE_URL = 'http://localhost:8080/api/admin'; // Update to match your server configuration
 
-<nav class="sidebar" id="sidebar">
-    <div class="logo">⚡ cam<span>Biz</span> Admin</div>
-    <a class="nav-link active" onclick="window.showTab('dashboard')"><i class="fas fa-th-large"></i> Dashboard</a>
-    <a class="nav-link" onclick="window.showTab('users')"><i class="fas fa-users"></i> Users</a>
-    <a class="nav-link" onclick="window.showTab('sellers')"><i class="fas fa-store"></i> Sellers</a>
-    <a class="nav-link" onclick="window.showTab('categories')"><i class="fas fa-tags"></i> Categories</a>
-    <a class="nav-link" onclick="window.showTab('revenue')"><i class="fas fa-coins"></i> Revenue</a>
-    <a class="nav-link" onclick="window.showTab('payments')"><i class="fas fa-credit-card"></i> Payments</a>
-    <a class="nav-link" onclick="window.showTab('products')"><i class="fas fa-box"></i> Products <span class="badge-count" id="pendingBadge">0</span></a>
-    <a class="nav-link" onclick="window.showTab('orders')"><i class="fas fa-shopping-cart"></i> Orders</a>
-    <a class="nav-link" onclick="window.showTab('transactions')"><i class="fas fa-exchange-alt"></i> Transactions</a>
-    <a class="nav-link" onclick="window.showTab('disputes')"><i class="fas fa-gavel"></i> Disputes</a>
-    <a class="nav-link" onclick="window.showTab('reviews')"><i class="fas fa-star"></i> Reviews</a>
-    <a class="nav-link" onclick="window.showTab('settings')"><i class="fas fa-cog"></i> Settings</a>
-    <a class="nav-link" onclick="window.showTab('health')"><i class="fas fa-heartbeat"></i> Health</a>
-</nav>
+export default function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({});
+  const [tableData, setTableData] = useState([]);
+  const [actionReason, setActionReason] = useState('');
 
-<div class="main">
-    <div style="background:linear-gradient(90deg,#7f1d1d,#991b1b);color:white;padding:16px 22px;border-radius:14px;margin-bottom:20px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.15)">
-        🛡️ Platform Control Center — Monitor users, revenue, disputes and platform operations.
-    </div>
-    <div class="topbar">
-        <h4 id="pageTitle">📊 Dashboard Overview</h4>
-        <div style="display:flex;gap:8px;align-items:center">
-            
-            <button class="btn btn-outline-danger btn-logout" onclick="window.confirmLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+  // Tab definitions corresponding exactly to the backend controller capabilities
+  const tabs = [
+    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, category: 'Core' },
+    { id: 'users', name: 'User Directory', icon: Users, category: 'Management' },
+    { id: 'sellers', name: 'Seller Verification', icon: Store, category: 'Management' },
+    { id: 'products', name: 'Product Approvals', icon: PackageCheck, category: 'Management' },
+    { id: 'categories', name: 'Category Manager', icon: FolderTree, category: 'Management' },
+    { id: 'orders', name: 'Order Management', icon: ShoppingCart, category: 'Operations' },
+    { id: 'disputes', name: 'Disputes & Escrow', icon: ShieldAlert, category: 'Operations' },
+    { id: 'payouts', name: 'Vendor Payouts', icon: CreditCard, category: 'Finance' },
+    { id: 'revenue', name: 'Revenue Streams', icon: DollarSign, category: 'Finance' },
+    { id: 'transactions', name: 'Ledger Records', icon: FileSpreadsheet, category: 'Finance' },
+    { id: 'featured', name: 'Featured Slots', icon: Sparkles, category: 'Growth' },
+    { id: 'premium', name: 'Premium Tier', icon: Award, category: 'Growth' },
+    { id: 'keywords', name: 'Keyword Analytics', icon: BarChart3, category: 'Intelligence' },
+    { id: 'security', name: 'Security Shields', icon: ShieldCheck, category: 'System' },
+    { id: 'audit', name: 'Audit Trails', icon: FileSpreadsheet, category: 'System' },
+    { id: 'health', name: 'System Health', icon: HeartPulse, category: 'System' },
+    { id: 'settings', name: 'Global Settings', icon: Settings, category: 'System' },
+  ];
+
+  useEffect(() => {
+    fetchDashboardStats();
+    fetchTabContent();
+  }, [activeTab]);
+
+  const fetchDashboardStats = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/stats`);
+      const json = await res.json();
+      if (json.success) setStats(json.data);
+    } catch (err) {
+      console.error("Failed fetching runtime stats map", err);
+    }
+  };
+
+  const fetchTabContent = async () => {
+    setLoading(true);
+    setError(null);
+    let endpoint = '';
+
+    switch (activeTab) {
+      case 'users': endpoint = '/users'; break;
+      case 'sellers': endpoint = '/sellers'; break;
+      case 'categories': endpoint = '/categories'; break;
+      case 'orders': endpoint = '/orders'; break;
+      case 'transactions': endpoint = '/transactions'; break;
+      case 'revenue': endpoint = '/revenue'; break;
+      case 'settings': endpoint = '/settings'; break;
+      case 'health': endpoint = '/health'; break;
+      case 'disputes': endpoint = '/disputes'; break;
+      case 'products': endpoint = '/products/pending'; break;
+      case 'payouts': endpoint = '/payouts/pending'; break;
+      case 'featured': endpoint = '/featured'; break;
+      case 'premium': endpoint = '/premium/active'; break;
+      case 'keywords': endpoint = '/analytics/keywords'; break;
+      case 'security': endpoint = '/security/logs'; break;
+      case 'audit': endpoint = '/audit/logs'; break;
+      default: endpoint = '/revenue-chart';
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`);
+      const json = await res.json();
+      if (json.success) {
+        setTableData(json.data || json);
+      } else {
+        setError(json.message || "Endpoint payload resolution execution failure");
+      }
+    } catch (err) {
+      setError("Network or CORS handling connectivity configuration problem");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAction = async (method, route, body = null) => {
+    try {
+      const config = { method, headers: { 'Content-Type': 'application/json' } };
+      if (body) config.body = JSON.stringify(body);
+      
+      const res = await fetch(`${API_BASE_URL}${route}`, config);
+      const json = await res.json();
+      if (json.success) {
+        setActionReason('');
+        fetchTabContent();
+        fetchDashboardStats();
+      } else {
+        alert(json.message);
+      }
+    } catch (err) {
+      alert("Action transmission failed execution phase");
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-slate-900 text-slate-100 font-sans antialiased overflow-hidden">
+      {/* Sidebar Navigation */}
+      <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between select-none">
+        <div className="overflow-y-auto custom-scrollbar flex-1">
+          <div className="p-6 border-b border-slate-800 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black tracking-wider text-white">CB</div>
+            <div>
+              <h1 className="font-bold text-sm leading-tight text-white">CamBiz Engine</h1>
+              <p className="text-xs text-indigo-400 font-medium">Control Plane v1.1</p>
+            </div>
+          </div>
+          
+          <div className="p-4 space-y-6">
+            {['Core', 'Management', 'Operations', 'Finance', 'Growth', 'Intelligence', 'System'].map(cat => (
+              <div key={cat} className="space-y-1">
+                <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase px-3">{cat}</span>
+                {tabs.filter(t => t.category === cat).map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group ${
+                        isActive 
+                          ? 'bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/10' 
+                          : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-400'}`} />
+                      {tab.name}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
+        <div className="p-4 border-t border-slate-800 text-[11px] text-slate-500 font-medium bg-slate-950/50">
+          Logged in as: <span className="text-slate-400 font-semibold">admin@cambiz.cm</span>
+        </div>
+      </aside>
+
+      {/* Main Panel Content Area */}
+      <main className="flex-1 flex flex-col min-w-0 bg-slate-900 overflow-y-auto">
+        <header className="h-16 shrink-0 border-b border-slate-800 bg-slate-950/40 backdrop-blur px-8 flex items-center justify-between z-10 sticky top-0">
+          <div className="flex items-center gap-3">
+            <h2 className="font-bold text-lg text-white capitalize">{activeTab.replace('-', ' ')} Hub</h2>
+            {loading && <RefreshCw className="w-4 h-4 text-indigo-400 animate-spin" />}
+          </div>
+          <div className="flex items-center gap-4 text-xs">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Node Online
+            </span>
+          </div>
+        </header>
+
+        <div className="p-8 flex-1 space-y-8">
+          {error && (
+            <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3 text-rose-400 text-xs font-semibold animate-fadeIn">
+              <AlertTriangle className="w-5 h-5 shrink-0" />
+              <span>Runtime Engine Warning: {error}</span>
+            </div>
+          )}
+
+          {/* Core Metrics Ribbon Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { label: 'Platform Gross Revenue', val: `${stats.totalRevenue?.toLocaleString() || 0} XAF`, color: 'border-l-emerald-500' },
+              { label: 'Active User Base', val: stats.totalUsers || 0, color: 'border-l-indigo-500' },
+              { label: 'Gross Completed Orders', val: stats.totalOrders || 0, color: 'border-l-amber-500' },
+              { label: 'System Action Items', val: stats.pendingDisputes || 0, color: 'border-l-rose-500' }
+            ].map((card, idx) => (
+              <div key={idx} className={`bg-slate-950 border border-slate-800/80 rounded-xl p-5 border-l-4 ${card.color} shadow-sm`}>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{card.label}</p>
+                <p className="text-xl font-black text-white mt-1.5 font-mono">{card.val}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Dynamic Interactive Panel Resolution Matrix */}
+          <div className="bg-slate-950 border border-slate-800 rounded-xl shadow-xl overflow-hidden">
+            <div className="p-6 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
+              <h3 className="font-bold text-sm text-slate-200">System Dynamic View</h3>
+              <button onClick={fetchTabContent} className="p-1.5 hover:bg-slate-900 rounded-lg text-slate-400 hover:text-white transition-colors">
+                <RefreshCw className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-x-auto">
+              {loading ? (
+                <div className="py-24 text-center text-xs text-slate-500 font-mono tracking-wider">RESOLVING BACKEND RECORD ARRAYS...</div>
+              ) : (
+                <>
+                  {/* TAB: DASHBOARD / DEFAULT ANCHOR */}
+                  {activeTab === 'dashboard' && (
+                    <div className="space-y-6">
+                      <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-indigo-400 mb-4">Platform State Metrics Breakdown</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-xs font-mono">
+                          <div><span className="text-slate-500">Registered Sellers:</span> <span className="text-slate-200 font-bold">{stats.totalSellers}</span></div>
+                          <div><span className="text-slate-500">Registered Buyers:</span> <span className="text-slate-200 font-bold">{stats.totalBuyers}</span></div>
+                          <div><span className="text-slate-500">Total Catalog Items:</span> <span className="text-slate-200 font-bold">{stats.totalProducts}</span></div>
+                          <div><span className="text-slate-500">Premium Tier Sellers:</span> <span className="text-indigo-400 font-bold">{stats.premiumSellers}</span></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB: USERS DIRECTORY */}
+                  {activeTab === 'users' && Array.isArray(tableData) && (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="text-slate-400 font-bold border-b border-slate-800">
+                          <th className="pb-3 font-semibold">User Matrix ID</th>
+                          <th className="pb-3 font-semibold">Identity / Email Address</th>
+                          <th className="pb-3 font-semibold">Account Subtype</th>
+                          <th className="pb-3 font-semibold">Security State</th>
+                          <th className="pb-3 text-right font-semibold">Administrative Access</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-medium">
+                        {tableData.map((u) => (
+                          <tr key={u.id} className="hover:bg-slate-900/40 transition-colors">
+                            <td className="py-3.5 font-mono text-slate-500">#{u.id}</td>
+                            <td className="py-3.5">
+                              <div className="font-bold text-slate-200">{u.firstName} {u.lastName}</div>
+                              <div className="text-[11px] text-slate-400 font-mono mt-0.5">{u.email}</div>
+                            </td>
+                            <td className="py-3.5 font-mono"><span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 text-[10px]">{u.userType}</span></td>
+                            <td className="py-3.5">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${u.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
+                                {u.status}
+                              </span>
+                            </td>
+                            <td className="py-3.5 text-right space-x-2">
+                              {u.status === 'ACTIVE' ? (
+                                <button onClick={() => handleAction('PUT', `/users/${u.id}/status?status=BANNED`)} className="px-2 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded hover:bg-rose-500/20 text-[11px]">Suspend</button>
+                              ) : (
+                                <button onClick={() => handleAction('PUT', `/users/${u.id}/status?status=ACTIVE`)} className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded hover:bg-emerald-500/20 text-[11px]">Reinstate</button>
+                              )}
+                              <button onClick={() => handleAction('DELETE', `/users/${u.id}`)} className="px-2 py-1 bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white rounded text-[11px]">Purge</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {/* TAB: SELLER VERIFICATION */}
+                  {activeTab === 'sellers' && Array.isArray(tableData) && (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="text-slate-400 font-bold border-b border-slate-800">
+                          <th className="pb-3 font-semibold">Seller ID</th>
+                          <th className="pb-3 font-semibold">Corporate Branding Name</th>
+                          <th className="pb-3 font-semibold">Assigned Tier</th>
+                          <th className="pb-3 text-right font-semibold">Tier Strategy Modification</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-medium">
+                        {tableData.map((s) => (
+                          <tr key={s.id} className="hover:bg-slate-900/40 transition-colors">
+                            <td className="py-3.5 font-mono text-slate-500">#{s.id}</td>
+                            <td className="py-3.5">
+                              <div className="font-bold text-slate-200">{s.businessName || 'No Registered Business Name'}</div>
+                              <div className="text-[11px] text-slate-400 font-mono">{s.email}</div>
+                            </td>
+                            <td className="py-3.5 font-mono"><span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.accountType === 'PREMIUM' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-900 border border-slate-800 text-slate-400'}`}>{s.accountType}</span></td>
+                            <td className="py-3.5 text-right space-x-2">
+                              {s.accountType !== 'PREMIUM' ? (
+                                <button onClick={() => handleAction('PUT', `/sellers/${s.id}/verify`)} className="px-2 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded hover:bg-amber-500/20 text-[11px]">Promote Premium</button>
+                              ) : (
+                                <button onClick={() => handleAction('PUT', `/sellers/${s.id}/revoke-premium`)} className="px-2 py-1 bg-slate-800 text-slate-400 hover:bg-slate-700 rounded text-[11px]">Revoke Premium</button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {/* TAB: PRODUCT APPROVALS WORKFLOW */}
+                  {activeTab === 'products' && Array.isArray(tableData) && (
+                    <div className="space-y-6">
+                      <div className="flex gap-2">
+                        <button onClick={() => handleAction('POST', '/products/batch-approve', tableData.map(p => p.id))} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs shadow-md">
+                          Execute Global Batch Approval ({tableData.length})
+                        </button>
+                      </div>
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="text-slate-400 font-bold border-b border-slate-800">
+                            <th className="pb-3 font-semibold">Entity ID</th>
+                            <th className="pb-3 font-semibold">Listing Nomenclature</th>
+                            <th className="pb-3 font-semibold">Assigned Node Category</th>
+                            <th className="pb-3 font-semibold">Valuation Matrix</th>
+                            <th className="pb-3 text-right font-semibold">Evaluation Logic</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/60 font-medium">
+                          {tableData.map((p) => (
+                            <tr key={p.id} className="hover:bg-slate-900/40 transition-colors">
+                              <td className="py-3.5 font-mono text-slate-500">#{p.id}</td>
+                              <td className="py-3.5">
+                                <div className="font-bold text-slate-200">{p.name}</div>
+                                <div className="text-[11px] text-slate-400 mt-0.5">By: {p.sellerBusinessName || p.sellerName}</div>
+                              </td>
+                              <td className="py-3.5 text-slate-300 font-mono">{p.categoryName}</td>
+                              <td className="py-3.5 font-mono font-bold text-emerald-400">{p.price?.toLocaleString()} XAF</td>
+                              <td className="py-3.5 text-right space-x-2">
+                                <button onClick={() => handleAction('PUT', `/products/${p.id}/approve`)} className="p-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded hover:bg-emerald-500/20 inline-flex items-center"><Check className="w-3.5 h-3.5" /></button>
+                                <div className="inline-flex items-center gap-1">
+                                  <input 
+                                    type="text" 
+                                    placeholder="Rejection Reason" 
+                                    value={actionReason} 
+                                    onChange={(e) => setActionReason(e.target.value)}
+                                    className="px-2 py-1 bg-slate-900 border border-slate-800 text-slate-200 rounded text-[11px] w-32 focus:outline-none focus:border-indigo-500"
+                                  />
+                                  <button onClick={() => handleAction('PUT', `/products/${p.id}/reject?reason=${encodeURIComponent(actionReason)}`)} className="p-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded hover:bg-rose-500/20"><X className="w-3.5 h-3.5" /></button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                          {tableData.length === 0 && (
+                            <tr><td colSpan="5" className="text-center py-12 text-slate-500 font-mono">Approval queue is currently empty.</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* TAB: PAYOUTS PIPELINE */}
+                  {activeTab === 'payouts' && Array.isArray(tableData) && (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="text-slate-400 font-bold border-b border-slate-800">
+                          <th className="pb-3 font-semibold">Settlement ID</th>
+                          <th className="pb-3 font-semibold">Vendor Target ID</th>
+                          <th className="pb-3 font-semibold">Mobile Money Gateway Route</th>
+                          <th className="pb-3 font-semibold">Liquidity Disbursal Volume</th>
+                          <th className="pb-3 text-right font-semibold">State Lifecycle</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-medium">
+                        {tableData.map((pay, i) => (
+                          <tr key={i} className="hover:bg-slate-900/40 font-mono">
+                            <td className="py-3.5 text-slate-500">#{pay.payoutId}</td>
+                            <td className="py-3.5 text-slate-300">Merchant #{pay.merchantId}</td>
+                            <td className="py-3.5 text-slate-200">{pay.destinationPhone}</td>
+                            <td className="py-3.5 font-bold text-emerald-400">{pay.amountToSettle?.toLocaleString()} XAF</td>
+                            <td className="py-3.5 text-right">
+                              <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold">{pay.status}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {/* TAB: SECURITY MONITORING SHIELDS */}
+                  {activeTab === 'security' && Array.isArray(tableData) && (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="text-slate-400 font-bold border-b border-slate-800">
+                          <th className="pb-3 font-semibold">Source Client IP Address</th>
+                          <th className="pb-3 font-semibold">Inbound Target Endpoint</th>
+                          <th className="pb-3 font-semibold">Rate-Limiter Inbound Metrics</th>
+                          <th className="pb-3 text-right font-semibold">Firewall Action Applied</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-mono">
+                        {tableData.map((log, i) => (
+                          <tr key={i} className="hover:bg-slate-900/40">
+                            <td className="py-3.5 text-indigo-400 font-bold">{log.ip}</td>
+                            <td className="py-3.5 text-slate-300">{log.endpoint}</td>
+                            <td className="py-3.5 text-slate-400">{log.hits}</td>
+                            <td className="py-3.5 text-right">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${log.action === 'BLOCKED' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
+                                {log.action}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {/* TAB: AUDIT TRAILS SUMMARY */}
+                  {activeTab === 'audit' && Array.isArray(tableData) && (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="text-slate-400 font-bold border-b border-slate-800">
+                          <th className="pb-3 font-semibold">ISO Timestamp Epoch</th>
+                          <th className="pb-3 font-semibold">Administrative Signature Identity</th>
+                          <th className="pb-3 font-semibold">Action Handle Signature</th>
+                          <th className="pb-3 font-semibold">Entity Mutation Footprint Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
+                        {tableData.map((aud, i) => (
+                          <tr key={i} className="hover:bg-slate-900/40 text-slate-300">
+                            <td className="py-3.5 text-slate-500">{aud.timestamp}</td>
+                            <td className="py-3.5 text-indigo-400 font-bold">{aud.adminContext}</td>
+                            <td className="py-3.5 text-amber-400 font-semibold">{aud.actionSignature}</td>
+                            <td className="py-3.5 text-slate-200 font-sans">{aud.entityMutated}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {/* TAB: KEYWORD STRATEGY INTELLIGENCE */}
+                  {activeTab === 'keywords' && Array.isArray(tableData) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {tableData.map((k, i) => (
+                        <div key={i} className="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between">
+                          <span className="font-bold text-slate-200">"{k.term}"</span>
+                          <span className="font-mono text-xs font-black bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded border border-indigo-500/20">{k.count} Queries</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* TAB: SYSTEM HEALTH METRICS */}
+                  {activeTab === 'health' && typeof tableData === 'object' && tableData !== null && !Array.isArray(tableData) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono text-xs">
+                      {[
+                        { title: "Core Engine Operations Status", detail: tableData.apiStatus, accent: "text-emerald-400" },
+                        { title: "Relational DB Engine State", detail: tableData.databaseStatus, accent: "text-emerald-400" },
+                        { title: "Active Runtime Uptime", detail: tableData.uptime, accent: "text-slate-200" },
+                        { title: "Assigned Memory Allocations (Used / Total)", detail: `${tableData.usedMemory} / ${tableData.totalMemory}`, accent: "text-slate-200" },
+                        { title: "Dynamic Memory Threshold Load", detail: `${tableData.memoryUsagePercent}%`, accent: "text-amber-400 font-bold" },
+                        { title: "Available High-Performance Execution Processors", detail: `${tableData.processors} Cores`, accent: "text-indigo-400" },
+                        { title: "Infrastructure OS Execution Node", detail: tableData.osName, accent: "text-slate-400" }
+                      ].map((item, idx) => (
+                        <div key={idx} className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-1">
+                          <div className="text-slate-500 font-sans font-medium text-[11px]">{item.title}</div>
+                          <div className={`text-sm font-black ${item.accent}`}>{item.detail}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* TAB: FEATURED AND PROMOTED PRODUCT SLOTS */}
+                  {activeTab === 'featured' && Array.isArray(tableData) && (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="text-slate-400 font-bold border-b border-slate-800">
+                          <th className="pb-3 font-semibold">Promotion Index ID</th>
+                          <th className="pb-3 font-semibold">Product Entity Code ID</th>
+                          <th className="pb-3 font-semibold">Expiration Horizon Timeline</th>
+                          <th className="pb-3 text-right font-semibold">Financial Receipt Tracking Code</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
+                        {tableData.map((f, i) => (
+                          <tr key={i} className="hover:bg-slate-900/40">
+                            <td className="py-3.5 text-slate-500">#{f.id}</td>
+                            <td className="py-3.5 text-indigo-400 font-bold">Product #{f.productId}</td>
+                            <td className="py-3.5 text-slate-200">{f.featuredUntil}</td>
+                            <td className="py-3.5 text-right text-amber-400 font-semibold">Txn #{f.paymentId}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {/* TAB: CATEGORY MANAGEMENT CONTROL GRID */}
+                  {activeTab === 'categories' && Array.isArray(tableData) && (
+                    <div className="space-y-6">
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="New Category English Title Label" 
+                          id="newCatInput"
+                          className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-slate-100 text-xs rounded-lg focus:outline-none focus:border-indigo-500 w-64 font-sans"
+                        />
+                        <button 
+                          onClick={() => {
+                            const val = document.getElementById('newCatInput').value;
+                            if(val) handleAction('POST', '/categories', { name: val });
+                          }}
+                          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 font-bold text-white text-xs rounded-lg shadow-md"
+                        >
+                          Append Category Node
+                        </button>
+                      </div>
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="text-slate-400 font-bold border-b border-slate-800">
+                            <th className="pb-3 font-semibold">Index ID</th>
+                            <th className="pb-3 font-semibold">Nomenclature Title Name En</th>
+                            <th className="pb-3 font-semibold">Operational Distribution Volume Count</th>
+                            <th className="pb-3 font-semibold">Lifecycle State Switch</th>
+                            <th className="pb-3 text-right font-semibold">Destructive Action Clearances</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/60 font-medium">
+                          {tableData.map((c) => (
+                            <tr key={c.id} className="hover:bg-slate-900/40 transition-colors">
+                              <td className="py-3.5 font-mono text-slate-500">#{c.id}</td>
+                              <td className="py-3.5 text-slate-200 font-bold">{c.name}</td>
+                              <td className="py-3.5 font-mono text-indigo-400">{c.productCount} Associated Units</td>
+                              <td className="py-3.5">
+                                <button 
+                                  onClick={() => handleAction('PUT', `/categories/${c.id}`, { active: String(!c.active) })}
+                                  className={`px-2 py-0.5 rounded text-[10px] font-bold border ${c.active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}
+                                >
+                                  {c.active ? 'ACTIVE_NODE' : 'SUSPENDED_NODE'}
+                                </button>
+                              </td>
+                              <td className="py-3.5 text-right">
+                                <button onClick={() => handleAction('DELETE', `/categories/${c.id}`)} className="px-2 py-1 bg-slate-900 hover:bg-rose-900/40 hover:text-rose-400 border border-slate-800 rounded font-mono text-[11px] text-slate-400">Flush</button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* TAB: DISPUTES ESCROW MITIGATION SUITE */}
+                  {activeTab === 'disputes' && Array.isArray(tableData) && (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="text-slate-400 font-bold border-b border-slate-800">
+                          <th className="pb-3 font-semibold">Dispute ID</th>
+                          <th className="pb-3 font-semibold">Order Reference</th>
+                          <th className="pb-3 font-semibold">Filing Parties Involvement</th>
+                          <th className="pb-3 font-semibold">Contested Capital Pool</th>
+                          <th className="pb-3 font-semibold">Stated Claim Grievance Reason</th>
+                          <th className="pb-3 font-semibold">Status Flag</th>
+                          <th className="pb-3 text-right font-semibold">Escrow Arbitration Execution Switch</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-medium">
+                        {tableData.map((d) => (
+                          <tr key={d.id} className="hover:bg-slate-900/40 transition-colors">
+                            <td className="py-3.5 font-mono text-slate-500">#{d.id}</td>
+                            <td className="py-3.5 font-mono text-slate-300">Order #{d.orderId}</td>
+                            <td className="py-3.5">
+                              <div className="text-slate-200 font-bold">Claimant: {d.buyerName}</div>
+                              <div className="text-[11px] text-slate-400 mt-0.5">Respondent: {d.sellerName}</div>
+                            </td>
+                            <td className="py-3.5 font-mono font-bold text-amber-400">{d.amount?.toLocaleString()} XAF</td>
+                            <td className="py-3.5 text-slate-300 italic max-w-xs truncate">"{d.reason}"</td>
+                            <td className="py-3.5">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${d.status.startsWith('RESOLVED') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
+                                {d.status}
+                              </span>
+                            </td>
+                            <td className="py-3.5 text-right space-x-1 whitespace-nowrap">
+                              {!d.status.startsWith('RESOLVED') && (
+                                <>
+                                  <button onClick={() => handleAction('PUT', `/disputes/${d.id}/resolve?resolution=RELEASED`)} className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-[11px]">Payout Seller</button>
+                                  <button onClick={() => handleAction('PUT', `/disputes/${d.id}/resolve?resolution=REFUND`)} className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[11px]">Refund Buyer</button>
+                                </>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {/* TAB: GLOBAL PLATFORM VARIABLES METADATA SETTINGS */}
+                  {activeTab === 'settings' && typeof tableData === 'object' && tableData !== null && !Array.isArray(tableData) && (
+                    <div className="max-w-xl space-y-6 text-xs">
+                      {[
+                        { id: 'siteName', label: "Application Site Branding Identity Nomenclature", type: "text" },
+                        { id: 'currency', label: "Base Transactional Currency Code ISO", type: "text" },
+                        { id: 'commissionRate', label: "Dynamic Percentage Marketplace Platform Fee Commission Rate", type: "number" },
+                        { id: 'payoutThreshold', label: "Minimum Liquidity Threshold Bound for Vendor Disbursal", type: "number" },
+                        { id: 'maxProductsRegular', label: "Standard Catalog Inventory Constraints Cap (Regular Tier)", type: "number" },
+                        { id: 'maxProductsPremium', label: "Premium Catalog Inventory Constraints Cap (Premium Tier)", type: "number" }
+                      ].map((field) => (
+                        <div key={field.id} className="space-y-1.5">
+                          <label className="text-slate-400 font-semibold block">{field.label}</label>
+                          <input 
+                            type={field.type} 
+                            defaultValue={tableData[field.id]}
+                            id={`setting-${field.id}`}
+                            className="w-full px-3 py-2 bg-slate-900 border border-slate-800 text-slate-100 rounded-lg font-mono focus:outline-none focus:border-indigo-500 text-xs"
+                          />
+                        </div>
+                      ))}
+
+                      <div className="flex gap-6 py-2">
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                          <input 
+                            type="checkbox" 
+                            defaultChecked={tableData.maintenanceMode} 
+                            id="setting-maintenanceMode"
+                            className="w-4 h-4 rounded border-slate-800 bg-slate-900 text-indigo-600 focus:ring-0 focus:ring-offset-0"
+                          />
+                          <span className="text-slate-300 font-bold">Force Global Maintenance Mode Hard Lockout</span>
+                        </label>
+                      </div>
+
+                      <button 
+                        onClick={() => {
+                          const payload = {
+                            siteName: document.getElementById('setting-siteName').value,
+                            currency: document.getElementById('setting-currency').value,
+                            commissionRate: parseFloat(document.getElementById('setting-commissionRate').value),
+                            payoutThreshold: parseFloat(document.getElementById('setting-payoutThreshold').value),
+                            maxProductsRegular: parseInt(document.getElementById('setting-maxProductsRegular').value),
+                            maxProductsPremium: parseInt(document.getElementById('setting-maxProductsPremium').value),
+                            maintenanceMode: document.getElementById('setting-maintenanceMode').checked,
+                          };
+                          handleAction('PUT', '/settings', payload);
+                        }}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 font-bold text-white rounded-lg shadow-lg"
+                      >
+                        Commit Configurations to Platform Engine Cache
+                      </button>
+                    </div>
+                  )}
+
+                  {/* TAB: FALLBACK GENERIC COMPACT ARRAY VIEW FOR SIMPLE LOG TABLES (Orders, Transactions, Revenue) */}
+                  {['orders', 'transactions', 'revenue'].includes(activeTab) && (
+                    <pre className="text-[11px] font-mono p-4 bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto text-indigo-400 leading-relaxed max-w-full">
+                      {JSON.stringify(tableData, null, 2)}
+                    </pre>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-    <div id="tab-content"></div>
-</div>
-
-<script>
-// ========== GLOBAL UTILS ==========
-window.toggleSidebar = function() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
-};
-
-var revenueChart=null,commissionChart=null,paymentMethodChart=null,paymentStatusChart=null,currentFilter='pending';
-var F=function(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'XAF',maximumFractionDigits:0}).format(v||0)};
-var D=function(d){return d?new Date(d).toLocaleDateString('en-GB'):'N/A'};
-window.toast=function(t,i){Swal.fire({toast:true,position:'top-end',icon:i||'success',title:t,showConfirmButton:false,timer:2000,timerProgressBar:true})};
-window.confirmLogout=function(){Swal.fire({title:'Sign Out?',text:'You will be redirected.',icon:'question',showCancelButton:true,confirmButtonText:'Sign Out',confirmButtonColor:'#ef4444'}).then(function(r){if(r.isConfirmed){localStorage.removeItem('token');window.location.href='/dashboard'}})};
-
-// ========== TABS ==========
-var tabs={
-    dashboard:{title:'📊 Dashboard',html:'<div class="stat-row" id="dashStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-line text-success me-2"></i>Revenue Trend</span></div><div class="card-body"><canvas id="revenueChart" height="280"></canvas></div></div>',load:function(){loadDashboard()}},
-    users:{title:'👥 Users',html:'<div class="card"><div class="card-header"><span><i class="fas fa-users text-primary me-2"></i>All Users</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div></div></div>',load:function(){loadUsers()}},
-    sellers:{title:'🏪 Sellers',html:'<div class="card"><div class="card-header"><span><i class="fas fa-store text-warning me-2"></i>Seller Management</span></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Business</th><th>Owner</th><th>Email</th><th>Account</th><th>Actions</th></tr></thead><tbody id="sellersTable"></tbody></table></div></div></div>',load:function(){loadSellers()}},
-    categories:{title:'📁 Categories',html:'<div class="card"><div class="card-header"><span><i class="fas fa-tags text-info me-2"></i>Category Management</span><button class="btn btn-primary btn-sm" onclick="window.showCategoryModal()"><i class="fas fa-plus"></i> Add</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Name</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead><tbody id="categoriesTable"></tbody></table></div></div></div>',load:function(){loadCategories()}},
-    revenue:{title:'💰 Revenue',html:'<div class="stat-row" id="revenueStats"></div><div class="card"><div class="card-header"><span><i class="fas fa-chart-pie text-success me-2"></i>Commission Breakdown</span></div><div class="card-body"><canvas id="commissionChart" height="280"></canvas></div></div>',load:function(){loadRevenue()}},
-    payments:{title:'💳 Payments',html:'<div class="stat-row" id="paymentStats"></div><div class="row"><div class="col-md-6"><div class="card"><div class="card-header">Payment Methods</div><div class="card-body"><canvas id="paymentMethodChart" height="250"></canvas></div></div></div><div class="col-md-6"><div class="card"><div class="card-header">Payment Status</div><div class="card-body"><canvas id="paymentStatusChart" height="250"></canvas></div></div></div></div><div class="card mt-3"><div class="card-header"><span><i class="fas fa-credit-card me-2"></i>Transactions</span><div><select class="form-select form-select-sm d-inline w-auto me-2" onchange="window.loadPayments(this.value)"><option value="all">All</option><option value="SUCCESS">Success</option><option value="FAILED">Failed</option><option value="PENDING">Pending</option></select><button class="btn btn-sm btn-outline-success" onclick="window.exportCSV()"><i class="fas fa-download"></i> CSV</button></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Order</th><th>Method</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div></div>',load:function(){window.loadPayments('all')}},
-    products:{title:'📦 Products',html:'<div class="stat-row"><div class="stat-card text-center"><h3 id="prodPending" style="color:#f59e0b">0</h3><small>⏳ Pending</small></div><div class="stat-card text-center"><h3 id="prodApproved" style="color:#10b981">0</h3><small>✅ Approved</small></div><div class="stat-card text-center"><h3 id="prodRejected" style="color:#ef4444">0</h3><small>❌ Rejected</small></div><div class="stat-card text-center"><h3 id="prodTotal" style="color:#3b82f6">0</h3><small>📦 Total</small></div></div><div class="card"><div class="card-header"><span><i class="fas fa-box me-2"></i>Product Listings</span><div><button class="btn btn-success btn-sm me-2" onclick="window.batchApprove()"><i class="fas fa-check-double"></i> Approve Selected</button><select class="form-select form-select-sm d-inline w-auto" onchange="window.loadProducts(this.value)"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="all">All</option></select></div></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th><input type="checkbox" onchange="window.toggleAll(this)"></th><th>Product</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></div>',load:function(){window.loadProducts('pending')}},
-    orders:{title:'📋 Orders',html:'<div class="card"><div class="card-header">All Orders</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead><tbody id="ordersTable"></tbody></table></div></div></div>',load:function(){loadOrders()}},
-    transactions:{title:'💳 Transactions',html:'<div class="card"><div class="card-header">Transactions</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Ref</th><th>Type</th><th>Amount</th><th>Fee</th><th>Net</th><th>Status</th></tr></thead><tbody id="txTable"></tbody></table></div></div></div>',load:function(){loadTransactions()}},
-    disputes:{title:'⚖️ Disputes',html:'<div class="stat-row"><div class="stat-card text-center"><h3 id="dispOpen" style="color:#f59e0b">0</h3><small>⚖️ Open</small></div><div class="stat-card text-center"><h3 id="dispResolved" style="color:#10b981">0</h3><small>✅ Resolved</small></div></div><div class="card"><div class="card-header">Dispute Cases</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="disputesTable"></tbody></table></div></div></div>',load:function(){loadDisputes()}},
-    reviews:{title:'⭐ Reviews',html:'<div class="card"><div class="card-header">Reviews Moderation</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>ID</th><th>Product</th><th>User</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reviewsTable"></tbody></table></div></div></div>',load:function(){loadReviews()}},
-    settings:{title:'⚙️ Settings',html:'<div class="card"><div class="card-header">Platform Settings</div><div class="card-body" id="settingsForm">Loading...</div></div>',load:function(){loadSettings()}},
-    health:{title:'❤️ Health',html:'<div class="stat-row" id="healthStats"></div>',load:function(){loadHealth()}}
-};
-
-window.showTab=function(t){
-    document.querySelectorAll('.sidebar a').forEach(function(l){l.classList.remove('active')});
-    var link=document.querySelector('.sidebar a[onclick*="'+t+'"]');if(link)link.classList.add('active');
-    if(window.innerWidth<768)window.toggleSidebar();
-    var tab=tabs[t];if(!tab)return;
-    document.getElementById('pageTitle').innerHTML=tab.title;
-    document.getElementById('tab-content').innerHTML=tab.html;
-    if(tab.load)setTimeout(tab.load,100);
-};
-
-// ========== DATA FUNCTIONS ==========
-async function loadDashboard(){try{var r=await fetch('/api/admin/stats'),d=(await r.json()).data;var ds=document.getElementById('dashStats');if(ds)ds.innerHTML='<div class="stat-card"><h3>'+d.totalUsers+'</h3><small>👥 Users</small></div><div class="stat-card"><h3>'+d.totalSellers+'</h3><small>🏪 Sellers</small></div><div class="stat-card"><h3>'+d.totalProducts+'</h3><small>📦 Products</small></div><div class="stat-card"><h3>'+F(d.totalRevenue)+'</h3><small>💰 Revenue</small></div>';var cr=await fetch('/api/admin/revenue-chart'),cd=(await cr.json()).data;if(cd){var c=document.getElementById('revenueChart');if(c){var ctx=c.getContext('2d');if(revenueChart)revenueChart.destroy();revenueChart=new Chart(ctx,{type:'line',data:{labels:Object.keys(cd),datasets:[{label:'Revenue',data:Object.values(cd),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',fill:true,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return F(v)}}}}}});}}}catch(e){}}
-async function loadUsers(){try{var r=await fetch('/api/admin/users'),d=(await r.json()).data;var ut=document.getElementById('usersTable');if(ut)ut.innerHTML=d.map(function(u){var a='';if(u.status==='ACTIVE')a+='<button class="btn btn-outline-danger btn-sm me-1" onclick="window.toggleUser('+u.id+',\'SUSPENDED\')">Suspend</button>';else a+='<button class="btn btn-outline-success btn-sm me-1" onclick="window.toggleUser('+u.id+',\'ACTIVE\')">Activate</button>';a+='<button class="btn btn-outline-dark btn-sm" onclick="window.delUser('+u.id+',\''+u.firstName+' '+u.lastName+'\')"><i class="fas fa-trash"></i></button>';return '<tr><td>#'+u.id+'</td><td>'+u.firstName+' '+u.lastName+'</td><td>'+u.email+'</td><td><span class="badge bg-info">'+u.userType+'</span></td><td><span class="badge '+(u.status==='ACTIVE'?'bg-success':'bg-danger')+'">'+u.status+'</span></td><td>'+a+'</td></tr>'}).join('')}catch(e){}}
-window.toggleUser=async function(id,s){await fetch('/api/admin/users/'+id+'/status?status='+s,{method:'PUT'});window.toast(s==='SUSPENDED'?'Suspended':'Activated','success');loadUsers()}
-window.delUser=async function(id,n){var r=await Swal.fire({title:'Delete?',text:'Delete '+n+'?',icon:'error',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});if(r.isConfirmed){await fetch('/api/admin/users/'+id,{method:'DELETE'});window.toast('Deleted','success');loadUsers()}}
-async function loadSellers(){try{var r=await fetch('/api/admin/sellers'),d=(await r.json()).data;var st=document.getElementById('sellersTable');if(st)st.innerHTML=d.map(function(s){var p=s.accountType==='PREMIUM';return '<tr><td>#'+s.id+'</td><td><strong>'+(s.businessName||'N/A')+'</strong></td><td>'+s.firstName+' '+s.lastName+'</td><td>'+s.email+'</td><td><span class="badge '+(p?'bg-warning text-dark':'bg-secondary')+'">'+(p?'🏆 ':'')+s.accountType+'</span></td><td>'+(!p?'<button class="btn btn-warning btn-sm" onclick="window.verifySeller('+s.id+')">Verify</button>':'<button class="btn btn-outline-danger btn-sm" onclick="window.revokeSeller('+s.id+')">Revoke</button>')+'</td></tr>'}).join('')}catch(e){}}
-window.verifySeller=async function(id){await fetch('/api/admin/sellers/'+id+'/verify',{method:'PUT'});window.toast('Verified','success');loadSellers()}
-window.revokeSeller=async function(id){await fetch('/api/admin/sellers/'+id+'/revoke-premium',{method:'PUT'});window.toast('Revoked','info');loadSellers()}
-async function loadCategories(){try{var r=await fetch('/api/admin/categories'),d=(await r.json()).data;var ct=document.getElementById('categoriesTable');if(ct)ct.innerHTML=(d||[]).map(function(c){return '<tr><td>#'+c.id+'</td><td>'+(c.name||'N/A')+'</td><td>'+(c.productCount||0)+'</td><td><span class="badge '+(c.active?'bg-success':'bg-secondary')+'">'+(c.active?'Active':'Disabled')+'</span></td><td><button class="btn btn-outline-primary btn-sm me-1" onclick="window.editCat('+c.id+',\''+(c.name||'')+'\','+c.active+')"><i class="fas fa-edit"></i></button><button class="btn btn-outline-danger btn-sm" onclick="window.delCat('+c.id+',\''+(c.name||'')+'\')"><i class="fas fa-trash"></i></button></td></tr>'}).join('')}catch(e){}}
-window.showCategoryModal=function(id,name,active){var isEdit=arguments.length>0&&!!id;Swal.fire({title:isEdit?'Edit':'Add',html:'<input id="swalCatName" class="form-control" placeholder="Name" value="'+(name||'')+'">'+(isEdit?'<div class="form-check mt-2"><input id="swalCatActive" class="form-check-input" type="checkbox" '+(active?'checked':'')+'><label>Active</label></div>':''),showCancelButton:true,confirmButtonText:isEdit?'Update':'Add',confirmButtonColor:'#3b82f6',preConfirm:function(){var n=document.getElementById('swalCatName').value.trim();if(!n){Swal.showValidationMessage('Required');return false}return{name:n,active:isEdit?document.getElementById('swalCatActive').checked:true}}}).then(async function(r){if(r.isConfirmed){var u=isEdit?'/api/admin/categories/'+id:'/api/admin/categories',m=isEdit?'PUT':'POST';await fetch(u,{method:m,headers:{'Content-Type':'application/json'},body:JSON.stringify(r.value)});window.toast('Saved','success');loadCategories()}})}
-window.editCat=function(id,name,active){window.showCategoryModal(id,name,active)}
-window.delCat=async function(id,name){var r=await Swal.fire({title:'Delete '+name+'?',icon:'warning',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#ef4444'});if(r.isConfirmed){await fetch('/api/admin/categories/'+id,{method:'DELETE'});window.toast('Deleted','success');loadCategories()}}
-async function loadRevenue(){try{var r=await fetch('/api/admin/revenue'),d=(await r.json()).data;var rs=document.getElementById('revenueStats');if(rs)rs.innerHTML='<div class="stat-card"><h3>'+F(d.totalRevenue)+'</h3><small>💰 Total</small></div><div class="stat-card"><h3>'+F(d.totalFees)+'</h3><small>📊 Fees</small></div><div class="stat-card"><h3>'+F(d.totalPayouts)+'</h3><small>💸 Payouts</small></div><div class="stat-card"><h3>'+d.commissionRate+'%</h3><small>🔧 Rate</small></div>';var c=document.getElementById('commissionChart');if(c){var ctx=c.getContext('2d');if(commissionChart)commissionChart.destroy();commissionChart=new Chart(ctx,{type:'doughnut',data:{labels:['Fees','Payouts'],datasets:[{data:[d.totalFees,d.totalPayouts],backgroundColor:['#3b82f6','#10b981']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}})}}catch(e){}}
-window.loadPayments=async function(filter){filter=filter||'all';try{var r=await fetch('/api/admin/payments'),d=await r.json();if(d.success&&d.data){var data=filter==='all'?d.data:d.data.filter(function(p){return p.status===filter});var ps=document.getElementById('paymentStats');if(ps)ps.innerHTML='<div class="stat-card"><h3>'+d.data.length+'</h3><small>Total</small></div><div class="stat-card"><h3 style="color:#10b981">'+d.data.filter(function(p){return p.status==='SUCCESS'}).length+'</h3><small>Success</small></div><div class="stat-card"><h3 style="color:#ef4444">'+d.data.filter(function(p){return p.status==='FAILED'}).length+'</h3><small>Failed</small></div><div class="stat-card"><h3 style="color:#d97706">'+d.data.filter(function(p){return p.status==='PENDING'}).length+'</h3><small>Pending</small></div>';var pt=document.getElementById('paymentsTable');if(pt)pt.innerHTML=data.map(function(p){return '<tr><td>#'+p.id+'</td><td>#'+(p.orderId||'N/A')+'</td><td><span class="badge '+(p.paymentMethod&&p.paymentMethod.includes('MTN')?'bg-warning text-dark':p.paymentMethod&&p.paymentMethod.includes('Orange')?'bg-info':'bg-secondary')+'">'+(p.paymentMethod||'N/A')+'</span></td><td>'+F(p.amount)+'</td><td><span class="badge '+(p.status==='SUCCESS'?'bg-success':p.status==='FAILED'?'bg-danger':'bg-warning')+'">'+(p.status||'N/A')+'</span></td><td>'+D(p.createdAt)+'</td></tr>'}).join('')||'<tr><td colspan="6" class="text-center">No payments</td></tr>';try{var methods={};data.forEach(function(p){var m=p.paymentMethod||'Other';methods[m]=(methods[m]||0)+1});var ctx1=document.getElementById('paymentMethodChart');if(ctx1){var c1=ctx1.getContext('2d');if(paymentMethodChart)paymentMethodChart.destroy();paymentMethodChart=new Chart(c1,{type:'bar',data:{labels:Object.keys(methods),datasets:[{label:'Transactions',data:Object.values(methods),backgroundColor:['#f59e0b','#3b82f6','#64748b']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}})}var statuses={};data.forEach(function(p){var s=p.status||'UNKNOWN';statuses[s]=(statuses[s]||0)+1});var ctx2=document.getElementById('paymentStatusChart');if(ctx2){var c2=ctx2.getContext('2d');if(paymentStatusChart)paymentStatusChart.destroy();paymentStatusChart=new Chart(c2,{type:'doughnut',data:{labels:Object.keys(statuses),datasets:[{data:Object.values(statuses),backgroundColor:['#10b981','#ef4444','#d97706','#64748b']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}})}}catch(e){}}}catch(e){}}
-window.exportCSV=function(){var rows=[['ID','Order','Method','Amount','Status','Date']];var table=document.getElementById('paymentsTable');if(!table)return;table.querySelectorAll('tr').forEach(function(tr){var row=[];tr.querySelectorAll('td').forEach(function(td){row.push('"'+td.textContent.replace(/"/g,'""')+'"')});if(row.length)rows.push(row)});var csv=rows.map(function(r){return r.join(',')}).join('\n');var blob=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='payments.csv';a.click();window.toast('Downloaded','success')}
-window.loadProducts=async function(f){currentFilter=f||currentFilter;try{var p=await fetch('/api/admin/products/pending').then(function(r){return r.json()});var a=await fetch('/api/admin/products/approved').then(function(r){return r.json()});var rj=await fetch('/api/admin/products/rejected').then(function(r){return r.json()});var all=await fetch('/api/admin/products/all').then(function(r){return r.json()});var pp=document.getElementById('prodPending');if(pp)pp.textContent=(p.data||[]).length;var pa=document.getElementById('prodApproved');if(pa)pa.textContent=(a.data||[]).length;var prj=document.getElementById('prodRejected');if(prj)prj.textContent=(rj.data||[]).length;var ptot=document.getElementById('prodTotal');if(ptot)ptot.textContent=(all.data||[]).length;var badge=document.getElementById('pendingBadge');if(badge)badge.textContent=(p.data||[]).length;var data=currentFilter==='pending'?p.data:currentFilter==='approved'?a.data:currentFilter==='rejected'?rj.data:all.data;var pt=document.getElementById('productsTable');if(pt)pt.innerHTML=(data||[]).map(function(pr){var sb=currentFilter==='pending'?'bg-warning text-dark':currentFilter==='approved'?'bg-success':'bg-danger';var ac=currentFilter==='pending'?'<button class="btn btn-success btn-sm me-1" onclick="window.approveProduct('+pr.id+')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="window.showReject('+pr.id+',\''+(pr.name||'').replace(/'/g,"\\'")+'\')"><i class="fas fa-times"></i></button>':currentFilter==='rejected'?'<button class="btn btn-outline-success btn-sm" onclick="window.approveProduct('+pr.id+')"><i class="fas fa-redo"></i></button><br><small class="text-danger">'+(pr.rejectionReason||'')+'</small>':'<small class="text-muted">Approved</small>';return '<tr><td>'+(currentFilter==='pending'?'<input type="checkbox" class="prodCheck" value="'+pr.id+'">':'')+'</td><td><strong>'+(pr.name||'N/A')+'</strong></td><td>'+(pr.sellerBusinessName||pr.sellerName||'N/A')+'</td><td><strong>'+F(pr.price)+'</strong></td><td><span class="badge '+sb+'">'+currentFilter+'</span></td><td>'+ac+'</td></tr>'}).join('')}catch(e){}}
-window.approveProduct=async function(id){await fetch('/api/admin/products/'+id+'/approve',{method:'PUT'});window.toast('Approved','success');window.loadProducts()}
-window.showReject=function(id,n){Swal.fire({title:'Reject?',html:'<textarea id="swalReason" class="form-control" rows="2" placeholder="Reason..."></textarea>',icon:'warning',showCancelButton:true,confirmButtonText:'Reject',confirmButtonColor:'#ef4444',preConfirm:function(){var r=document.getElementById('swalReason').value.trim();if(!r){Swal.showValidationMessage('Required');return false}return r}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/products/'+id+'/reject?reason='+encodeURIComponent(r.value),{method:'PUT'});window.toast('Rejected','info');window.loadProducts()}})}
-window.toggleAll=function(el){document.querySelectorAll('.prodCheck').forEach(function(c){c.checked=el.checked})}
-window.batchApprove=async function(){var ids=Array.from(document.querySelectorAll('.prodCheck:checked')).map(function(c){return parseInt(c.value)});if(!ids.length){Swal.fire({icon:'info',title:'None selected'});return}var r=await Swal.fire({title:'Approve '+ids.length+'?',icon:'question',showCancelButton:true,confirmButtonText:'Yes',confirmButtonColor:'#10b981'});if(r.isConfirmed){await fetch('/api/admin/products/batch-approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(ids)});window.toast('Approved','success');window.loadProducts()}}
-async function loadOrders(){try{var r=await fetch('/api/admin/orders'),d=(await r.json()).data;var ot=document.getElementById('ordersTable');if(ot)ot.innerHTML=(d||[]).map(function(o){return '<tr><td>#'+(o.id||o.orderId||'N/A')+'</td><td>'+(o.customerName||o.buyerEmail||'N/A')+'</td><td>'+F(o.totalAmount||o.amount)+'</td><td><span class="badge bg-info">'+(o.status||'PENDING')+'</span></td></tr>'}).join('')}catch(e){}}
-async function loadTransactions(){try{var r=await fetch('/api/admin/transactions'),d=(await r.json()).data;var txt=document.getElementById('txTable');if(txt)txt.innerHTML=(d||[]).map(function(t){return '<tr><td><small>'+(t.transactionRef||t.transaction_ref||'N/A')+'</small></td><td><span class="badge bg-primary">'+(t.type||'N/A')+'</span></td><td>'+F(t.amount)+'</td><td>'+F(t.platformFee||t.platform_fee)+'</td><td><strong>'+F(t.netAmount||t.net_amount)+'</strong></td><td><span class="badge '+(t.status==='COMPLETED'?'bg-success':'bg-warning')+'">'+(t.status||'N/A')+'</span></td></tr>'}).join('')}catch(e){}}
-async function loadDisputes(){try{var r=await fetch('/api/admin/disputes'),d=await r.json();var doE=document.getElementById('dispOpen');if(doE)doE.textContent=d.openCount||0;var dr=document.getElementById('dispResolved');if(dr)dr.textContent=d.resolvedCount||0;var dt=document.getElementById('disputesTable');if(dt)dt.innerHTML=(d.data||[]).map(function(ds){var isOpen=ds.status==='OPEN'||ds.status==='UNDER_REVIEW';var actions='';if(ds.status==='OPEN')actions='<button class="btn btn-info btn-sm me-1" onclick="window.reviewDisp('+ds.id+')"><i class="fas fa-search"></i></button>';else if(ds.status==='UNDER_REVIEW')actions='<button class="btn btn-success btn-sm me-1" onclick="window.resolveDisp('+ds.id+',\'RELEASED\',\''+ds.sellerName+'\')"><i class="fas fa-check"></i></button><button class="btn btn-danger btn-sm me-1" onclick="window.resolveDisp('+ds.id+',\'REFUNDED\',\''+ds.buyerName+'\')"><i class="fas fa-undo"></i></button>';actions+='<button class="btn btn-outline-secondary btn-sm" onclick="window.chatDisp('+ds.id+')"><i class="fas fa-comments"></i></button>';return '<tr><td><strong>#'+ds.id+'</strong></td><td>'+ds.buyerName+'</td><td>'+ds.sellerName+'</td><td><strong>'+F(ds.amount)+'</strong></td><td><span class="badge '+(isOpen?'bg-warning text-dark':'bg-success')+'">'+ds.status+'</span></td><td>'+actions+'</td></tr>'}).join('')}catch(e){}}
-window.reviewDisp=async function(id){await fetch('/api/admin/disputes/'+id+'/review',{method:'PUT'});window.toast('Reviewing','success');loadDisputes()}
-window.resolveDisp=async function(id,res,n){var isR=res==='RELEASED';Swal.fire({title:isR?'Release?':'Refund?',text:(isR?'Release to ':'Refund ')+n+'?',icon:'question',showCancelButton:true,confirmButtonText:isR?'Release':'Refund',confirmButtonColor:isR?'#10b981':'#ef4444'}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/disputes/'+id+'/resolve?resolution='+res,{method:'PUT'});window.toast('Resolved','success');loadDisputes()}})}
-window.chatDisp=async function(id){var r=await fetch('/api/admin/disputes/'+id+'/comments'),d=await r.json();var html=(d.data||[]).map(function(c){return '<div style="background:#f8fafc;padding:8px;border-radius:6px;margin-bottom:6px;"><strong>'+c.userName+'</strong>: '+c.message+'</div>'}).join('')||'No messages';Swal.fire({title:'Chat',html:html+'<textarea id="newMsg" class="form-control mt-2" rows="2" placeholder="Message..."></textarea>',showCancelButton:true,confirmButtonText:'Send',confirmButtonColor:'#0d9488',preConfirm:function(){var msg=document.getElementById('newMsg').value.trim();if(!msg){Swal.showValidationMessage('Type a message');return false}return msg}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/disputes/'+id+'/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:0,userName:'Admin',userType:'ADMIN',message:r.value})});window.toast('Sent','success')}})}
-async function loadReviews(){try{var r=await fetch('/api/admin/reviews'),d=(await r.json()).data;var rt=document.getElementById('reviewsTable');if(rt)rt.innerHTML=(d||[]).map(function(rv){var stars='';for(var i=1;i<=5;i++)stars+=i<=rv.rating?'⭐':'☆';var actions=rv.isHidden?'<button class="btn btn-outline-success btn-sm me-1" onclick="window.unhideReview('+rv.id+')"><i class="fas fa-eye"></i></button>':'<button class="btn btn-outline-warning btn-sm me-1" onclick="window.hideReview('+rv.id+')"><i class="fas fa-eye-slash"></i></button>';actions+='<button class="btn btn-outline-info btn-sm me-1" onclick="window.replyReview('+rv.id+',\''+(rv.productName||'').replace(/'/g,"\\'")+'\')"><i class="fas fa-reply"></i> Reply</button>';actions+='<button class="btn btn-outline-danger btn-sm" onclick="window.delReview('+rv.id+')"><i class="fas fa-trash"></i></button>';var ri=rv.adminReply?'<br><small class="text-success">↳ '+rv.adminReply.substring(0,50)+'</small>':'';return '<tr><td>#'+rv.id+'</td><td>'+rv.productName+'</td><td>'+rv.userName+'</td><td>'+stars+'</td><td>'+(rv.comment||'').substring(0,50)+ri+'</td><td><span class="badge '+(rv.isHidden?'bg-danger':'bg-success')+'">'+(rv.isHidden?'Hidden':'Visible')+'</span></td><td>'+actions+'</td></tr>'}).join('')}catch(e){}}
-window.hideReview=async function(id){await fetch('/api/admin/reviews/'+id+'/hide',{method:'PUT'});window.toast('Hidden','success');loadReviews()}
-window.unhideReview=async function(id){await fetch('/api/admin/reviews/'+id+'/unhide',{method:'PUT'});window.toast('Visible','success');loadReviews()}
-window.delReview=async function(id){var r=await Swal.fire({title:'Delete?',icon:'error',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});if(r.isConfirmed){await fetch('/api/admin/reviews/'+id,{method:'DELETE'});window.toast('Deleted','success');loadReviews()}}
-window.replyReview=async function(id,pn){Swal.fire({title:'Reply',html:'<p>'+pn+'</p><textarea id="replyText" class="form-control" rows="3" placeholder="Reply..."></textarea>',showCancelButton:true,confirmButtonText:'Post',confirmButtonColor:'#3b82f6',preConfirm:function(){var r=document.getElementById('replyText').value.trim();if(!r){Swal.showValidationMessage('Required');return false}return r}}).then(async function(r){if(r.isConfirmed){await fetch('/api/admin/reviews/'+id+'/reply',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({reply:r.value})});window.toast('Posted','success');loadReviews()}})}
-async function loadSettings(){try{var r=await fetch('/api/admin/settings'),d=(await r.json()).data;var sf=document.getElementById('settingsForm');if(sf)sf.innerHTML='<div class="row"><div class="col-md-6 mb-3"><label class="fw-bold">Site Name</label><input class="form-control" id="setSN" value="'+d.siteName+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Currency</label><input class="form-control" id="setCur" value="'+d.currency+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Commission (%)</label><input type="number" step="0.1" class="form-control" id="setCom" value="'+d.commissionRate+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Payout Threshold</label><input type="number" class="form-control" id="setThr" value="'+d.payoutThreshold+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Max Products (Regular)</label><input type="number" class="form-control" id="setReg" value="'+d.maxProductsRegular+'"></div><div class="col-md-6 mb-3"><label class="fw-bold">Max Products (Premium)</label><input type="number" class="form-control" id="setPrem" value="'+d.maxProductsPremium+'"></div><div class="col-md-6 mb-3"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" id="setMaint" '+(d.maintenanceMode?'checked':'')+'><label>Maintenance Mode</label></div><div class="form-check mt-2"><input class="form-check-input" type="checkbox" id="setRegAllow" '+(d.allowRegistration?'checked':'')+'><label>Allow Registration</label></div></div></div><button class="btn btn-primary" onclick="window.saveSettings()"><i class="fas fa-save"></i> Save</button>'}catch(e){}}
-window.saveSettings=async function(){var data={siteName:document.getElementById('setSN').value,currency:document.getElementById('setCur').value,commissionRate:parseFloat(document.getElementById('setCom').value),payoutThreshold:parseFloat(document.getElementById('setThr').value),maxProductsRegular:parseInt(document.getElementById('setReg').value),maxProductsPremium:parseInt(document.getElementById('setPrem').value),maintenanceMode:document.getElementById('setMaint').checked,allowRegistration:document.getElementById('setRegAllow').checked};await fetch('/api/admin/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});window.toast('Saved','success')}
-async function loadHealth(){try{var r=await fetch('/api/admin/health'),d=(await r.json()).data;var hs=document.getElementById('healthStats');if(hs)hs.innerHTML='<div class="stat-card"><h3 style="color:#10b981"><i class="fas fa-check-circle"></i> '+d.apiStatus+'</h3><small>API</small></div><div class="stat-card"><h3 style="color:#3b82f6"><i class="fas fa-database"></i> '+d.databaseStatus+'</h3><small>DB</small></div><div class="stat-card"><h3>'+d.memoryUsagePercent+'%</h3><small>Memory</small></div><div class="stat-card"><h3><i class="fas fa-clock"></i> '+d.uptime+'</h3><small>Uptime</small></div>'}catch(e){}}
-
-// ========== INIT ==========
-window.showTab('dashboard');
-
-setInterval(async function(){try{var r=await fetch('/api/admin/products/pending-count'),d=await r.json();var pb=document.getElementById('pendingBadge');if(d.success&&pb)pb.textContent=d.count}catch(e){}},30000);
-</script>
-</body>
-</html>
+  );
+}
