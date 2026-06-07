@@ -49,7 +49,6 @@ public class AdvancedSearchService {
             whereClause.append("AND p.free_delivery = true ");
         }
         
-        // Count
         String countSql = "SELECT COUNT(*) FROM products p " + whereClause.toString();
         long totalResults = 0;
         try {
@@ -59,7 +58,6 @@ public class AdvancedSearchService {
             totalResults = 0;
         }
         
-        // Sort
         String orderBy = "ORDER BY p.is_featured DESC, p.created_at DESC";
         String sortBy = criteria.getSortBy() != null ? criteria.getSortBy() : "relevance";
         if ("price_asc".equals(sortBy)) orderBy = "ORDER BY COALESCE(p.discounted_price, p.price) ASC";
@@ -68,7 +66,6 @@ public class AdvancedSearchService {
         int page = criteria.getPage();
         int size = criteria.getSize();
         
-        // Main query - NO GROUP BY
         String sql = "SELECT p.id, p.name, COALESCE(p.description,'') as description, p.price, " +
                      "COALESCE(p.discounted_price,0) as discounted_price, " +
                      "COALESCE(p.product_condition,'') as product_condition, " +
